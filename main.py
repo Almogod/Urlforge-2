@@ -1,8 +1,8 @@
-from crawler import crawl
-from extractor import extract_metadata
-from normalizer import normalize
-from filter import is_valid
-from generator import generate_sitemap
+from src.crawler import crawl
+from src.extractor import extract_metadata
+from src.normalizer import normalize
+from src.filter import is_valid
+from src.generator import generate_sitemap
 
 def build_clean_urls(pages):
     clean = set()
