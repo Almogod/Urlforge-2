@@ -9,6 +9,9 @@ from src.extractor import extract_metadata
 from src.normalizer import normalize
 from src.filter import is_valid
 from src.generator import generate_sitemaps
+from fastapi.staticfiles import StaticFiles
+
+app.mount("/", StaticFiles(directory=".", html=True), name="static")
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
