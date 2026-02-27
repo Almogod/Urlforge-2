@@ -65,11 +65,6 @@ def generate(
     })
     # --- END OF MODIFIED SECTION ---
 
-
-@app.get("/download/{filename}")
-def download_file(filename: str):
-    # Using os.path.join for reliable path construction
-    file_path = os.path.join(os.getcwd(), filename)
-    if os.path.exists(file_path):
-        return FileResponse(path=file_path, filename=filename)
-    return {"error": "File not found"}
+@app.get("/download")
+def download_file(path: str):
+    return FileResponse(path=path, filename=os.path.basename(path))
