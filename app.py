@@ -1,9 +1,10 @@
+import os
 from fastapi import FastAPI, Form
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.requests import Request
-import os
 
+# Importing your custom modules
 from src.crawler import crawl
 from src.js_crawler import crawl_js_sync
 from src.extractor import extract_metadata
@@ -13,6 +14,7 @@ from src.generator import generate_sitemaps
 
 app = FastAPI()
 
+# Setup templates directory using Jinja2
 templates = Jinja2Templates(directory="templates")
 
 
@@ -22,7 +24,7 @@ def build_clean_urls(pages, fix_canonical=False):
         meta = extract_metadata(p)
         if not is_valid(meta):
             continue
-        chosen = meta["canonical"] if fix_canonical else meta["url"]
+        chosen = meta["canonical"] if (fix_canonical and meta["canonical"]) else meta["url"]
         clean.add(normalize(chosen))
     return list(clean)
 
@@ -40,23 +42,34 @@ def generate(
     use_js: bool = Form(False),
     fix_canonical: bool = Form(False),
 ):
+    # 1. Crawl the domain
     if use_js:
         pages = crawl_js_sync(domain, limit=limit)
     else:
         pages = crawl(domain, limit=limit)
 
+    # 2. Clean and process URLs
     clean_urls = build_clean_urls(pages, fix_canonical)
 
+    # 3. Generate sitemaps
     files = generate_sitemaps(clean_urls, base_url=domain, output_prefix="./sitemap")
+
+    # --- START OF MODIFIED SECTION ---
+    # Convert filenames to absolute paths
+    file_paths = [os.path.abspath(f) for f in files]
 
     return templates.TemplateResponse("index.html", {
         "request": request,
-        "files": files,
+        "files": file_paths,
         "count": len(clean_urls)
     })
+    # --- END OF MODIFIED SECTION ---
 
 
 @app.get("/download/{filename}")
 def download_file(filename: str):
+    # Using os.path.join for reliable path construction
     file_path = os.path.join(os.getcwd(), filename)
-    return FileResponse(path=file_path, filename=filename)
+    if os.path.exists(file_path):
+        return FileResponse(path=file_path, filename=filename)
+    return {"error": "File not found"}
