@@ -3,7 +3,6 @@ from urllib.parse import urljoin, urlparse
 from bs4 import BeautifulSoup
 from playwright.async_api import async_playwright
 
-
 async def crawl_js(start_url, limit=200):
     visited = set()
     to_visit = set([start_url])
@@ -19,28 +18,33 @@ async def crawl_js(start_url, limit=200):
             if url in visited:
                 continue
 
+            # --- UPDATED NAVIGATION LOGIC START ---
             try:
-                await page.goto(url, timeout=15000, wait_until="networkidle")
+                # Using domcontentloaded is significantly faster than networkidle
+                await page.goto(url, timeout=15000, wait_until="domcontentloaded")
                 html = await page.content()
-
-                visited.add(url)
-
-                results.append({
-                    "url": url,
-                    "status": 200,
-                    "html": html
-                })
-
-                soup = BeautifulSoup(html, "lxml")
-
-                for link in soup.find_all("a", href=True):
-                    new_url = urljoin(url, link["href"])
-
-                    if urlparse(new_url).netloc == urlparse(start_url).netloc:
-                        to_visit.add(new_url)
-
-            except:
+            except Exception:
+                # If the page fails to load, skip to the next URL in to_visit
                 continue
+            # --- UPDATED NAVIGATION LOGIC END ---
+
+            visited.add(url)
+
+            results.append({
+                "url": url,
+                "status": 200,
+                "html": html
+            })
+
+            soup = BeautifulSoup(html, "lxml")
+
+            for link in soup.find_all("a", href=True):
+                new_url = urljoin(url, link["href"])
+
+                # Ensure we only crawl URLs within the same domain
+                if urlparse(new_url).netloc == urlparse(start_url).netloc:
+                    if new_url not in visited:
+                        to_visit.add(new_url)
 
         await browser.close()
 
@@ -48,4 +52,7 @@ async def crawl_js(start_url, limit=200):
 
 
 def crawl_js_sync(start_url, limit=200):
+    """
+    Synchronous wrapper to run the async crawler using [asyncio.run](https://docs.python.org).
+    """
     return asyncio.run(crawl_js(start_url, limit))
