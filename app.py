@@ -130,7 +130,7 @@ def generate(
             "request": request,
             "files": files,
             "count": len(clean_urls),
-            "audit": audit
+            "audit": audit,
             "fixes": fixes_applied
         })
 
