@@ -15,6 +15,7 @@ from src.generator import generate_sitemaps
 from src.sitemap_parser import get_sitemap_urls
 # Audit modules
 from src.audit import generate_audit_report
+from src.fixer import fix_urls, generate_fix_report
 
 app = FastAPI()
 
@@ -114,11 +115,10 @@ def generate(
         # CLEAN + GENERATE SITEMAP
         # -----------------------------
         clean_urls = build_clean_urls(pages, fix_canonical)
-
         audit = generate_audit_report(pages, clean_urls)
-
+        fixed_urls = fix_urls(clean_urls)
         files = generate_sitemaps(clean_urls, base_url=domain)
-
+        fixes_applied = generate_fix_report(audit)
         return templates.TemplateResponse("index.html", {
             "request": request,
             "files": files,
@@ -131,6 +131,7 @@ def generate(
             "files": files,
             "count": len(clean_urls),
             "audit": audit
+            "fixes": fixes_applied
         })
 
 
