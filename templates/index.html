@@ -4,33 +4,39 @@
     <title>Sitemap Fixer</title>
 </head>
 <body>
-    <h1>Sitemap Fixer</h1>
 
-    <!-- Error Message Display -->
-    {% if error %}
-    <p style="color:red;">Error: {{error}}</p>
-    {% endif %}
+<h1>Sitemap Fixer</h1>
 
-    <form action="/generate" method="post">
-        <label>Domain:</label><br>
-        <input type="text" name="domain" placeholder="https://example.com" required><br><br>
+<form action="/generate" method="post">
+    <label>Domain:</label><br>
+    <input type="text" name="domain" placeholder="https://example.com" required><br><br>
 
-        <label>Limit:</label><br>
-        <input type="number" name="limit" value="200"><br><br>
+    <label>Limit:</label><br>
+    <input type="number" name="limit" value="50"><br><br>
 
-        <label>
-            <input type="checkbox" name="use_js"> Use JS Rendering
-        </label><br>
+    <label>
+        <input type="checkbox" name="use_js"> Use JS Rendering
+    </label><br>
 
-        <label>
-            <input type="checkbox" name="fix_canonical"> Fix Canonical URLs
-        </label><br><br>
+    <label>
+        <input type="checkbox" name="fix_canonical"> Fix Canonical URLs
+    </label><br><br>
 
-        <button type="submit">Generate Sitemap</button>
-    </form>
+    <button type="submit">Generate Sitemap</button>
+</form>
 
- {% if files %}
-    <h3>Generated {{count}} URLs</h3>
+<hr>
+
+<!-- ERROR -->
+{% if error %}
+    <p style="color:red;">{{error}}</p>
+{% endif %}
+
+<!-- SITEMAP -->
+{% if files %}
+    <h2>Sitemap Generated</h2>
+    <p>Total URLs: {{count}}</p>
+
     <ul>
         {% for file in files %}
             <li>
@@ -40,6 +46,9 @@
     </ul>
 {% endif %}
 
+<hr>
+
+<!-- SEO AUDIT -->
 {% if audit %}
     <h2>SEO Audit Report</h2>
 
@@ -61,17 +70,21 @@
     </ul>
 
     <p><b>Total Crawled:</b> {{audit.total_pages_crawled}}</p>
-    <p><b>Final URLs in Sitemap:</b> {{audit.total_clean_urls}}</p>
+    <p><b>Final URLs:</b> {{audit.total_clean_urls}}</p>
 
     {% for issue, urls in audit.issues.items() %}
-        <h3>{{issue.replace("_", " ").title()}} ({{urls|length}})</h3>
+        <h4>{{issue.replace("_", " ").title()}} ({{urls|length}})</h4>
         <ul>
-            {% for url in urls[:10] %}
+            {% for url in urls[:5] %}
                 <li>{{url}}</li>
             {% endfor %}
         </ul>
     {% endfor %}
 {% endif %}
+
+<hr>
+
+<!-- FIXES -->
 {% if fixes %}
     <h2>Fixes Applied Automatically</h2>
     <ul>
@@ -80,6 +93,6 @@
         {% endfor %}
     </ul>
 {% endif %}
-    
+
 </body>
 </html>
