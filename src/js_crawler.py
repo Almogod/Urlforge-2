@@ -19,7 +19,7 @@ async def crawl_js(start_url, limit=50):
                 continue
 
             try:
-                await page.goto(url, timeout=15000, wait_until="domcontentloaded")
+                await page.goto(url, timeout=10000, wait_until="domcontentloaded")
                 html = await page.content()
                 
                 visited.add(url)
@@ -34,6 +34,9 @@ async def crawl_js(start_url, limit=50):
                 soup = BeautifulSoup(html, "lxml")
                 
                 for link in soup.find_all("a", href=True):
+                    if len(to_visit) > limit * 2:
+                        break
+                        
                     new_url = urljoin(url, link["href"])
                     
                    
