@@ -1,100 +1,184 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Sitemap Fixer</title>
+    <title>Generated Site Fixer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        input, button {
+            padding: 10px;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+
+        .score {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .score-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .good { background: #4CAF50; }
+        .average { background: #ff9800; }
+        .bad { background: #f44336; }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        a {
+            color: #1a73e8;
+        }
+    </style>
 </head>
 <body>
-<h2>DEBUG: {{debug}}</h2>
-<h3>Audit present: {{ audit }}</h3>
-<h3>Fixes present: {{ fixes }}</h3>
-<h1>Sitemap Fixer</h1>
 
-<form action="/generate" method="post">
-    <label>Domain:</label><br>
-    <input type="text" name="domain" placeholder="https://example.com" required><br><br>
+<div class="container">
 
-    <label>Limit:</label><br>
-    <input type="number" name="limit" value="50"><br><br>
+    <h1>Sitemap Fixer</h1>
 
-    <label>
-        <input type="checkbox" name="use_js"> Use JS Rendering
-    </label><br>
+    <!-- FORM -->
+    <div class="card">
+        <form action="/generate" method="post">
+            <label>Domain:</label>
+            <input type="text" name="domain" placeholder="https://example.com" required>
 
-    <label>
-        <input type="checkbox" name="fix_canonical"> Fix Canonical URLs
-    </label><br><br>
+            <label>Limit:</label>
+            <input type="number" name="limit" value="50">
 
-    <button type="submit">Generate Sitemap</button>
-</form>
+            <label><input type="checkbox" name="use_js"> Use JS Rendering</label><br>
+            <label><input type="checkbox" name="fix_canonical"> Fix Canonical URLs</label>
 
-<hr>
+            <button type="submit">Generate Sitemap</button>
+        </form>
+    </div>
 
-<!-- ERROR -->
-{% if error %}
-    <p style="color:red;">{{error}}</p>
-{% endif %}
-
-<!-- SITEMAP -->
-{% if files %}
-    <h2>Sitemap Generated</h2>
-    <p>Total URLs: {{count}}</p>
-
-    <ul>
-        {% for file in files %}
-            <li>
-                <a href="/download?file={{file}}" target="_blank">{{file}}</a>
-            </li>
-        {% endfor %}
-    </ul>
-{% endif %}
-
-<hr>
-
-<!-- SEO AUDIT -->
-{% if audit is defined %}
-    <h2>SEO Audit Report</h2>
-
-    <h3>SEO Score: {{audit.score}} / 100</h3>
-
-    {% if audit.score > 80 %}
-        <p style="color:green;">Good SEO health</p>
-    {% elif audit.score > 50 %}
-        <p style="color:orange;">Average SEO health</p>
-    {% else %}
-        <p style="color:red;">Poor SEO health</p>
+    <!-- ERROR -->
+    {% if error %}
+    <div class="card">
+        <p style="color:red;">{{error}}</p>
+    </div>
     {% endif %}
 
-    <h3>Fix Suggestions</h3>
-    <ul>
-        {% for suggestion in audit.suggestions %}
-            <li>{{suggestion}}</li>
-        {% endfor %}
-    </ul>
+    <!-- SITEMAP -->
+    {% if files %}
+    <div class="card">
+        <h2>Sitemap Generated</h2>
+        <p>Total URLs: {{count}}</p>
 
-    <p><b>Total Crawled:</b> {{audit.total_pages_crawled}}</p>
-    <p><b>Final URLs:</b> {{audit.total_clean_urls}}</p>
-
-    {% for issue, urls in audit.issues.items() %}
-        <h4>{{issue.replace("_", " ").title()}} ({{urls|length}})</h4>
         <ul>
-            {% for url in urls[:5] %}
-                <li>{{url}}</li>
+            {% for file in files %}
+                <li><a href="/download?file={{file}}" target="_blank">{{file}}</a></li>
             {% endfor %}
         </ul>
-    {% endfor %}
-{% endif %}
+    </div>
+    {% endif %}
 
-<hr>
+    <!-- SEO AUDIT -->
+    {% if audit is defined %}
+    <div class="card">
 
-<!-- FIXES -->
-{% if fixes is defined %}
-    <h2>Fixes Applied Automatically</h2>
-    <ul>
-        {% for fix in fixes %}
-            <li>{{fix}}</li>
+        <h2>SEO Audit Report</h2>
+
+        <!-- SCORE -->
+        <div class="score">
+            {% set score = audit.score %}
+            <div class="score-circle 
+                {% if score > 80 %}good
+                {% elif score > 50 %}average
+                {% else %}bad
+                {% endif %}">
+                {{score}}
+            </div>
+
+            {% if score > 80 %}
+                <p style="color:green;">Good SEO health</p>
+            {% elif score > 50 %}
+                <p style="color:orange;">Average SEO health</p>
+            {% else %}
+                <p style="color:red;">Poor SEO health</p>
+            {% endif %}
+        </div>
+
+        <!-- SUGGESTIONS -->
+        <h3>Fix Suggestions</h3>
+        <ul>
+            {% for suggestion in audit.suggestions %}
+                <li>{{suggestion}}</li>
+            {% endfor %}
+        </ul>
+
+        <!-- ISSUES -->
+        <h3>Issues Found</h3>
+        {% for issue, urls in audit.issues.items() %}
+            <p><b>{{issue.replace("_", " ").title()}} ({{urls|length}})</b></p>
+            <ul>
+                {% for url in urls[:5] %}
+                    <li>{{url}}</li>
+                {% endfor %}
+            </ul>
         {% endfor %}
-    </ul>
-{% endif %}
+
+    </div>
+    {% endif %}
+
+    <!-- FIXES -->
+    {% if fixes is defined %}
+    <div class="card">
+        <h2>Fixes Applied</h2>
+        <ul>
+            {% for fix in fixes %}
+                <li>{{fix}}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+</div>
 
 </body>
 </html>
