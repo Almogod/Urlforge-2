@@ -31,20 +31,16 @@
         <button type="submit">Generate Sitemap</button>
     </form>
 
-    {% if files %}
-    <hr>
-    <h3>Generated {{ count }} URLs</h3>
+ {% if files %}
+    <h3>Generated {{count}} URLs</h3>
     <ul>
         {% for file in files %}
             <li>
-                <!-- Updated to use the filename from the path for the download route -->
-                <a href="/download/{{ file.split('/')[-1] if '/' in file else file.split('\\')[-1] }}" target="_blank">
-                    Download {{ file.split('/')[-1] if '/' in file else file.split('\\')[-1] }}
-                </a>
+                <a href="/download?file={{file}}" target="_blank">{{file}}</a>
             </li>
         {% endfor %}
     </ul>
-    {% endif %}
+{% endif %}
 
 </body>
 </html>
