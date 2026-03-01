@@ -1,24 +1,23 @@
 import httpx
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
-from src.robots import get_robot_parser, is_allowed
+
 
 def crawl(start_url, limit=200):
     visited = set()
-    to_visit = set([start_url])
+    to_visit = [(start_url, 0)]  # (url, depth)
     results = []
-    rp = get_robot_parser(start_url)
-    
+
+    domain = urlparse(start_url).netloc
+    depth_limit = 2
+
     with httpx.Client(timeout=10, follow_redirects=True) as client:
         while to_visit and len(visited) < limit:
-            url = to_visit.pop()
+            url, depth = to_visit.pop(0)
 
-            if url in visited:
+            if url in visited or depth > depth_limit:
                 continue
 
-            if not is_allowed(rp, url):
-                continue
-            
             try:
                 r = client.get(url)
                 visited.add(url)
@@ -29,14 +28,24 @@ def crawl(start_url, limit=200):
                     "html": r.text
                 })
 
-                if "text/html" in r.headers.get("content-type", ""):
-                    soup = BeautifulSoup(r.text, "lxml")
+                if "text/html" not in r.headers.get("content-type", ""):
+                    continue
 
-                    for link in soup.find_all("a", href=True):
-                        new_url = urljoin(url, link["href"])
+                soup = BeautifulSoup(r.text, "lxml")
 
-                        if urlparse(new_url).netloc == urlparse(start_url).netloc:
-                            to_visit.add(new_url)
+                # 1. Extract normal links
+                for link in soup.find_all("a", href=True):
+                    new_url = urljoin(url, link["href"])
+
+                    if urlparse(new_url).netloc == domain:
+                        to_visit.append((new_url, depth + 1))
+
+                # 2. Extract canonical
+                canonical = soup.find("link", rel="canonical")
+                if canonical and canonical.get("href"):
+                    new_url = urljoin(url, canonical["href"])
+                    if urlparse(new_url).netloc == domain:
+                        to_visit.append((new_url, depth + 1))
 
             except:
                 continue
