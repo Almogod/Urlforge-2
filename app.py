@@ -1,4 +1,5 @@
 import os
+import concurrent.futures
 from fastapi import FastAPI, Form
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.templating import Jinja2Templates
@@ -43,6 +44,10 @@ def build_clean_urls(pages, fix_canonical=False):
     return list(clean)
 
 
+def run_js(domain, limit):
+    return crawl_js_sync(domain, limit=limit)
+
+
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
@@ -56,19 +61,26 @@ def generate(
     use_js: bool = Form(False),
     fix_canonical: bool = Form(False),
 ):
+    # --- New Crawl Section with ThreadPoolExecutor ---
     try:
         if use_js:
-            pages = crawl_js_sync(domain, limit=limit)
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                future = executor.submit(run_js, domain, limit)
+                pages = future.result(timeout=30)   # hard timeout
         else:
             pages = crawl(domain, limit=limit)
+    except:
+        pages = []  # fail safely instead of hanging
+    # ------------------------------------------------
 
+    try:
         clean_urls = build_clean_urls(pages, fix_canonical)
         files = generate_sitemaps(clean_urls, base_url=domain)
 
         return templates.TemplateResponse("index.html", {
             "request": request,
             "files": files,
-            "message": "Sitemaps generated successfully!"
+            "message": "Sitemaps generated successfully!" if pages else "No pages were found (or the request timed out)."
         })
 
     except Exception as e:
