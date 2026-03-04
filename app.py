@@ -88,24 +88,28 @@ def generate(
 
         clean_urls = build_clean_urls(pages, fix_canonical)
 
-        engine_result = run_engine(pages, clean_urls)
+        # Updated: Pass domain and unpack new meta result keys
+        engine_result = run_engine(pages, clean_urls, domain)
 
         audit = engine_result["audit"]
         fixed_urls = engine_result["fixed_urls"]
-        fixes_applied = engine_result["fixes"]
+        meta_issues = engine_result["meta_issues"]
+        meta_fixes = engine_result["meta_fixes"]
         plan = engine_result["plan"]
 
         files = generate_sitemaps(fixed_urls, base_url=domain)
-        # 🔥 DEBUG PRINT (you will see this in terminal)
+
+        # 🔥 DEBUG PRINT
         print("AUDIT:", audit)
-        print("FIXES:", fixes_applied)
+        print("META ISSUES:", meta_issues)
 
         return templates.TemplateResponse("index.html", {
             "request": request,
             "files": files,
             "count": len(fixed_urls),
             "audit": audit,
-            "fixes": fixes_applied,
+            "meta_issues": meta_issues,
+            "meta_fixes": meta_fixes,
             "plan": plan
         })
 
