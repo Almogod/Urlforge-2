@@ -1,7 +1,7 @@
 # src/engine/engine.py
 import logging
 
-from src.audit import generate_audit_report
+from src.services.audit import generate_audit_report
 from src.engine.planner import build_fix_plan
 from src.engine.registry import MODULE_REGISTRY
 
