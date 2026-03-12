@@ -1,66 +1,41 @@
-# src/engine.py
-
 from src.audit import generate_audit_report
-from src.fixer import fix_urls
-from src.modules.sitemap import fix_sitemap
-from src.modules.canonical import fix_canonical_tags
-from src.modules.robots import fix_robots
-from src.modules.meta import analyze_meta, generate_meta_tags
+from src.engine.registry import MODULE_REGISTRY
+from src.engine.planner import build_fix_plan
 
 
 def run_engine(pages, clean_urls, domain):
-    audit = generate_audit_report(pages, clean_urls)
-
-    plan = build_fix_plan(audit)
-
-    # Analyze and generate meta fixes
-    meta_issues = analyze_meta(pages)
-    meta_fixes = generate_meta_tags(pages)
 
     context = {
+        "pages": pages,
         "urls": clean_urls,
         "domain": domain,
-        "pages": pages,
-        "meta_issues": meta_issues,
-        "meta_fixes": meta_fixes
     }
 
-    # Apply modular fixes
-    if "sitemap" in plan:
-        context["urls"] = fix_sitemap(context["urls"])
+    # 1. Run audit
+    audit = generate_audit_report(pages, clean_urls)
 
-    if "canonical" in plan:
-        context["urls"] = fix_canonical_tags(context)
+    # 2. Build execution plan
+    plan = build_fix_plan(audit)
 
-    if "robots" in plan:
-        fix_robots(context)
-
-    # Generic URL fixes
-    context["urls"] = fix_urls(context["urls"])
-
-    return {
+    results = {
         "audit": audit,
         "plan": plan,
-        "fixed_urls": context["urls"],
-        "meta_issues": context["meta_issues"],
-        "meta_fixes": context["meta_fixes"]
+        "modules": {},
+        "urls": clean_urls
     }
 
+    # 3. Execute modules
+    for module_name in plan:
+        module = MODULE_REGISTRY[module_name]
 
-def build_fix_plan(audit):
-    plan = []
+        module_result = module.run(context)
 
-    if audit["issues"]["duplicates"]:
-        plan.append("sitemap")
+        results["modules"][module_name] = module_result
 
-    if audit["issues"]["has_query_params"]:
-        plan.append("sitemap")
+        # modules may update URLs
+        if "urls" in module_result:
+            context["urls"] = module_result["urls"]
 
-    if audit["issues"]["not_https"]:
-        plan.append("sitemap")
+    results["fixed_urls"] = context["urls"]
 
-    # Future modules
-    plan.append("canonical")
-    plan.append("robots")
-
-    return plan
+    return results
