@@ -1,13 +1,12 @@
-def verify_fixes(before, after):
+def verify_fixes(before_audit, after_audit):
 
-    improvement = {}
+    before_issues = len(before_audit.get("issues", []))
+    after_issues = len(after_audit.get("issues", []))
 
-    improvement["issues_before"] = len(before.get("issues", []))
-    improvement["issues_after"] = len(after.get("issues", []))
+    improvement = before_issues - after_issues
 
-    improvement["score_change"] = (
-        improvement["issues_before"] -
-        improvement["issues_after"]
-    )
-
-    return improvement
+    return {
+        "issues_before": before_issues,
+        "issues_after": after_issues,
+        "improvement": improvement
+    }
