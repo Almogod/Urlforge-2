@@ -16,7 +16,7 @@ from src.services.sitemap_parser import get_sitemap_urls
 # Audit modules
 from src.services.audit import generate_audit_report
 from src.services.fixer import fix_urls, generate_fix_report
-#Engine modules
+# Engine modules
 from src.engine.engine import run_engine
 
 app = FastAPI()
@@ -92,15 +92,22 @@ def generate(
         fixed_urls = engine_result["fixed_urls"]
         plan = engine_result["plan"]
 
+        # Meta Results
         meta_results = engine_result["modules"].get("meta", {})
         meta_issues = meta_results.get("issues", [])
         meta_fixes = meta_results.get("fixes", {})
+
+        # Internal Link Results
+        internal_link_results = engine_result["modules"].get("internal_links", {})
+        link_issues = internal_link_results.get("issues", {})
+        link_suggestions = internal_link_results.get("suggestions", {})
 
         files = generate_sitemaps(fixed_urls, base_url=domain)
 
         # 🔥 DEBUG PRINT
         print("AUDIT:", audit)
         print("META ISSUES:", meta_issues)
+        print("LINK ISSUES:", link_issues)
 
         return templates.TemplateResponse("index.html", {
             "request": request,
@@ -109,6 +116,8 @@ def generate(
             "audit": audit,
             "meta_issues": meta_issues,
             "meta_fixes": meta_fixes,
+            "link_issues": link_issues,
+            "link_suggestions": link_suggestions,
             "plan": plan
         })
 
