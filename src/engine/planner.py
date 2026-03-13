@@ -22,5 +22,6 @@ def build_fix_plan(audit):
     plan.append("canonical")
     plan.append("robots")
     plan.append("schema")
+    plan.append("image_seo")
 
     return plan
