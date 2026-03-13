@@ -145,6 +145,13 @@ def generate(
         core_issues = core_results.get("issues", [])
         core_suggestions = core_results.get("suggestions", {})
 
+        #Keyword Gap
+        keyword_results = engine_result["modules"].get("keyword_gap", {})
+        site_keywords = keyword_results.get("site_keywords", [])
+        competitor_keywords = keyword_results.get("competitor_keywords", {})
+        keyword_gap = keyword_results.get("keyword_gap", {})
+
+        
         if task_id: progress_store[task_id] = "Writing output files..."
         time.sleep(1.5)
         files = generate_sitemaps(fixed_urls, base_url=domain)
