@@ -8,7 +8,7 @@ from src.engine.registry import MODULE_REGISTRY
 # Initialize logger
 logger = logging.getLogger(__name__)
 
-def run_engine(pages, clean_urls, domain):
+def run_engine(pages, clean_urls, domain, graph):
     """
     Core SEO repair engine.
 
@@ -25,7 +25,8 @@ def run_engine(pages, clean_urls, domain):
     context = {
         "pages": pages,
         "urls": clean_urls,
-        "domain": domain
+        "domain": domain,
+        "graph": graph
     }
 
     # -----------------------------
