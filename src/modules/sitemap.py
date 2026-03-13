@@ -1,5 +1,7 @@
 from src.services.generator import generate_sitemaps
-def fix_sitemap(urls):
+
+def run(context):
+    urls = context.get("urls", [])
     cleaned = set()
 
     for url in urls:
@@ -10,4 +12,4 @@ def fix_sitemap(urls):
 
         cleaned.add(url.rstrip("/"))
 
-    return list(cleaned)
+    return {"urls": list(cleaned)}

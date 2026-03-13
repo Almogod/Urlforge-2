@@ -1,7 +1,5 @@
-# src/modules/robots.py
-
-def run(context):
-    domain = context.get("domain", "")
+def fix_robots(context):
+    domain = context["domain"]
 
     robots_content = f"""
 User-agent: *
@@ -12,5 +10,3 @@ Sitemap: {domain}/sitemap.xml
 
     with open("robots.txt", "w") as f:
         f.write(robots_content.strip())
-        
-    return {"status": "success"}

@@ -3,7 +3,7 @@ import httpx
 from .fetcher import fetch
 
 
-async def run_workers(frontier, parser, limit=200, concurrency=10):
+async def run_workers(frontier, parser, graph, limit=200, concurrency=10):
 
     results = []
 
@@ -31,6 +31,7 @@ async def run_workers(frontier, parser, limit=200, concurrency=10):
                 links = parser(page["html"], page["url"])
 
                 for link in links:
+                    graph.add_edge(page["url"], link)
                     frontier.add(link)
 
         workers = [worker() for _ in range(concurrency)]
