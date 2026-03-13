@@ -102,6 +102,11 @@ def generate(
         link_issues = internal_link_results.get("issues", {})
         link_suggestions = internal_link_results.get("suggestions", {})
 
+        # Crawl Budget Results
+        crawl_budget_results = engine_result["modules"].get("crawl_budget", {})
+        crawl_budget_issues = crawl_budget_results.get("issues", {})
+        crawl_budget_suggestions = crawl_budget_results.get("suggestions", [])
+
         files = generate_sitemaps(fixed_urls, base_url=domain)
 
         # 🔥 DEBUG PRINT
