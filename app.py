@@ -175,7 +175,17 @@ def generate(
             "meta_fixes": meta_fixes,
             "link_issues": link_issues,
             "link_suggestions": link_suggestions,
-            "plan": plan
+            "plan": plan,
+            "image_issues": image_issues,
+            "image_fixes": image_fixes,
+            "core_issues": core_issues,
+            "core_suggestions": core_suggestions,
+            "keyword_gap": keyword_gap,
+            "site_keywords": site_keywords,
+            "competitor_keywords": competitor_keywords,
+            "actions": actions,
+            "strategy": strategy,
+            "seo_score": seo_score
         })
 
     except Exception as e:

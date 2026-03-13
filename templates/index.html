@@ -1,279 +1,726 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Generated Site Fixer</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sitemap Fixer</title>
+    
+    <!-- Apply theme ASAP to avoid flash and persist states -->
+    <script>
+        const initTheme = localStorage.getItem('theme');
+        if (initTheme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        } else {
+            document.documentElement.setAttribute('data-theme', 'light');
+        }
+    </script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root, html[data-theme="light"] {
+            /* Light Theme Options - Crème / Pearl */
+            --bg-color: #fdfbf7;
+            --text-color: #2d3748;
+            --text-muted: #718096;
+            --card-bg: rgba(255, 255, 255, 0.6);
+            --card-border: rgba(0, 0, 0, 0.04);
+            --primary-color: #10b981; /* Emerald 500 */
+            --primary-hover: #059669; /* Emerald 600 */
+            --error-color: #ef4444;
+            --hover-glow: rgba(16, 185, 129, 0.15); /* Intentionally more prevalent */
+            --glow-size: 800px;
+            --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.02), 0 4px 6px -2px rgba(0, 0, 0, 0.01);
+        }
+
+        html[data-theme="dark"] {
+            /* Dark Theme Options - Slate */
+            --bg-color: #0f172a; 
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --card-bg: rgba(30, 41, 59, 0.4);
+            --card-border: rgba(255, 255, 255, 0.05);
+            --primary-color: #34d399; /* Emerald 400 */
+            --primary-hover: #10b981; /* Emerald 500 */
+            --error-color: #f87171;
+            --hover-glow: rgba(52, 211, 153, 0.08); /* Intentionally more prevalent */
+            --glow-size: 800px;
+            --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        /* -------------------------------------
+           GLOBAL AMBIENT GLOW & BODY
+           ------------------------------------- */
         body {
-            font-family: Arial, sans-serif;
-            background: #f5f7fb;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            min-height: 100vh;
+            transition: background-color 0.4s ease, color 0.4s ease;
+            position: relative;
+            z-index: 0;
         }
 
-        .container {
-            max-width: 900px;
-            margin: auto;
+        /* The Antigravity Global Mouse Tracker */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: radial-gradient(
+                var(--glow-size) circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+                var(--hover-glow),
+                transparent 50%
+            );
+            z-index: -1;
+            pointer-events: none;
+            transition: background-image 0.4s ease, background-color 0.4s ease;
         }
 
-        h1 {
-            text-align: center;
+        /* Subtle dot pattern overlaid universally */
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background-image: radial-gradient(var(--card-border) 1px, transparent 1px);
+            background-size: 30px 30px;
+            z-index: -2;
+            pointer-events: none;
         }
 
-        .card {
-            background: white;
-            padding: 20px;
-            margin-top: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        input, button {
-            padding: 10px;
-            margin-top: 10px;
-            width: 100%;
-        }
-
-        button {
-            background: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background: #45a049;
-        }
-
-        .score {
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        .score-circle {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            margin: auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            font-weight: bold;
-            color: white;
-        }
-
-        .good { background: #4CAF50; }
-        .average { background: #ff9800; }
-        .bad { background: #f44336; }
-
-        ul {
-            padding-left: 20px;
+        h1, h2, h3, h4 {
+            margin-top: 0;
+            font-weight: 600;
+            letter-spacing: -0.01em;
         }
 
         a {
-            color: #1a73e8;
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.2s;
         }
+
+        a:hover {
+            color: var(--primary-hover);
+            text-decoration: underline;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 60px 20px 30px 20px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2.4rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            color: var(--text-color);
+            padding: 10px 18px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+        }
+        
+        .theme-toggle:hover {
+            background: var(--card-border);
+            transform: translateY(-1px);
+        }
+
+        /* -------------------------------------
+           CARDS & LAYOUT
+           ------------------------------------- */
+        #cards {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px 80px 20px;
+        }
+
+        /* Clean, refined glassmorphism cards without harsh glow borders */
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 40px;
+            position: relative;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        /* Subtle lift effect on hover */
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.05), 0 5px 15px -3px rgba(0, 0, 0, 0.02);
+        }
+        
+        [data-theme="dark"] .card:hover {
+            box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.4), 0 5px 15px -3px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Removed all .card-inner logic since background hover handles it globally */
+
+        /* Inputs and Forms */
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: var(--text-color);
+            font-size: 0.95rem;
+        }
+
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+            background: rgba(255, 255, 255, 0.3);
+            color: var(--text-color);
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s;
+        }
+        
+        [data-theme="dark"] input[type="text"], [data-theme="dark"] input[type="number"] {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background: transparent;
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .checkbox-group label {
+            margin-bottom: 0;
+            display: inline-block;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+
+        button.submit-btn {
+            background-color: var(--primary-color);
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            padding: 16px 24px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
+            margin-top: 15px;
+            box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.39);
+        }
+
+        button.submit-btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+        
+        button.submit-btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Extended UI / Text Display */
+        .section-title {
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 24px;
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        /* Score Display */
+        .score-display {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            margin-bottom: 35px;
+            padding-bottom: 25px;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .score-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 700;
+            color: white;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+        
+        .score-circle.good { background-image: linear-gradient(135deg, #34d399, #10b981); }
+        .score-circle.average { background-image: linear-gradient(135deg, #fbbf24, #f59e0b); }
+        .score-circle.bad { background-image: linear-gradient(135deg, #f87171, #ef4444); }
+
+        .score-text h3 {
+            margin: 0 0 6px 0;
+            font-size: 1.3rem;
+            letter-spacing: -0.01em;
+        }
+
+        .score-text p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* Lists & Accordions */
+        ul {
+            padding-left: 20px;
+            line-height: 1.7;
+        }
+        
+        li {
+            margin-bottom: 6px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: var(--card-border);
+            color: var(--text-muted);
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+        
+        p b {
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        /* Loading UI */
+        #thinking-steps {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        #thinking-steps li {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            opacity: 0.8;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 0.8; transform: translateY(0); }
+        }
+
+        @keyframes spin { 
+            100% { transform: rotate(360deg); } 
+        }
+
+        /* Hide elements dynamically */
+        .hidden {
+            display: none !important;
+        }
+
     </style>
 </head>
 <body>
 
-<div class="container">
-
+<div class="header">
     <h1>Sitemap Fixer</h1>
+    <button class="theme-toggle" id="theme-btn">
+        <span id="theme-icon">🌙</span> <span id="theme-text">Dark Mode</span>
+    </button>
+</div>
 
-    <!-- LOADING OVERLAY -->
-    <div id="loading-overlay" style="display:none; text-align:center; padding: 40px; background: white; margin-top: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-        <h2>Analysis in Progress...</h2>
-        <div style="width: 100%; background: #ddd; height: 20px; border-radius: 10px; overflow: hidden; margin: 20px 0;">
-            <div id="loading-bar" style="width: 0%; height: 100%; background: #4CAF50; transition: width 0.5s;"></div>
-        </div>
-        <p id="loading-text" style="font-weight: bold; color: #555;">Starting...</p>
-    </div>
+<div id="cards">
 
-    <!-- FORM -->
+    <!-- FORM CARD -->
     <div class="card result-card" id="form-card">
         <form id="generate-form" action="/generate" method="post">
-            <label>Domain:</label>
-            <input type="text" name="domain" placeholder="https://example.com" required>
-
-            <label>Limit:</label>
-            <input type="number" name="limit" value="50">
-
-            <label><input type="checkbox" name="use_js"> Use JS Rendering</label><br>
-            <label><input type="checkbox" name="fix_canonical"> Fix Canonical URLs</label>
-
-            <button type="submit">Generate Sitemap</button>
-        </form>
-    </div>
-
-    <!-- ERROR -->
-    {% if error %}
-    <div class="card result-card">
-        <p style="color:red;">{{error}}</p>
-    </div>
-    {% endif %}
-
-    <!-- SITEMAP -->
-    {% if files %}
-    <div class="card result-card">
-        <h2>Sitemap Generated</h2>
-        <p>Total URLs: {{count}}</p>
-
-        <ul>
-            {% for file in files %}
-                <li><a href="/download?file={{file}}" target="_blank">{{file}}</a></li>
-            {% endfor %}
-        </ul>
-    </div>
-    {% endif %}
-
-    <!-- SEO AUDIT -->
-    {% if audit is defined %}
-    <div class="card result-card">
-
-        <h2>SEO Audit Report</h2>
-
-        <!-- SCORE -->
-        <div class="score">
-            {% set score = audit.score %}
-            <div class="score-circle 
-                {% if score > 80 %}good
-                {% elif score > 50 %}average
-                {% else %}bad
-                {% endif %}">
-                {{score}}
+            <div class="form-group">
+                <label>Target Domain</label>
+                <input type="text" name="domain" placeholder="https://example.com" required>
             </div>
 
-            {% if score > 80 %}
-                <p style="color:green;">Good SEO health</p>
-            {% elif score > 50 %}
-                <p style="color:orange;">Average SEO health</p>
-            {% else %}
-                <p style="color:red;">Poor SEO health</p>
-            {% endif %}
+            <div class="form-group">
+                <label>Crawl Limit (Pages)</label>
+                <input type="number" name="limit" value="50">
+            </div>
+
+            <div class="checkbox-group">
+                <input type="checkbox" id="use_js" name="use_js">
+                <label for="use_js">Enable JS Rendering</label>
+            </div>
+
+            <div class="checkbox-group">
+                <input type="checkbox" id="fix_canonical" name="fix_canonical">
+                <label for="fix_canonical">Auto-Fix Canonical URLs</label>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submit-btn">Run Engine</button>
+        </form>
+
+        <!-- LOADING UI INLINE -->
+        <div id="loading-overlay" class="hidden" style="margin-top: 30px; border-top: 1px solid var(--card-border); padding-top: 25px;">
+            <h3 style="margin-bottom: 15px; font-weight: 600;">Analysis in Progress</h3>
+            <ul id="thinking-steps">
+                <!-- Polling inserts steps here -->
+            </ul>
+        </div>
+    </div>
+
+    <!-- ERROR STATE -->
+    {% if error %}
+    <div class="card result-card">
+        <h3 style="color: var(--error-color);">Error Occurred</h3>
+        <p style="color: var(--text-muted);">{{error}}</p>
+    </div>
+    {% endif %}
+
+    <!-- RESULTS (Conditional Rendering) -->
+    {% if audit is defined or seo_score is defined %}
+    
+    <!-- OVERVIEW & SCORE CARD -->
+    <div class="card result-card">
+        <h2 class="section-title">Engine Overview</h2>
+        
+        <div class="score-display">
+            {% set display_score = seo_score if seo_score else audit.score %}
+            <div class="score-circle 
+                {% if display_score >= 80 %}good
+                {% elif display_score >= 50 %}average
+                {% else %}bad
+                {% endif %}">
+                {{display_score}}
+            </div>
+            <div class="score-text">
+                {% if display_score >= 80 %}
+                    <h3 style="color: #10b981;">Excellent Health</h3>
+                {% elif display_score >= 50 %}
+                    <h3 style="color: #f59e0b;">Average Health</h3>
+                {% else %}
+                    <h3 style="color: #ef4444;">Poor Health</h3>
+                {% endif %}
+                <p>{{count}} URLs successfully crawled and analyzed.</p>
+            </div>
         </div>
 
-        <!-- SUGGESTIONS -->
-        <h3>Fix Suggestions</h3>
-        <ul>
-            {% for suggestion in audit.suggestions %}
-                <li>{{suggestion}}</li>
-            {% endfor %}
-        </ul>
+        <!-- Fix Strategy AI Output -->
+        {% if strategy %}
+        <div style="margin-top: 25px;">
+            <h3>AI Fix Strategy</h3>
+            <p style="color: var(--text-muted); line-height: 1.7;">{{strategy}}</p>
+        </div>
+        {% endif %}
 
-        <!-- ISSUES -->
-        <h3>Issues Found</h3>
-        {% for issue, urls in audit.issues.items() %}
-            {% if urls|length > 0 %}
-            <p><b>{{issue.replace("_", " ").title()}} ({{urls|length}})</b></p>
+        <!-- General Audit Suggestions -->
+        {% if audit and audit.suggestions %}
+        <div style="margin-top: 25px;">
+            <h3>Priority Recommendations</h3>
             <ul>
-                {% for url in urls %}
-                    <li>{{url}}</li>
+                {% for suggestion in audit.suggestions %}
+                    <li>{{suggestion}}</li>
                 {% endfor %}
             </ul>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- SITEMAP FILES -->
+    {% if files %}
+    <div class="card result-card">
+        <h2 class="section-title">Generated Exports</h2>
+        <p style="color: var(--text-muted);">The following optimized sitemap files have been generated based on the engine's strategy.</p>
+        <ul>
+            {% for file in files %}
+                <li><a href="/download?file={{file}}" target="_blank">{{file}}</a> <span class="badge">XML</span></li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <!-- URL ISSUES & FIXES -->
+    {% if audit and audit.issues %}
+    <div class="card result-card">
+        <h2 class="section-title">URL Inspection</h2>
+        
+        {% for issue, urls in audit.issues.items() %}
+            {% if urls|length > 0 %}
+            <div style="margin-top: 25px;">
+                <p><b>{{issue.replace("_", " ").title()}}</b> <span class="badge">{{urls|length}} pages</span></p>
+                <ul style="color: var(--text-muted); margin-top: 8px;">
+                    {% for url in urls %}
+                        <li>{{url}}</li>
+                    {% endfor %}
+                </ul>
+            </div>
             {% endif %}
         {% endfor %}
 
+        {% if fixes %}
+            <h3 style="margin-top: 35px; border-top: 1px solid var(--card-border); padding-top: 25px;">Applied Automated Fixes</h3>
+            <ul style="color: var(--text-muted);">
+                {% for fix in fixes %}
+                    <li>{{fix}}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
     </div>
     {% endif %}
 
-    <!-- FIXES -->
-    {% if fixes is defined %}
+    <!-- EXTENDED MODULES MODULES -->
+    {% if strategy or actions or image_issues or core_issues or keyword_gap %}
     <div class="card result-card">
-        <h2>Fixes Applied</h2>
+        <h2 class="section-title">Deep Analysis Modules</h2>
+
+        <!-- Core Web Vitals -->
+        {% if core_issues or core_suggestions %}
+        <h3 style="margin-top: 20px;">Core Web Vitals</h3>
         <ul>
-            {% for fix in fixes %}
-                <li>{{fix}}</li>
+            {% for issue in core_issues %}
+                <li style="color: var(--error-color);">{{issue}}</li>
+            {% endfor %}
+            {% for sug in core_suggestions %}
+                <li style="color: var(--primary-color);">{{sug}}</li>
             {% endfor %}
         </ul>
+        {% endif %}
+
+        <!-- Image SEO -->
+        {% if image_issues or image_fixes %}
+        <h3 style="margin-top: 25px;">Image SEO</h3>
+        {% if image_issues %}
+            <ul>
+            {% for issue in image_issues %}
+                <li style="color: var(--error-color);">{{issue}}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+        {% if image_fixes %}
+            <p><b>Applied Fixes:</b></p>
+            <ul style="color: var(--text-muted);">
+                {% for fix in image_fixes %}
+                    <li>{{fix}}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        {% endif %}
+
+        <!-- Keyword Gap -->
+        {% if site_keywords or keyword_gap %}
+        <h3 style="margin-top: 25px;">Content & Keyword Gaps</h3>
+        <p><b>Identified Site Keywords:</b> 
+            <span style="color: var(--primary-color); font-weight: 500;">{{site_keywords | join(", ")}}</span>
+        </p>
+        {% if keyword_gap %}
+        <p style="margin-top: 15px;"><b>Keyword Gaps vs Competitors:</b></p>
+        <ul>
+            {% for competitor, gaps in keyword_gap.items() %}
+                <li><b>{{competitor}}:</b> <span style="color: var(--text-muted);">{{gaps | join(", ")}}</span></li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endif %}
+
     </div>
     {% endif %}
 
+    {% endif %}
 </div>
 
 <script>
-if(document.getElementById('generate-form')) {
-    document.getElementById('generate-form').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        // Hide old results if any
-        document.querySelectorAll('.result-card').forEach(el => {
-            if (el.id !== 'form-card') el.style.display = 'none';
+    // --- Dark Mode Toggle Logic ---
+    const themeBtn = document.getElementById('theme-btn');
+    const themeIcon = document.getElementById('theme-icon');
+    const themeText = document.getElementById('theme-text');
+    
+    // Check local storage for theme preference immediately
+    function applyTheme() {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            if(themeIcon) themeIcon.innerText = '☀️';
+            if(themeText) themeText.innerText = 'Light Mode';
+        } else {
+            document.documentElement.setAttribute('data-theme', 'light');
+            if(themeIcon) themeIcon.innerText = '🌙';
+            if(themeText) themeText.innerText = 'Dark Mode';
+        }
+    }
+    
+    // Run immediately
+    applyTheme();
+
+    if (themeBtn) {
+        themeBtn.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            if (currentTheme === 'dark') {
+                localStorage.setItem('theme', 'light');
+            } else {
+                localStorage.setItem('theme', 'dark');
+            }
+            applyTheme();
         });
-        
-        const overlay = document.getElementById('loading-overlay');
-        overlay.style.display = 'block';
-        
-        // Create Claude-like thinking list
-        overlay.innerHTML = `
-            <h2>Analyzing Site...</h2>
-            <ul id="thinking-steps" style="list-style: none; padding: 0; text-align: left; max-width: 400px; margin: 20px auto; font-family: monospace; font-size: 16px;">
-            </ul>
-        `;
-        
-        const taskId = Math.random().toString(36).substring(2, 15);
-        const formData = new FormData(this);
-        formData.append('task_id', taskId);
-        
-        const stepsContainer = document.getElementById('thinking-steps');
-        let knownSteps = [];
-        
-        // Start polling
-        const pollInterval = setInterval(async () => {
-            try {
-                const res = await fetch('/progress?task_id=' + taskId);
-                if (res.ok) {
-                    const data = await res.json();
-                    const status = data.status || "Starting...";
-                    
-                    if (!knownSteps.includes(status)) {
-                        // Mark previous step as done
-                        if (knownSteps.length > 0) {
-                            const lastLi = stepsContainer.lastElementChild;
-                            lastLi.innerHTML = `<span style="color: #4CAF50;">✅</span> ${knownSteps[knownSteps.length - 1]}`;
-                        }
+    }
+
+    // --- Antigravity Global Mouse Hover Effect ---
+    // Attached to document to track universally across the screen
+    let glowSize = 800;
+    document.addEventListener("mousemove", e => {
+        document.body.style.setProperty("--mouse-x", `${e.clientX}px`);
+        document.body.style.setProperty("--mouse-y", `${e.clientY}px`);
+        document.body.style.setProperty("--glow-size", `${glowSize}px`);
+    });
+    
+    // Add Click Burst Effect
+    document.addEventListener("mousedown", () => {
+        glowSize = 1200;
+        document.body.style.setProperty("--glow-size", `${glowSize}px`);
+        document.body.style.setProperty("--hover-glow", document.documentElement.getAttribute('data-theme') === 'dark' ? 'rgba(52, 211, 153, 0.15)' : 'rgba(16, 185, 129, 0.35)');
+    });
+    
+    document.addEventListener("mouseup", () => {
+        glowSize = 800;
+        document.body.style.setProperty("--glow-size", `${glowSize}px`);
+        document.body.style.setProperty("--hover-glow", document.documentElement.getAttribute('data-theme') === 'dark' ? 'rgba(52, 211, 153, 0.08)' : 'rgba(16, 185, 129, 0.15)');
+    });
+
+    // --- Form Submission & Polling ---
+    const form = document.getElementById('generate-form');
+    if (form) {
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Hide old results if any
+            document.querySelectorAll('.result-card').forEach(el => {
+                if (el.id !== 'form-card') {
+                    el.style.display = 'none';
+                }
+            });
+            
+            // Show inline loading block within form card
+            const overlay = document.getElementById('loading-overlay');
+            const submitBtn = document.getElementById('submit-btn');
+            overlay.classList.remove('hidden');
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.5';
+            submitBtn.innerText = 'Analyzing...';
+            
+            // Create random task_id to track progress
+            const taskId = Math.random().toString(36).substring(2, 15);
+            const formData = new FormData(this);
+            formData.append('task_id', taskId);
+            
+            const stepsContainer = document.getElementById('thinking-steps');
+            stepsContainer.innerHTML = ''; // reset steps
+            let knownSteps = [];
+            
+            // Start polling backend status
+            const pollInterval = setInterval(async () => {
+                try {
+                    const res = await fetch('/progress?task_id=' + taskId);
+                    if (res.ok) {
+                        const data = await res.json();
+                        const status = data.status || "Starting...";
                         
-                        // Add new step
-                        knownSteps.push(status);
-                        const newLi = document.createElement('li');
-                        newLi.style.marginBottom = '10px';
-                        newLi.innerHTML = `<span style="display: inline-block; animation: spin 1s linear infinite;">⏳</span> ${status}`;
-                        stepsContainer.appendChild(newLi);
+                        if (!knownSteps.includes(status)) {
+                            // Mark previous step as done
+                            if (knownSteps.length > 0) {
+                                const lastLi = stepsContainer.lastElementChild;
+                                lastLi.innerHTML = `<span style="color: var(--primary-color);">✓</span> ${knownSteps[knownSteps.length - 1]}`;
+                            }
+                            
+                            // Add new step
+                            knownSteps.push(status);
+                            const newLi = document.createElement('li');
+                            newLi.innerHTML = `<span style="display: inline-block; animation: spin 1s linear infinite;">⏳</span> ${status}`;
+                            stepsContainer.appendChild(newLi);
+                        }
                     }
+                } catch (err) {
+                    console.error("Polling error:", err);
+                }
+            }, 500);
+
+            // Submit form to generate
+            try {
+                const res = await fetch('/generate', { method: 'POST', body: formData });
+                clearInterval(pollInterval);
+                
+                if (res.ok) {
+                    const html = await res.text();
+                    document.open();
+                    document.write(html);
+                    document.close();
+                } else {
+                    stepsContainer.lastElementChild.innerHTML = `<span style="color: var(--error-color);">✕</span> Error occurred during Generation`;
+                    submitBtn.disabled = false;
+                    submitBtn.style.opacity = '1';
+                    submitBtn.innerText = 'Run Engine';
                 }
             } catch (err) {
-                console.error("Polling error:", err);
+                clearInterval(pollInterval);
+                stepsContainer.lastElementChild.innerHTML = `<span style="color: var(--error-color);">✕</span> Network Error`;
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+                submitBtn.innerText = 'Run Engine';
             }
-        }, 500);
-
-        // Add CSS for spinner
-        if (!document.getElementById('spinner-style')) {
-            const style = document.createElement('style');
-            style.id = 'spinner-style';
-            style.innerHTML = `@keyframes spin { 100% { transform: rotate(360deg); } }`;
-            document.head.appendChild(style);
-        }
-
-        // Submit form
-        try {
-            const res = await fetch('/generate', { method: 'POST', body: formData });
-            clearInterval(pollInterval);
-            
-            if (res.ok) {
-                const html = await res.text();
-                document.open();
-                document.write(html);
-                document.close();
-            } else {
-                stepsContainer.lastElementChild.innerHTML = `<span style="color: red;">❌</span> Error occurred`;
-                document.querySelector('.result-card').style.display = 'block';
-            }
-        } catch (err) {
-            clearInterval(pollInterval);
-            stepsContainer.lastElementChild.innerHTML = `<span style="color: red;">❌</span> Network Error`;
-        }
-    });
-}
+        });
+    }
 </script>
 </body>
 </html>
