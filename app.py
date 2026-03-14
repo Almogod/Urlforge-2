@@ -59,18 +59,23 @@ def run_analysis_task(task_id: str, domain: str, limit: int, use_js: bool, fix_c
         task_store.set_status(task_id, "Checking existing sitemap...")
         sitemap_urls = get_sitemap_urls(domain)
         for url in sitemap_urls:
-            pages.append({"url": url, "status": 200, "html": ""})
+            if len(pages) >= limit:
+                break
+            # Avoid duplicates if they were already crawled
+            if not any(p["url"] == url for p in pages):
+                pages.append({"url": url, "status": 200, "html": ""})
 
         pages.sort(key=lambda x: x.get("url", ""))
 
         task_store.set_status(task_id, "Cleaning URLs...")
-        clean_urls, domain_detected, graph_parsed = build_clean_urls(pages, fix_canonical)
-
+        # Pre-process
+        clean_urls = build_clean_urls(pages, fix_canonical)
+        
         def engine_progress(msg):
             task_store.set_status(task_id, msg)
 
-        # 1. Run Engine (Now includes all 20 modules via updated registry/planner)
-        engine_result = run_engine(pages, clean_urls, domain, graph_parsed, progress_callback=engine_progress)
+        # 1. Run Engine
+        engine_result = run_engine(pages, clean_urls, domain, graph, progress_callback=engine_progress)
 
         # 2. Run Automation
         task_store.set_status(task_id, "Running Automations...")
@@ -115,6 +120,8 @@ def generate(
     use_js: bool = Form(False),
     task_id: Optional[str] = Form(None)
 ):
+    # Ensure at least 1 page
+    limit = max(1, limit)
     if not task_id:
         task_id = str(uuid.uuid4())
     background_tasks.add_task(
@@ -142,6 +149,9 @@ def run_plugin_task(
     ollama_host: Optional[str] = Form(None),
     task_id: Optional[str] = Form(None)
 ):
+    # Ensure at least 1 page
+    limit = max(1, limit)
+    
     if not task_id:
         task_id = str(uuid.uuid4())[:10]
     task_store.set_status(task_id, "In Progress")
@@ -173,17 +183,29 @@ def approve_plugin_fixes(
     task_id: str = Form(...),
     approved_actions: str = Form(""), # comma separated IDs
     approved_pages: str = Form(""),   # comma separated keywords
-    github_token: str = Form(None),
-    ftp_host: str = Form(None),
-    ftp_user: str = Form(None),
-    ftp_pass: str = Form(None),
-    webhook_url: str = Form(None)
+    method: str = Form("github"),
+    github_token: Optional[str] = Form(None),
+    vercel_token: Optional[str] = Form(None),
+    vercel_project_id: Optional[str] = Form(None),
+    vercel_team_id: Optional[str] = Form(None),
+    hostinger_api_key: Optional[str] = Form(None),
+    hostinger_site_id: Optional[str] = Form(None),
+    ftp_host: Optional[str] = Form(None),
+    ftp_user: Optional[str] = Form(None),
+    ftp_pass: Optional[str] = Form(None),
+    webhook_url: Optional[str] = Form(None)
 ):
     action_ids = [a.strip() for a in approved_actions.split(",") if a.strip()]
     page_keywords = [p.strip() for p in approved_pages.split(",") if p.strip()]
     
     deploy_config = {
+        "platform": method,
         "github_token": github_token,
+        "vercel_token": vercel_token,
+        "vercel_project_id": vercel_project_id,
+        "vercel_team_id": vercel_team_id,
+        "hostinger_api_key": hostinger_api_key,
+        "hostinger_site_id": hostinger_site_id,
         "ftp_host": ftp_host,
         "ftp_user": ftp_user,
         "ftp_pass": ftp_pass,
@@ -238,7 +260,8 @@ def show_results(request: Request, task_id: str):
         "link_issues": modules.get("broken_links", {}).get("issues", []),
         "keyword_gap": modules.get("keyword_gap", {}).get("keyword_gap", {}),
         "site_keywords": modules.get("keyword_gap", {}).get("site_keywords", []),
-        "pages_generated": results.get("pages_generated", [])
+        "pages_generated": results.get("pages_generated", []),
+        "active_tab": "plugin-tab" if is_plugin else "standard-tab"
     }
     
     return templates.TemplateResponse("index.html", ctx)
@@ -255,6 +278,58 @@ def download_plugin_report(task_id: str):
     
     generate_seo_pdf(results, file_path)
     return FileResponse(file_path, filename=report_file)
+
+@app.post("/plugin/generate_content")
+def generate_keyword_content(
+    background_tasks: BackgroundTasks,
+    task_id: str = Form(...),
+    keyword: str = Form(...),
+    competitors: str = Form(""),
+    openai_key: Optional[str] = Form(None),
+    gemini_key: Optional[str] = Form(None),
+    ollama_host: Optional[str] = Form(None)
+):
+    """
+    Endpoint for targeted generation of a single page based on a keyword.
+    """
+    comp_list = [c.strip() for c in competitors.split(",") if c.strip()]
+    llm_config = {
+        "provider": "openai" if openai_key else ("gemini" if gemini_key else "ollama"),
+        "api_key": openai_key or gemini_key,
+        "ollama_host": ollama_host or "http://localhost:11434"
+    }
+
+    from src.content.engine import generate_content_for_keyword
+    
+    def run_gen():
+        # Get existing pages for internal links
+        results = task_store.get_results(task_id) or {}
+        engine_res = results.get("engine_result", {})
+        existing = [{"url": p["url"], "title": p.get("title", p["url"])} for p in engine_res.get("pages", [])]
+        
+        # Generate
+        new_page = generate_content_for_keyword(keyword, comp_list, llm_config, existing)
+        
+        if "error" not in new_page:
+            # Append to pages_generated in the report
+            if "pages_generated" not in results:
+                results["pages_generated"] = []
+            
+            results["pages_generated"].append({
+                "keyword": keyword,
+                "slug": new_page["slug"],
+                "title": new_page["meta_title"],
+                "word_count": new_page["word_count"],
+                "html": new_page["html"],
+                "approved": True
+            })
+            task_store.save_results(task_id, results)
+            task_store.set_status(task_id, f"Generated content for: {keyword}")
+        else:
+            task_store.set_status(task_id, f"Failed to generate content for {keyword}: {new_page['error']}")
+
+    background_tasks.add_task(run_gen)
+    return JSONResponse(content={"status": "generation_started", "keyword": keyword})
 
 @app.get("/download")
 def download_file(file: str):

@@ -469,7 +469,7 @@
 
                 <div class="form-group">
                     <label>Crawl Limit (Pages)</label>
-                    <input type="number" name="limit" value="50">
+                    <input type="number" name="limit" value="50" min="1" required>
                 </div>
 
                 <button type="submit" class="submit-btn" id="submit-btn">Run Engine</button>
@@ -494,7 +494,7 @@
 
                 <div class="form-group">
                     <label>Crawl Limit</label>
-                    <input type="number" name="limit" value="100">
+                    <input type="number" name="limit" value="100" min="1" required>
                 </div>
 
                 <div style="border-top: 1px solid var(--card-border); margin-top: 20px; padding-top: 20px;">
@@ -513,7 +513,6 @@
                     </div>
                 </div>
 
-                <button type="submit" class="submit-btn" id="plugin-submit-btn">Run Analysis & Get Suggestions</button>
             </form>
         </div>
 
@@ -551,6 +550,38 @@
                 <p><b>Suggested Fixes:</b> {{plugin_report.suggested_actions|length}}</p>
             </div>
         </div>
+
+        {% if keyword_gap %}
+        <div class="review-section" style="margin-top: 20px; border-top: 1px solid var(--card-border); padding-top: 20px;">
+            <h3 style="margin-bottom: 15px; font-weight: 600;">Content Engine: Keyword Gap Recommendations</h3>
+            <p style="color: var(--text-muted); margin-bottom: 15px;">Target these keywords that your competitors rank for but you are missing.</p>
+            
+            <table class="suggestions-table">
+                <thead>
+                    <tr>
+                        <th>Keyword</th>
+                        <th>Source</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for comp, keywords in keyword_gap.items() %}
+                        {% for kw in keywords %}
+                        <tr>
+                            <td><strong>{{kw}}</strong></td>
+                            <td>{{comp}}</td>
+                            <td>
+                                <button onclick="generateContentForKeyword('{{kw}}', '{{comp}}')" class="btn-sm" style="background: var(--primary-color); border: none; padding: 5px 12px; border-radius: 4px; color: white; cursor: pointer;">
+                                    Generate SEO Page
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
 
         {% if plugin_report.state == 'pending_approval' %}
         <div class="review-section" id="review-area">
@@ -615,21 +646,51 @@
                 <input type="hidden" name="task_id" value="{{task_id}}">
                 <div class="form-group">
                     <label>Deployment Method</label>
-                    <select name="method" id="deploy_method" onchange="toggleDeployFields()">
-                        <option value="github">GitHub Token</option>
-                        <option value="ftp">FTP Server</option>
+                    <select name="method" id="deploy_method" onchange="toggleDeployFields()" style="padding: 12px; font-size: 1rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-color);">
+                        <option value="github">GitHub Push</option>
+                        <option value="vercel">Vercel Deployment</option>
+                        <option value="hostinger">Hostinger Hub</option>
+                        <option value="ftp">Standard FTP/SFTP</option>
                         <option value="webhook">REST Webhook</option>
                     </select>
                 </div>
 
-                <div id="github-fields">
+                <div id="github-fields" class="deploy-group">
                     <div class="form-group">
                         <label>GitHub Personal Access Token</label>
                         <input type="password" name="github_token" placeholder="ghp_...">
                     </div>
                 </div>
 
-                <div id="ftp-fields" class="hidden">
+                <div id="vercel-fields" class="deploy-group hidden">
+                    <div class="form-group">
+                        <label>Vercel Auth Token</label>
+                        <input type="password" name="vercel_token" placeholder="vct_...">
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="form-group">
+                            <label>Project ID</label>
+                            <input type="text" name="vercel_project_id" placeholder="prj_...">
+                        </div>
+                        <div class="form-group">
+                            <label>Team ID (Optional)</label>
+                            <input type="text" name="vercel_team_id" placeholder="team_...">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="hostinger-fields" class="deploy-group hidden">
+                    <div class="form-group">
+                        <label>Hostinger API Key / SSH Key</label>
+                        <input type="password" name="hostinger_api_key" placeholder="h_...">
+                    </div>
+                    <div class="form-group">
+                        <label>Site Domain / ID</label>
+                        <input type="text" name="hostinger_site_id" placeholder="example.com">
+                    </div>
+                </div>
+
+                <div id="ftp-fields" class="deploy-group hidden">
                     <div class="form-group">
                         <label>FTP Host</label>
                         <input type="text" name="ftp_host" placeholder="ftp.example.com">
@@ -646,7 +707,7 @@
                     </div>
                 </div>
 
-                <div id="webhook-fields" class="hidden">
+                <div id="webhook-fields" class="deploy-group hidden">
                     <div class="form-group">
                         <label>Webhook URL</label>
                         <input type="text" name="webhook_url" placeholder="https://api.site.com/seo-hook">
@@ -979,13 +1040,50 @@
     }
     function toggleDeployFields() {
         const method = document.getElementById('deploy_method').value;
-        const gh = document.getElementById('github-fields');
-        const ftp = document.getElementById('ftp-fields');
-        const wh = document.getElementById('webhook-fields');
+        const allGroups = document.querySelectorAll('.deploy-group');
+        allGroups.forEach(g => g.classList.add('hidden'));
         
-        gh.classList.toggle('hidden', method !== 'github');
-        ftp.classList.toggle('hidden', method !== 'ftp');
-        wh.classList.toggle('hidden', method !== 'webhook');
+        const activeGroup = document.getElementById(method + '-fields');
+        if (activeGroup) activeGroup.classList.remove('hidden');
+    }
+    async function generateContentForKeyword(kw, comp) {
+        const btn = event.target;
+        const originalText = btn.innerText;
+        btn.disabled = true;
+        btn.innerText = "Generating...";
+        
+        try {
+            const formData = new FormData();
+            formData.append('task_id', '{{task_id}}');
+            formData.append('keyword', kw);
+            formData.append('competitors', comp);
+            
+            // Get LLM keys from existing forms if available or prompt user?
+            // For now, assume they were used in the initial analysis and stored 
+            // In a better version we'd store specialized plugin state.
+            
+            const response = await fetch('/plugin/generate_content', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            
+            if (data.status === 'generation_started') {
+                alert(`Content generation started for "${kw}". Check progress below.`);
+                btn.innerText = "Success";
+                setTimeout(() => {
+                    location.reload(); // Quick refresh to show the new pages in the "AI Pages" table
+                }, 1500);
+            } else {
+                alert("Failed: " + (data.error || "Unknown error"));
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        } catch (err) {
+            alert("Error: " + err.message);
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
     }
     function downloadPDF() {
         window.open('/plugin/download_report?task_id={{task_id}}', '_blank');

@@ -16,6 +16,9 @@ def run_automation(actions, config):
 
     if platform == "github":
         return apply_github_actions(actions, config)
+    elif platform in ["vercel", "hostinger", "ftp", "webhook"]:
+        logger.info(f"Deployment to {platform} is accepted. (Implementation pending for specific provider APIs).")
+        return {"status": "accepted_for_deployment", "platform": platform}
 
     return {
         "status": "unsupported_platform",

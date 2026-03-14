@@ -222,7 +222,17 @@ def _crawl(site_url, crawl_options):
     else:
         from src.crawler_engine.crawler import crawl
         pages, graph = crawl(site_url, limit=limit)
+    
+    # Also add sitemap URLs but respect limit
+    from src.services.sitemap_parser import get_sitemap_urls
+    sitemap_urls = get_sitemap_urls(site_url)
+    for url in sitemap_urls:
+        if len(pages) >= limit:
+            break
+        if not any(p["url"] == url for p in pages):
+            pages.append({"url": url, "status": 200, "html": ""})
         
+    from src.utils.url_utils import build_clean_urls
     clean_urls = build_clean_urls(pages)
 
     return pages, clean_urls, domain, graph
