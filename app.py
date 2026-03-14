@@ -8,72 +8,51 @@ from fastapi.requests import Request
 
 # Core modules
 from src.crawler_engine.crawler import crawl
-from src.crawler_engine.js_crawler import crawl_js_sync  # optional fallback
 from src.services.extractor import extract_metadata
 from src.services.normalizer import normalize
 from src.services.filter import is_valid
 from src.services.generator import generate_sitemaps
 from src.services.sitemap_parser import get_sitemap_urls
-# Audit modules
-from src.services.audit import generate_audit_report
-from src.services.fixer import fix_urls, generate_fix_report
-# Engine modules
 from src.engine.engine import run_engine
+from src.automation.automation_engine import run_automation
 
 app = FastAPI()
-
 templates = Jinja2Templates(directory="templates")
 
-# -----------------------------
-# PROGRESS TRACKING
-# -----------------------------
+# Define or Import your config here
+AUTOMATION_CONFIG = {
+    "platform": "github",
+    "github_token": os.getenv("GITHUB_TOKEN", "..."),
+    "repo": "user/site-repo",
+    "branch": "main"
+}
+
 progress_store = {}
 
 @app.get("/progress")
 def get_progress(task_id: str):
     return {"status": progress_store.get(task_id, "Starting..."), "progress": None}
 
-# -----------------------------
-# URL CLEANING LOGIC (IMPROVED)
-# -----------------------------
 def build_clean_urls(pages, fix_canonical=False):
     clean = set()
-
     for p in pages:
         meta = extract_metadata(p)
-
-        if not is_valid(meta):
-            continue
-
+        if not is_valid(meta): continue
         chosen = meta["url"]
-
         if fix_canonical:
             canonical = meta.get("canonical")
-            if canonical and canonical.startswith("http"):
-                chosen = canonical
-
-        # remove query params (important for SEO)
+            if canonical and canonical.startswith("http"): chosen = canonical
         chosen = chosen.split("?")[0]
-
         try:
             clean.add(normalize(chosen))
         except:
             continue
-
     return sorted(list(clean))
 
-
-# -----------------------------
-# HOME ROUTE
-# -----------------------------
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
-
-# -----------------------------
-# MAIN GENERATE ROUTE
-# -----------------------------
 @app.post("/generate", response_class=HTMLResponse)
 def generate(
     request: Request,
@@ -85,123 +64,69 @@ def generate(
 ):
     try:
         if task_id: progress_store[task_id] = "Crawling website pages..."
-        time.sleep(1.5)
         pages, graph = crawl(domain, limit=limit)
-        # 2. Add sitemap URLs
+        
         if task_id: progress_store[task_id] = "Checking existing sitemap..."
-        time.sleep(1.5)
         sitemap_urls = get_sitemap_urls(domain)
         for url in sitemap_urls:
-            pages.append({
-                "url": url,
-                "status": 200,
-                "html": ""
-            })
+            pages.append({"url": url, "status": 200, "html": ""})
 
-        # Sort pages to guarantee deterministic execution order later
         pages.sort(key=lambda x: x["url"])
 
         if task_id: progress_store[task_id] = "Cleaning URLs..."
-        time.sleep(1.5)
         clean_urls = build_clean_urls(pages, fix_canonical)
 
         def engine_progress(msg):
             if task_id: progress_store[task_id] = msg
-            time.sleep(1)
 
+        # 1. Run Engine
         engine_result = run_engine(pages, clean_urls, domain, graph, progress_callback=engine_progress)
 
-        audit = engine_result["audit"]
-        fixed_urls = engine_result["fixed_urls"]
-        plan = engine_result["plan"]
-
-        # Meta Results
-        meta_results = engine_result["modules"].get("meta", {})
-        meta_issues = meta_results.get("issues", [])
-        meta_fixes = meta_results.get("fixes", {})
-
-        # Internal Link Results
-        internal_link_results = engine_result["modules"].get("internal_links", {})
-        link_issues = internal_link_results.get("issues", {})
-        link_suggestions = internal_link_results.get("suggestions", {})
-
-        # Crawl Budget Results
-        crawl_budget_results = engine_result["modules"].get("crawl_budget", {})
-        crawl_budget_issues = crawl_budget_results.get("issues", {})
-        crawl_budget_suggestions = crawl_budget_results.get("suggestions", [])
-
-        #schema injector
-        schema_results = engine_result["modules"].get("schema", {})
-        schema_issues = schema_results.get("issues", [])
-        schema_generated = schema_results.get("schemas", {})
-
-        #Image SEO
-        image_results = engine_result["modules"].get("image_seo", {})
-        image_issues = image_results.get("issues", [])
-        image_fixes = image_results.get("fixes", {})
-
-        #Core web vitals
-        core_results = engine_result["modules"].get("core_web_vitals", {})
-        core_issues = core_results.get("issues", [])
-        core_suggestions = core_results.get("suggestions", {})
-
-        #Keyword Gap
-        keyword_results = engine_result["modules"].get("keyword_gap", {})
-        site_keywords = keyword_results.get("site_keywords", [])
-        competitor_keywords = keyword_results.get("competitor_keywords", {})
-        keyword_gap = keyword_results.get("keyword_gap", {})
-
-        #Actions
+        # 2. Run Automation using the constant
+        if task_id: progress_store[task_id] = "Running Automations..."
         actions = engine_result.get("actions", [])
-        strategy = engine_result.get("strategy", [])
-        seo_score = engine_result.get("seo_score", 0)
+        automation_result = run_automation(actions, AUTOMATION_CONFIG)
 
-        
-        if task_id: progress_store[task_id] = "Writing output files..."
-        time.sleep(1.5)
+        # 3. Generate Files
+        if task_id: progress_store[task_id] = "Finalizing..."
+        fixed_urls = engine_result.get("fixed_urls", [])
         files = generate_sitemaps(fixed_urls, base_url=domain)
 
-        # 🔥 DEBUG PRINT
-        print("AUDIT:", audit)
-        print("META ISSUES:", meta_issues)
-        print("LINK ISSUES:", link_issues)
-
-        return templates.TemplateResponse("index.html", {
-            "request": request,
-            "files": files,
-            "count": len(fixed_urls),
-            "audit": audit,
-            "meta_issues": meta_issues,
-            "meta_fixes": meta_fixes,
-            "link_issues": link_issues,
-            "link_suggestions": link_suggestions,
-            "plan": plan,
-            "image_issues": image_issues,
-            "image_fixes": image_fixes,
-            "core_issues": core_issues,
-            "core_suggestions": core_suggestions,
-            "keyword_gap": keyword_gap,
-            "site_keywords": site_keywords,
-            "competitor_keywords": competitor_keywords,
-            "actions": actions,
-            "strategy": strategy,
-            "seo_score": seo_score
-        })
+        # 4. Response
+        return templates.TemplateResponse(
+            "index.html",
+            {
+                "request": request,
+                "files": files,
+                "count": len(clean_urls),
+                "engine_result": engine_result,
+                "automation_result": automation_result,
+                # Mapping individual keys for existing template logic
+                "audit": engine_result.get("audit"),
+                "meta_issues": engine_result.get("modules", {}).get("meta", {}).get("issues", []),
+                "meta_fixes": engine_result.get("modules", {}).get("meta", {}).get("fixes", {}),
+                "link_issues": engine_result.get("modules", {}).get("internal_links", {}).get("issues", {}),
+                "link_suggestions": engine_result.get("modules", {}).get("internal_links", {}).get("suggestions", {}),
+                "plan": engine_result.get("plan"),
+                "image_issues": engine_result.get("modules", {}).get("image_seo", {}).get("issues", []),
+                "image_fixes": engine_result.get("modules", {}).get("image_seo", {}).get("fixes", {}),
+                "core_issues": engine_result.get("modules", {}).get("core_web_vitals", {}).get("issues", []),
+                "core_suggestions": engine_result.get("modules", {}).get("core_web_vitals", {}).get("suggestions", {}),
+                "keyword_gap": engine_result.get("modules", {}).get("keyword_gap", {}).get("keyword_gap", {}),
+                "site_keywords": engine_result.get("modules", {}).get("keyword_gap", {}).get("site_keywords", []),
+                "competitor_keywords": engine_result.get("modules", {}).get("keyword_gap", {}).get("competitor_keywords", {}),
+                "actions": actions,
+                "strategy": engine_result.get("strategy", []),
+                "seo_score": engine_result.get("seo_score", 0)
+            }
+        )
 
     except Exception as e:
-        return templates.TemplateResponse("index.html", {
-            "request": request,
-            "error": str(e)
-        })
+        return templates.TemplateResponse("index.html", {"request": request, "error": str(e)})
     finally:
         if task_id and task_id in progress_store:
             del progress_store[task_id]
 
-
-# -----------------------------
-# DOWNLOAD ROUTE
-# -----------------------------
 @app.get("/download")
 def download_file(file: str):
-    file_path = os.path.abspath(file)
-    return FileResponse(file_path, filename=os.path.basename(file_path))
+    return FileResponse(os.path.abspath(file), filename=os.path.basename(file))
