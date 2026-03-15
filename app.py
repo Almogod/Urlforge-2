@@ -99,7 +99,8 @@ def run_analysis_task(task_id: str, domain: str, limit: int, use_js: bool, fix_c
             "files": files,
             "count": len(clean_urls),
             "engine_result": engine_result,
-            "automation_result": automation_result
+            "automation_result": automation_result,
+            "analysis_mode": "standard"
         }
         task_store.save_results(task_id, final_results)
 

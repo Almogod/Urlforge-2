@@ -513,6 +513,7 @@
                     </div>
                 </div>
 
+                <button type="submit" class="submit-btn" id="plugin-submit-btn">Run Autonomous Analysis</button>
             </form>
         </div>
 
@@ -536,6 +537,7 @@
     <!-- RESULTS (Conditional Rendering) -->
     {% if audit is defined or seo_score is defined or is_plugin %}
     
+    {% if is_plugin %}
     <!-- PLUGIN REPORT SUMMARY -->
     {% if is_plugin and plugin_report %}
     <div class="card result-card">
@@ -736,7 +738,9 @@
         {% endif %}
     </div>
     {% endif %}
+    {% endif %}
 
+    {% if not is_plugin %}
     <!-- OVERVIEW & SCORE CARD -->
     <div class="card result-card">
         <h2 class="section-title">SEO Health Overview</h2>
@@ -863,6 +867,7 @@
     </div>
     {% endif %}
     {% endif %}
+    {% endif %}
 </div>
 
 <script>
@@ -929,6 +934,11 @@
         
         document.getElementById(tabId).classList.add('active');
         event.target.classList.add('active');
+
+        // Clear any loading state and reset forms when switching tabs
+        const overlay = document.getElementById('loading-overlay');
+        if (overlay) overlay.classList.add('hidden');
+        document.getElementById('thinking-steps').innerHTML = '';
     }
 
     // --- Form Submission & Polling ---
