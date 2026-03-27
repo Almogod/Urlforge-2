@@ -498,7 +498,11 @@
                 </div>
 
                 <div style="border-top: 1px solid var(--card-border); margin-top: 20px; padding-top: 20px;">
-                    <h3 style="font-size: 1rem; margin-bottom: 15px;">Advanced: AI Configuration</h3>
+                    <h3 style="font-size: 1rem; margin-bottom: 15px;">Advanced: Access & AI</h3>
+                    <div class="form-group">
+                        <label>Site Access Token (Optional)</label>
+                        <input type="password" name="site_token" placeholder="Bearer or custom token">
+                    </div>
                     <div class="form-group">
                         <label>OpenAI API Key (Optional)</label>
                         <input type="password" name="openai_key" placeholder="sk-...">
@@ -662,6 +666,16 @@
                         <label>GitHub Personal Access Token</label>
                         <input type="password" name="github_token" placeholder="ghp_...">
                     </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="form-group">
+                            <label>Repository (owner/repo)</label>
+                            <input type="text" name="github_repo" placeholder="username/my-site" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Branch</label>
+                            <input type="text" name="github_branch" value="main" placeholder="main">
+                        </div>
+                    </div>
                 </div>
 
                 <div id="vercel-fields" class="deploy-group hidden">
@@ -683,8 +697,18 @@
 
                 <div id="hostinger-fields" class="deploy-group hidden">
                     <div class="form-group">
-                        <label>Hostinger API Key / SSH Key</label>
-                        <input type="password" name="hostinger_api_key" placeholder="h_...">
+                        <label>SSH Password / API Key</label>
+                        <input type="password" name="hostinger_api_key" placeholder="Your SSH password">
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="form-group">
+                            <label>SSH Host</label>
+                            <input type="text" name="hostinger_host" placeholder="ssh.hostinger.com">
+                        </div>
+                        <div class="form-group">
+                            <label>SSH Username</label>
+                            <input type="text" name="hostinger_user" placeholder="u12345678">
+                        </div>
                     </div>
                     <div class="form-group">
                         <label>Site Domain / ID</label>
@@ -714,6 +738,11 @@
                         <label>Webhook URL</label>
                         <input type="text" name="webhook_url" placeholder="https://api.site.com/seo-hook">
                     </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 20px; border-top: 1px solid var(--card-border); padding-top: 20px;">
+                    <label>Re-verify Site Access Token (Optional)</label>
+                    <input type="password" name="site_token" placeholder="Leave blank to use initial token">
                 </div>
 
                 <button type="submit" class="submit-btn" style="background: #f59e0b;">Authorize & Deploy Fixes</button>

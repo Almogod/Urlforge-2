@@ -55875,5 +55875,2963 @@
     "13v3db1cdxxk": {
         "status_msg": "Starting phase: crawl...",
         "status": "running"
+    },
+    "tfjckn6t82j": {
+        "status_msg": "Completed",
+        "status": "completed",
+        "results": {
+            "files": [
+                "sitemap_1.xml.gz"
+            ],
+            "count": 1,
+            "engine_result": {
+                "audit": {
+                    "total_pages_crawled": 2,
+                    "total_clean_urls": 1,
+                    "issues": {
+                        "has_query_params": [
+                            "https://vibe.wix.com/?origin=site_banner"
+                        ],
+                        "excluded_from_sitemap": [
+                            "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                            "https://vibe.wix.com/?origin=site_banner"
+                        ]
+                    },
+                    "score": 84,
+                    "suggestions": [
+                        "Remove tracking/query parameters (e.g., ?utm=) from URLs in sitemap.",
+                        "Ensure all important pages are included in the sitemap."
+                    ]
+                },
+                "plan": [
+                    "sitemap",
+                    "internal_links",
+                    "crawl_budget",
+                    "canonical",
+                    "robots",
+                    "schema",
+                    "image_seo",
+                    "core_web_vitals",
+                    "keyword_gap",
+                    "page_speed",
+                    "heading_structure",
+                    "open_graph",
+                    "canonical_advanced",
+                    "broken_links",
+                    "content_quality",
+                    "mobile_seo",
+                    "page_experience",
+                    "structured_data_validator",
+                    "hreflang"
+                ],
+                "modules": {
+                    "sitemap": {
+                        "urls": [
+                            "https://vibe.wix.com"
+                        ]
+                    },
+                    "internal_links": {
+                        "issues": {
+                            "orphan_pages": [
+                                "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/"
+                            ],
+                            "low_internal_links": [
+                                "https://vibe.wix.com/?origin=site_banner"
+                            ]
+                        },
+                        "suggestions": {
+                            "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/": [
+                                {
+                                    "from": "https://vibe.wix.com/?origin=site_banner",
+                                    "to": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/"
+                                }
+                            ]
+                        }
+                    },
+                    "crawl_budget": {
+                        "issues": {
+                            "deep_pages": [],
+                            "wasted_crawl_budget": []
+                        },
+                        "suggestions": []
+                    },
+                    "canonical": {
+                        "urls": [
+                            "https://vibe.wix.com"
+                        ]
+                    },
+                    "robots": {
+                        "status": "success",
+                        "issues": [
+                            {
+                                "issue": "missing_sitemap_in_robots",
+                                "suggested_sitemap": "https://https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/sitemap.xml"
+                            }
+                        ],
+                        "current_content": "",
+                        "new_content": "User-agent: *\nAllow: /\n\nSitemap: https://https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/sitemap.xml"
+                    },
+                    "schema": {
+                        "issues": [
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "missing_schema"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_schema"
+                            }
+                        ],
+                        "schemas": {
+                            "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/": {
+                                "@context": "https://schema.org",
+                                "@type": "WebPage",
+                                "name": "Home | PCAcademy",
+                                "description": "",
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/"
+                            },
+                            "https://vibe.wix.com/?origin=site_banner": {
+                                "@context": "https://schema.org",
+                                "@type": "WebPage",
+                                "name": "Vibe Code a Website | From Text to Web Pages in Minutes | Wix",
+                                "description": "Just Describe your vision and watch it build a functioning website. Vibe code a website from simple prompts - no coding, no stress, just your style in minutes.",
+                                "url": "https://vibe.wix.com/?origin=site_banner"
+                            }
+                        }
+                    },
+                    "image_seo": {
+                        "issues": [],
+                        "fixes": {}
+                    },
+                    "core_web_vitals": {
+                        "issues": [
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "blocking_js",
+                                "script": "/_astro/page.D1FGnhRk.js"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "render_blocking_css"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "blocking_js",
+                                "script": "https://static.parastorage.com/unpkg/@sentry/browser@5.30.0/build/bundle.min.js"
+                            }
+                        ],
+                        "suggestions": {
+                            "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/": [
+                                {
+                                    "type": "defer_script",
+                                    "script": "/_astro/page.D1FGnhRk.js"
+                                }
+                            ],
+                            "https://vibe.wix.com/?origin=site_banner": [
+                                {
+                                    "type": "optimize_css",
+                                    "action": "inline_critical_css_or_defer"
+                                },
+                                {
+                                    "type": "defer_script",
+                                    "script": "https://static.parastorage.com/unpkg/@sentry/browser@5.30.0/build/bundle.min.js"
+                                }
+                            ]
+                        }
+                    },
+                    "keyword_gap": {
+                        "site_keywords": [
+                            "home",
+                            "pcacademy",
+                            "built",
+                            "vibe",
+                            "code",
+                            "website",
+                            "text",
+                            "pages",
+                            "minutes"
+                        ],
+                        "competitor_keywords": {},
+                        "keyword_gap": {}
+                    },
+                    "page_speed": {
+                        "issues": [
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "missing_dns_prefetch",
+                                "domain": "https://static.parastorage.com"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_dns_prefetch",
+                                "domain": "https://static.parastorage.com"
+                            }
+                        ],
+                        "suggestions": {
+                            "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/": [
+                                {
+                                    "type": "add_dns_prefetch",
+                                    "tag": "<link rel=\"dns-prefetch\" href=\"https://static.parastorage.com\">",
+                                    "action": "inject_into_head"
+                                }
+                            ],
+                            "https://vibe.wix.com/?origin=site_banner": [
+                                {
+                                    "type": "add_dns_prefetch",
+                                    "tag": "<link rel=\"dns-prefetch\" href=\"https://static.parastorage.com\">",
+                                    "action": "inject_into_head"
+                                }
+                            ]
+                        }
+                    },
+                    "heading_structure": {
+                        "issues": [
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "missing_h1"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_h1"
+                            }
+                        ],
+                        "suggestions": {
+                            "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/": [
+                                {
+                                    "type": "add_h1",
+                                    "action": "generate_h1_from_title_or_slug"
+                                }
+                            ],
+                            "https://vibe.wix.com/?origin=site_banner": [
+                                {
+                                    "type": "add_h1",
+                                    "action": "generate_h1_from_title_or_slug"
+                                }
+                            ]
+                        }
+                    },
+                    "open_graph": {
+                        "issues": [
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "missing_og_description"
+                            },
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "missing_og_image"
+                            },
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "missing_twitter_description"
+                            },
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "missing_twitter_image"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_og_title"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_og_description"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_og_url"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_og_type"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_og_image"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_twitter_card"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_twitter_title"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_twitter_description"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_twitter_image"
+                            }
+                        ],
+                        "suggestions": {
+                            "https://vibe.wix.com/?origin=site_banner": [
+                                {
+                                    "type": "add_og_tag",
+                                    "tag": "<meta property=\"og:title\" content=\"Vibe Code a Website | From Text to Web Pages in Minutes | Wix\">",
+                                    "action": "inject_into_head"
+                                },
+                                {
+                                    "type": "add_og_tag",
+                                    "tag": "<meta property=\"og:description\" content=\"Just Describe your vision and watch it build a functioning website. Vibe code a website from simple prompts - no coding, no stress, just your style in minu\">",
+                                    "action": "inject_into_head"
+                                },
+                                {
+                                    "type": "add_og_tag",
+                                    "tag": "<meta property=\"og:url\" content=\"https://vibe.wix.com/?origin=site_banner\">",
+                                    "action": "inject_into_head"
+                                },
+                                {
+                                    "type": "add_og_tag",
+                                    "tag": "<meta property=\"og:type\" content=\"website\">",
+                                    "action": "inject_into_head"
+                                },
+                                {
+                                    "type": "add_twitter_tag",
+                                    "tag": "<meta name=\"twitter:card\" content=\"summary_large_image\">",
+                                    "action": "inject_into_head"
+                                },
+                                {
+                                    "type": "add_twitter_tag",
+                                    "tag": "<meta name=\"twitter:title\" content=\"Vibe Code a Website | From Text to Web Pages in Minutes | Wix\">",
+                                    "action": "inject_into_head"
+                                },
+                                {
+                                    "type": "add_twitter_tag",
+                                    "tag": "<meta name=\"twitter:description\" content=\"Just Describe your vision and watch it build a functioning website. Vibe code a website from simple prompts - no coding, no stress, just your style in minu\">",
+                                    "action": "inject_into_head"
+                                }
+                            ]
+                        }
+                    },
+                    "canonical_advanced": {
+                        "issues": [
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_canonical"
+                            }
+                        ],
+                        "suggestions": {
+                            "https://vibe.wix.com/?origin=site_banner": [
+                                {
+                                    "type": "add_canonical",
+                                    "tag": "<link rel=\"canonical\" href=\"https://vibe.wix.com/?origin=site_banner\">",
+                                    "action": "inject_into_head"
+                                }
+                            ]
+                        }
+                    },
+                    "broken_links": {
+                        "issues": [],
+                        "suggestions": {}
+                    },
+                    "content_quality": {
+                        "issues": [
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "thin_content",
+                                "word_count": 3
+                            },
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "keyword_stuffing",
+                                "keyword": "home",
+                                "density": 33.33
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "thin_content",
+                                "word_count": 7
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "keyword_stuffing",
+                                "keyword": "vibe",
+                                "density": 14.29
+                            }
+                        ],
+                        "suggestions": {
+                            "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/": [
+                                {
+                                    "type": "expand_content",
+                                    "current_words": 3,
+                                    "target_words": 300,
+                                    "action": "generate_additional_content_for_page"
+                                },
+                                {
+                                    "type": "reduce_keyword_density",
+                                    "keyword": "home",
+                                    "action": "replace_some_instances_with_synonyms"
+                                }
+                            ],
+                            "https://vibe.wix.com/?origin=site_banner": [
+                                {
+                                    "type": "expand_content",
+                                    "current_words": 7,
+                                    "target_words": 300,
+                                    "action": "generate_additional_content_for_page"
+                                },
+                                {
+                                    "type": "reduce_keyword_density",
+                                    "keyword": "vibe",
+                                    "action": "replace_some_instances_with_synonyms"
+                                }
+                            ]
+                        }
+                    },
+                    "mobile_seo": {
+                        "issues": [],
+                        "suggestions": {}
+                    },
+                    "page_experience": {
+                        "issues": [
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "missing_x_frame_options"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_x_frame_options"
+                            }
+                        ],
+                        "suggestions": {
+                            "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/": [
+                                {
+                                    "type": "add_security_header",
+                                    "header": "X-Frame-Options: SAMEORIGIN",
+                                    "action": "configure_in_server_or_cdn"
+                                }
+                            ],
+                            "https://vibe.wix.com/?origin=site_banner": [
+                                {
+                                    "type": "add_security_header",
+                                    "header": "X-Frame-Options: SAMEORIGIN",
+                                    "action": "configure_in_server_or_cdn"
+                                }
+                            ]
+                        }
+                    },
+                    "structured_data_validator": {
+                        "issues": [],
+                        "suggestions": {
+                            "https://vibe.wix.com/?origin=site_banner": [
+                                {
+                                    "type": "inject_breadcrumb_schema",
+                                    "schema": {
+                                        "@context": "https://schema.org",
+                                        "@type": "BreadcrumbList",
+                                        "itemListElement": [
+                                            {
+                                                "@type": "ListItem",
+                                                "position": 1,
+                                                "name": "Home",
+                                                "item": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/"
+                                            },
+                                            {
+                                                "@type": "ListItem",
+                                                "position": 2,
+                                                "name": "Https:",
+                                                "item": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com//https:"
+                                            },
+                                            {
+                                                "@type": "ListItem",
+                                                "position": 3,
+                                                "name": "Vibe.Wix.Com",
+                                                "item": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com//https:/vibe.wix.com"
+                                            },
+                                            {
+                                                "@type": "ListItem",
+                                                "position": 4,
+                                                "name": "?Origin=Site_Banner",
+                                                "item": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com//https:/vibe.wix.com/?origin=site_banner"
+                                            }
+                                        ]
+                                    },
+                                    "action": "inject_breadcrumb_json_ld_into_head"
+                                }
+                            ]
+                        }
+                    },
+                    "hreflang": {
+                        "issues": [],
+                        "suggestions": {}
+                    }
+                },
+                "fixed_urls": [
+                    "https://vibe.wix.com"
+                ],
+                "strategy": [
+                    "internal_links",
+                    "crawl_budget",
+                    "robots",
+                    "schema",
+                    "core_web_vitals",
+                    "page_speed",
+                    "heading_structure",
+                    "open_graph",
+                    "canonical_advanced",
+                    "content_quality",
+                    "page_experience"
+                ],
+                "actions": [
+                    {
+                        "type": "inject_schema",
+                        "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                        "schema": {
+                            "@context": "https://schema.org",
+                            "@type": "WebPage",
+                            "name": "Home | PCAcademy",
+                            "description": "",
+                            "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/"
+                        }
+                    },
+                    {
+                        "type": "inject_schema",
+                        "url": "https://vibe.wix.com/?origin=site_banner",
+                        "schema": {
+                            "@context": "https://schema.org",
+                            "@type": "WebPage",
+                            "name": "Vibe Code a Website | From Text to Web Pages in Minutes | Wix",
+                            "description": "Just Describe your vision and watch it build a functioning website. Vibe code a website from simple prompts - no coding, no stress, just your style in minutes.",
+                            "url": "https://vibe.wix.com/?origin=site_banner"
+                        }
+                    },
+                    {
+                        "type": "defer_script",
+                        "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                        "script": "/_astro/page.D1FGnhRk.js"
+                    },
+                    {
+                        "type": "defer_script",
+                        "url": "https://vibe.wix.com/?origin=site_banner",
+                        "script": "https://static.parastorage.com/unpkg/@sentry/browser@5.30.0/build/bundle.min.js"
+                    },
+                    {
+                        "type": "inject_into_head",
+                        "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                        "tag": "<link rel=\"dns-prefetch\" href=\"https://static.parastorage.com\">"
+                    },
+                    {
+                        "type": "inject_into_head",
+                        "url": "https://vibe.wix.com/?origin=site_banner",
+                        "tag": "<link rel=\"dns-prefetch\" href=\"https://static.parastorage.com\">"
+                    },
+                    {
+                        "type": "heading_fix",
+                        "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                        "fix_type": "add_h1",
+                        "action": "generate_h1_from_title_or_slug"
+                    },
+                    {
+                        "type": "heading_fix",
+                        "url": "https://vibe.wix.com/?origin=site_banner",
+                        "fix_type": "add_h1",
+                        "action": "generate_h1_from_title_or_slug"
+                    },
+                    {
+                        "type": "inject_into_head",
+                        "url": "https://vibe.wix.com/?origin=site_banner",
+                        "tag": "<meta property=\"og:title\" content=\"Vibe Code a Website | From Text to Web Pages in Minutes | Wix\">"
+                    },
+                    {
+                        "type": "inject_into_head",
+                        "url": "https://vibe.wix.com/?origin=site_banner",
+                        "tag": "<meta property=\"og:description\" content=\"Just Describe your vision and watch it build a functioning website. Vibe code a website from simple prompts - no coding, no stress, just your style in minu\">"
+                    },
+                    {
+                        "type": "inject_into_head",
+                        "url": "https://vibe.wix.com/?origin=site_banner",
+                        "tag": "<meta property=\"og:url\" content=\"https://vibe.wix.com/?origin=site_banner\">"
+                    },
+                    {
+                        "type": "inject_into_head",
+                        "url": "https://vibe.wix.com/?origin=site_banner",
+                        "tag": "<meta property=\"og:type\" content=\"website\">"
+                    },
+                    {
+                        "type": "inject_into_head",
+                        "url": "https://vibe.wix.com/?origin=site_banner",
+                        "tag": "<meta name=\"twitter:card\" content=\"summary_large_image\">"
+                    },
+                    {
+                        "type": "inject_into_head",
+                        "url": "https://vibe.wix.com/?origin=site_banner",
+                        "tag": "<meta name=\"twitter:title\" content=\"Vibe Code a Website | From Text to Web Pages in Minutes | Wix\">"
+                    },
+                    {
+                        "type": "inject_into_head",
+                        "url": "https://vibe.wix.com/?origin=site_banner",
+                        "tag": "<meta name=\"twitter:description\" content=\"Just Describe your vision and watch it build a functioning website. Vibe code a website from simple prompts - no coding, no stress, just your style in minu\">"
+                    },
+                    {
+                        "type": "add_canonical",
+                        "url": "https://vibe.wix.com/?origin=site_banner",
+                        "tag": "<link rel=\"canonical\" href=\"https://vibe.wix.com/?origin=site_banner\">"
+                    },
+                    {
+                        "type": "expand_content",
+                        "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                        "current_words": 3,
+                        "target_words": 300
+                    },
+                    {
+                        "type": "expand_content",
+                        "url": "https://vibe.wix.com/?origin=site_banner",
+                        "current_words": 7,
+                        "target_words": 300
+                    }
+                ],
+                "seo_score": 63
+            },
+            "automation_result": {
+                "status": "unsupported_platform",
+                "platform": "filesystem"
+            },
+            "analysis_mode": "standard",
+            "sitemap_generated": true
+        }
+    },
+    "jltcshaddq": {
+        "status_msg": "Completed",
+        "status": "completed",
+        "results": {
+            "task_id": "jltcshaddq",
+            "site_url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+            "started_at": "2026-03-27T08:33:01.570840",
+            "fixes_applied": [],
+            "suggested_actions": [
+                {
+                    "type": "inject_schema",
+                    "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                    "schema": {
+                        "@context": "https://schema.org",
+                        "@type": "WebPage",
+                        "name": "Home | PCAcademy",
+                        "description": "",
+                        "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/"
+                    }
+                },
+                {
+                    "type": "inject_schema",
+                    "url": "https://vibe.wix.com/?origin=site_banner",
+                    "schema": {
+                        "@context": "https://schema.org",
+                        "@type": "WebPage",
+                        "name": "Vibe Code a Website | From Text to Web Pages in Minutes | Wix",
+                        "description": "Just Describe your vision and watch it build a functioning website. Vibe code a website from simple prompts - no coding, no stress, just your style in minutes.",
+                        "url": "https://vibe.wix.com/?origin=site_banner"
+                    }
+                },
+                {
+                    "type": "defer_script",
+                    "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                    "script": "/_astro/page.D1FGnhRk.js"
+                },
+                {
+                    "type": "defer_script",
+                    "url": "https://vibe.wix.com/?origin=site_banner",
+                    "script": "https://static.parastorage.com/unpkg/@sentry/browser@5.30.0/build/bundle.min.js"
+                },
+                {
+                    "type": "inject_into_head",
+                    "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                    "tag": "<link rel=\"dns-prefetch\" href=\"https://static.parastorage.com\">"
+                },
+                {
+                    "type": "inject_into_head",
+                    "url": "https://vibe.wix.com/?origin=site_banner",
+                    "tag": "<link rel=\"dns-prefetch\" href=\"https://static.parastorage.com\">"
+                },
+                {
+                    "type": "heading_fix",
+                    "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                    "fix_type": "add_h1",
+                    "action": "generate_h1_from_title_or_slug"
+                },
+                {
+                    "type": "heading_fix",
+                    "url": "https://vibe.wix.com/?origin=site_banner",
+                    "fix_type": "add_h1",
+                    "action": "generate_h1_from_title_or_slug"
+                },
+                {
+                    "type": "inject_into_head",
+                    "url": "https://vibe.wix.com/?origin=site_banner",
+                    "tag": "<meta property=\"og:title\" content=\"Vibe Code a Website | From Text to Web Pages in Minutes | Wix\">"
+                },
+                {
+                    "type": "inject_into_head",
+                    "url": "https://vibe.wix.com/?origin=site_banner",
+                    "tag": "<meta property=\"og:description\" content=\"Just Describe your vision and watch it build a functioning website. Vibe code a website from simple prompts - no coding, no stress, just your style in minu\">"
+                },
+                {
+                    "type": "inject_into_head",
+                    "url": "https://vibe.wix.com/?origin=site_banner",
+                    "tag": "<meta property=\"og:url\" content=\"https://vibe.wix.com/?origin=site_banner\">"
+                },
+                {
+                    "type": "inject_into_head",
+                    "url": "https://vibe.wix.com/?origin=site_banner",
+                    "tag": "<meta property=\"og:type\" content=\"website\">"
+                },
+                {
+                    "type": "inject_into_head",
+                    "url": "https://vibe.wix.com/?origin=site_banner",
+                    "tag": "<meta name=\"twitter:card\" content=\"summary_large_image\">"
+                },
+                {
+                    "type": "inject_into_head",
+                    "url": "https://vibe.wix.com/?origin=site_banner",
+                    "tag": "<meta name=\"twitter:title\" content=\"Vibe Code a Website | From Text to Web Pages in Minutes | Wix\">"
+                },
+                {
+                    "type": "inject_into_head",
+                    "url": "https://vibe.wix.com/?origin=site_banner",
+                    "tag": "<meta name=\"twitter:description\" content=\"Just Describe your vision and watch it build a functioning website. Vibe code a website from simple prompts - no coding, no stress, just your style in minu\">"
+                },
+                {
+                    "type": "add_canonical",
+                    "url": "https://vibe.wix.com/?origin=site_banner",
+                    "tag": "<link rel=\"canonical\" href=\"https://vibe.wix.com/?origin=site_banner\">"
+                },
+                {
+                    "type": "expand_content",
+                    "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                    "current_words": 3,
+                    "target_words": 300
+                },
+                {
+                    "type": "expand_content",
+                    "url": "https://vibe.wix.com/?origin=site_banner",
+                    "current_words": 7,
+                    "target_words": 300
+                }
+            ],
+            "pages_generated": [],
+            "deploy_results": [],
+            "seo_score_before": 63,
+            "errors": [],
+            "state": "completed",
+            "dry_run": false,
+            "engine_result": {
+                "audit": {
+                    "total_pages_crawled": 2,
+                    "total_clean_urls": 1,
+                    "issues": {
+                        "has_query_params": [
+                            "https://vibe.wix.com/?origin=site_banner"
+                        ],
+                        "excluded_from_sitemap": [
+                            "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                            "https://vibe.wix.com/?origin=site_banner"
+                        ]
+                    },
+                    "score": 84,
+                    "suggestions": [
+                        "Remove tracking/query parameters (e.g., ?utm=) from URLs in sitemap.",
+                        "Ensure all important pages are included in the sitemap."
+                    ]
+                },
+                "plan": [
+                    "sitemap",
+                    "internal_links",
+                    "crawl_budget",
+                    "canonical",
+                    "robots",
+                    "schema",
+                    "image_seo",
+                    "core_web_vitals",
+                    "keyword_gap",
+                    "page_speed",
+                    "heading_structure",
+                    "open_graph",
+                    "canonical_advanced",
+                    "broken_links",
+                    "content_quality",
+                    "mobile_seo",
+                    "page_experience",
+                    "structured_data_validator",
+                    "hreflang"
+                ],
+                "modules": {
+                    "sitemap": {
+                        "urls": [
+                            "https://vibe.wix.com"
+                        ]
+                    },
+                    "internal_links": {
+                        "issues": {
+                            "orphan_pages": [
+                                "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/"
+                            ],
+                            "low_internal_links": [
+                                "https://vibe.wix.com/?origin=site_banner"
+                            ]
+                        },
+                        "suggestions": {
+                            "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/": [
+                                {
+                                    "from": "https://vibe.wix.com/?origin=site_banner",
+                                    "to": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/"
+                                }
+                            ]
+                        }
+                    },
+                    "crawl_budget": {
+                        "issues": {
+                            "deep_pages": [],
+                            "wasted_crawl_budget": []
+                        },
+                        "suggestions": []
+                    },
+                    "canonical": {
+                        "urls": [
+                            "https://vibe.wix.com"
+                        ]
+                    },
+                    "robots": {
+                        "status": "success",
+                        "issues": [
+                            {
+                                "issue": "missing_sitemap_in_robots",
+                                "suggested_sitemap": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/sitemap.xml"
+                            }
+                        ],
+                        "current_content": "",
+                        "new_content": "User-agent: *\nAllow: /\n\nSitemap: https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/sitemap.xml"
+                    },
+                    "schema": {
+                        "issues": [
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "missing_schema"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_schema"
+                            }
+                        ],
+                        "schemas": {
+                            "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/": {
+                                "@context": "https://schema.org",
+                                "@type": "WebPage",
+                                "name": "Home | PCAcademy",
+                                "description": "",
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/"
+                            },
+                            "https://vibe.wix.com/?origin=site_banner": {
+                                "@context": "https://schema.org",
+                                "@type": "WebPage",
+                                "name": "Vibe Code a Website | From Text to Web Pages in Minutes | Wix",
+                                "description": "Just Describe your vision and watch it build a functioning website. Vibe code a website from simple prompts - no coding, no stress, just your style in minutes.",
+                                "url": "https://vibe.wix.com/?origin=site_banner"
+                            }
+                        }
+                    },
+                    "image_seo": {
+                        "issues": [],
+                        "fixes": {}
+                    },
+                    "core_web_vitals": {
+                        "issues": [
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "blocking_js",
+                                "script": "/_astro/page.D1FGnhRk.js"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "render_blocking_css"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "blocking_js",
+                                "script": "https://static.parastorage.com/unpkg/@sentry/browser@5.30.0/build/bundle.min.js"
+                            }
+                        ],
+                        "suggestions": {
+                            "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/": [
+                                {
+                                    "type": "defer_script",
+                                    "script": "/_astro/page.D1FGnhRk.js"
+                                }
+                            ],
+                            "https://vibe.wix.com/?origin=site_banner": [
+                                {
+                                    "type": "optimize_css",
+                                    "action": "inline_critical_css_or_defer"
+                                },
+                                {
+                                    "type": "defer_script",
+                                    "script": "https://static.parastorage.com/unpkg/@sentry/browser@5.30.0/build/bundle.min.js"
+                                }
+                            ]
+                        }
+                    },
+                    "keyword_gap": {
+                        "site_keywords": [
+                            "home",
+                            "pcacademy",
+                            "built",
+                            "vibe",
+                            "code",
+                            "website",
+                            "text",
+                            "pages",
+                            "minutes"
+                        ],
+                        "competitor_keywords": {},
+                        "keyword_gap": {}
+                    },
+                    "page_speed": {
+                        "issues": [
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "missing_dns_prefetch",
+                                "domain": "https://static.parastorage.com"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_dns_prefetch",
+                                "domain": "https://static.parastorage.com"
+                            }
+                        ],
+                        "suggestions": {
+                            "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/": [
+                                {
+                                    "type": "add_dns_prefetch",
+                                    "tag": "<link rel=\"dns-prefetch\" href=\"https://static.parastorage.com\">",
+                                    "action": "inject_into_head"
+                                }
+                            ],
+                            "https://vibe.wix.com/?origin=site_banner": [
+                                {
+                                    "type": "add_dns_prefetch",
+                                    "tag": "<link rel=\"dns-prefetch\" href=\"https://static.parastorage.com\">",
+                                    "action": "inject_into_head"
+                                }
+                            ]
+                        }
+                    },
+                    "heading_structure": {
+                        "issues": [
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "missing_h1"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_h1"
+                            }
+                        ],
+                        "suggestions": {
+                            "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/": [
+                                {
+                                    "type": "add_h1",
+                                    "action": "generate_h1_from_title_or_slug"
+                                }
+                            ],
+                            "https://vibe.wix.com/?origin=site_banner": [
+                                {
+                                    "type": "add_h1",
+                                    "action": "generate_h1_from_title_or_slug"
+                                }
+                            ]
+                        }
+                    },
+                    "open_graph": {
+                        "issues": [
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "missing_og_description"
+                            },
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "missing_og_image"
+                            },
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "missing_twitter_description"
+                            },
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "missing_twitter_image"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_og_title"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_og_description"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_og_url"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_og_type"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_og_image"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_twitter_card"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_twitter_title"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_twitter_description"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_twitter_image"
+                            }
+                        ],
+                        "suggestions": {
+                            "https://vibe.wix.com/?origin=site_banner": [
+                                {
+                                    "type": "add_og_tag",
+                                    "tag": "<meta property=\"og:title\" content=\"Vibe Code a Website | From Text to Web Pages in Minutes | Wix\">",
+                                    "action": "inject_into_head"
+                                },
+                                {
+                                    "type": "add_og_tag",
+                                    "tag": "<meta property=\"og:description\" content=\"Just Describe your vision and watch it build a functioning website. Vibe code a website from simple prompts - no coding, no stress, just your style in minu\">",
+                                    "action": "inject_into_head"
+                                },
+                                {
+                                    "type": "add_og_tag",
+                                    "tag": "<meta property=\"og:url\" content=\"https://vibe.wix.com/?origin=site_banner\">",
+                                    "action": "inject_into_head"
+                                },
+                                {
+                                    "type": "add_og_tag",
+                                    "tag": "<meta property=\"og:type\" content=\"website\">",
+                                    "action": "inject_into_head"
+                                },
+                                {
+                                    "type": "add_twitter_tag",
+                                    "tag": "<meta name=\"twitter:card\" content=\"summary_large_image\">",
+                                    "action": "inject_into_head"
+                                },
+                                {
+                                    "type": "add_twitter_tag",
+                                    "tag": "<meta name=\"twitter:title\" content=\"Vibe Code a Website | From Text to Web Pages in Minutes | Wix\">",
+                                    "action": "inject_into_head"
+                                },
+                                {
+                                    "type": "add_twitter_tag",
+                                    "tag": "<meta name=\"twitter:description\" content=\"Just Describe your vision and watch it build a functioning website. Vibe code a website from simple prompts - no coding, no stress, just your style in minu\">",
+                                    "action": "inject_into_head"
+                                }
+                            ]
+                        }
+                    },
+                    "canonical_advanced": {
+                        "issues": [
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_canonical"
+                            }
+                        ],
+                        "suggestions": {
+                            "https://vibe.wix.com/?origin=site_banner": [
+                                {
+                                    "type": "add_canonical",
+                                    "tag": "<link rel=\"canonical\" href=\"https://vibe.wix.com/?origin=site_banner\">",
+                                    "action": "inject_into_head"
+                                }
+                            ]
+                        }
+                    },
+                    "broken_links": {
+                        "issues": [],
+                        "suggestions": {}
+                    },
+                    "content_quality": {
+                        "issues": [
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "thin_content",
+                                "word_count": 3
+                            },
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "keyword_stuffing",
+                                "keyword": "home",
+                                "density": 33.33
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "thin_content",
+                                "word_count": 7
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "keyword_stuffing",
+                                "keyword": "vibe",
+                                "density": 14.29
+                            }
+                        ],
+                        "suggestions": {
+                            "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/": [
+                                {
+                                    "type": "expand_content",
+                                    "current_words": 3,
+                                    "target_words": 300,
+                                    "action": "generate_additional_content_for_page"
+                                },
+                                {
+                                    "type": "reduce_keyword_density",
+                                    "keyword": "home",
+                                    "action": "replace_some_instances_with_synonyms"
+                                }
+                            ],
+                            "https://vibe.wix.com/?origin=site_banner": [
+                                {
+                                    "type": "expand_content",
+                                    "current_words": 7,
+                                    "target_words": 300,
+                                    "action": "generate_additional_content_for_page"
+                                },
+                                {
+                                    "type": "reduce_keyword_density",
+                                    "keyword": "vibe",
+                                    "action": "replace_some_instances_with_synonyms"
+                                }
+                            ]
+                        }
+                    },
+                    "mobile_seo": {
+                        "issues": [],
+                        "suggestions": {}
+                    },
+                    "page_experience": {
+                        "issues": [
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "missing_x_frame_options"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_x_frame_options"
+                            }
+                        ],
+                        "suggestions": {
+                            "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/": [
+                                {
+                                    "type": "add_security_header",
+                                    "header": "X-Frame-Options: SAMEORIGIN",
+                                    "action": "configure_in_server_or_cdn"
+                                }
+                            ],
+                            "https://vibe.wix.com/?origin=site_banner": [
+                                {
+                                    "type": "add_security_header",
+                                    "header": "X-Frame-Options: SAMEORIGIN",
+                                    "action": "configure_in_server_or_cdn"
+                                }
+                            ]
+                        }
+                    },
+                    "structured_data_validator": {
+                        "issues": [],
+                        "suggestions": {
+                            "https://vibe.wix.com/?origin=site_banner": [
+                                {
+                                    "type": "inject_breadcrumb_schema",
+                                    "schema": {
+                                        "@context": "https://schema.org",
+                                        "@type": "BreadcrumbList",
+                                        "itemListElement": [
+                                            {
+                                                "@type": "ListItem",
+                                                "position": 1,
+                                                "name": "Home",
+                                                "item": "my-site-u3b7jde1-pradyumguha.wix-vibe.com"
+                                            },
+                                            {
+                                                "@type": "ListItem",
+                                                "position": 2,
+                                                "name": "Https:",
+                                                "item": "my-site-u3b7jde1-pradyumguha.wix-vibe.com/https:"
+                                            },
+                                            {
+                                                "@type": "ListItem",
+                                                "position": 3,
+                                                "name": "Vibe.Wix.Com",
+                                                "item": "my-site-u3b7jde1-pradyumguha.wix-vibe.com/https:/vibe.wix.com"
+                                            },
+                                            {
+                                                "@type": "ListItem",
+                                                "position": 4,
+                                                "name": "?Origin=Site_Banner",
+                                                "item": "my-site-u3b7jde1-pradyumguha.wix-vibe.com/https:/vibe.wix.com/?origin=site_banner"
+                                            }
+                                        ]
+                                    },
+                                    "action": "inject_breadcrumb_json_ld_into_head"
+                                }
+                            ]
+                        }
+                    },
+                    "hreflang": {
+                        "issues": [],
+                        "suggestions": {}
+                    }
+                },
+                "fixed_urls": [
+                    "https://vibe.wix.com"
+                ],
+                "strategy": [
+                    "internal_links",
+                    "crawl_budget",
+                    "robots",
+                    "schema",
+                    "core_web_vitals",
+                    "page_speed",
+                    "heading_structure",
+                    "open_graph",
+                    "canonical_advanced",
+                    "content_quality",
+                    "page_experience"
+                ],
+                "actions": [
+                    {
+                        "type": "inject_schema",
+                        "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                        "schema": {
+                            "@context": "https://schema.org",
+                            "@type": "WebPage",
+                            "name": "Home | PCAcademy",
+                            "description": "",
+                            "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/"
+                        }
+                    },
+                    {
+                        "type": "inject_schema",
+                        "url": "https://vibe.wix.com/?origin=site_banner",
+                        "schema": {
+                            "@context": "https://schema.org",
+                            "@type": "WebPage",
+                            "name": "Vibe Code a Website | From Text to Web Pages in Minutes | Wix",
+                            "description": "Just Describe your vision and watch it build a functioning website. Vibe code a website from simple prompts - no coding, no stress, just your style in minutes.",
+                            "url": "https://vibe.wix.com/?origin=site_banner"
+                        }
+                    },
+                    {
+                        "type": "defer_script",
+                        "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                        "script": "/_astro/page.D1FGnhRk.js"
+                    },
+                    {
+                        "type": "defer_script",
+                        "url": "https://vibe.wix.com/?origin=site_banner",
+                        "script": "https://static.parastorage.com/unpkg/@sentry/browser@5.30.0/build/bundle.min.js"
+                    },
+                    {
+                        "type": "inject_into_head",
+                        "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                        "tag": "<link rel=\"dns-prefetch\" href=\"https://static.parastorage.com\">"
+                    },
+                    {
+                        "type": "inject_into_head",
+                        "url": "https://vibe.wix.com/?origin=site_banner",
+                        "tag": "<link rel=\"dns-prefetch\" href=\"https://static.parastorage.com\">"
+                    },
+                    {
+                        "type": "heading_fix",
+                        "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                        "fix_type": "add_h1",
+                        "action": "generate_h1_from_title_or_slug"
+                    },
+                    {
+                        "type": "heading_fix",
+                        "url": "https://vibe.wix.com/?origin=site_banner",
+                        "fix_type": "add_h1",
+                        "action": "generate_h1_from_title_or_slug"
+                    },
+                    {
+                        "type": "inject_into_head",
+                        "url": "https://vibe.wix.com/?origin=site_banner",
+                        "tag": "<meta property=\"og:title\" content=\"Vibe Code a Website | From Text to Web Pages in Minutes | Wix\">"
+                    },
+                    {
+                        "type": "inject_into_head",
+                        "url": "https://vibe.wix.com/?origin=site_banner",
+                        "tag": "<meta property=\"og:description\" content=\"Just Describe your vision and watch it build a functioning website. Vibe code a website from simple prompts - no coding, no stress, just your style in minu\">"
+                    },
+                    {
+                        "type": "inject_into_head",
+                        "url": "https://vibe.wix.com/?origin=site_banner",
+                        "tag": "<meta property=\"og:url\" content=\"https://vibe.wix.com/?origin=site_banner\">"
+                    },
+                    {
+                        "type": "inject_into_head",
+                        "url": "https://vibe.wix.com/?origin=site_banner",
+                        "tag": "<meta property=\"og:type\" content=\"website\">"
+                    },
+                    {
+                        "type": "inject_into_head",
+                        "url": "https://vibe.wix.com/?origin=site_banner",
+                        "tag": "<meta name=\"twitter:card\" content=\"summary_large_image\">"
+                    },
+                    {
+                        "type": "inject_into_head",
+                        "url": "https://vibe.wix.com/?origin=site_banner",
+                        "tag": "<meta name=\"twitter:title\" content=\"Vibe Code a Website | From Text to Web Pages in Minutes | Wix\">"
+                    },
+                    {
+                        "type": "inject_into_head",
+                        "url": "https://vibe.wix.com/?origin=site_banner",
+                        "tag": "<meta name=\"twitter:description\" content=\"Just Describe your vision and watch it build a functioning website. Vibe code a website from simple prompts - no coding, no stress, just your style in minu\">"
+                    },
+                    {
+                        "type": "add_canonical",
+                        "url": "https://vibe.wix.com/?origin=site_banner",
+                        "tag": "<link rel=\"canonical\" href=\"https://vibe.wix.com/?origin=site_banner\">"
+                    },
+                    {
+                        "type": "expand_content",
+                        "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                        "current_words": 3,
+                        "target_words": 300
+                    },
+                    {
+                        "type": "expand_content",
+                        "url": "https://vibe.wix.com/?origin=site_banner",
+                        "current_words": 7,
+                        "target_words": 300
+                    }
+                ],
+                "seo_score": 63
+            }
+        }
+    },
+    "aqjn3ahbsqs": {
+        "status_msg": "Completed",
+        "status": "completed",
+        "results": {
+            "task_id": "aqjn3ahbsqs",
+            "site_url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+            "started_at": "2026-03-27T08:47:44.830390",
+            "fixes_applied": [],
+            "suggested_actions": [
+                {
+                    "type": "inject_schema",
+                    "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                    "schema": {
+                        "@context": "https://schema.org",
+                        "@type": "WebPage",
+                        "name": "Untitled Page",
+                        "description": "",
+                        "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/"
+                    }
+                },
+                {
+                    "type": "defer_script",
+                    "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                    "script": "/_astro/page.D1FGnhRk.js"
+                },
+                {
+                    "type": "heading_fix",
+                    "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                    "fix_type": "add_h1",
+                    "action": "generate_h1_from_title_or_slug"
+                },
+                {
+                    "type": "inject_into_head",
+                    "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                    "tag": "<meta property=\"og:url\" content=\"https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/\">"
+                },
+                {
+                    "type": "inject_into_head",
+                    "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                    "tag": "<meta property=\"og:type\" content=\"website\">"
+                },
+                {
+                    "type": "inject_into_head",
+                    "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                    "tag": "<meta name=\"twitter:card\" content=\"summary_large_image\">"
+                },
+                {
+                    "type": "add_canonical",
+                    "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                    "tag": "<link rel=\"canonical\" href=\"https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/\">"
+                },
+                {
+                    "type": "expand_content",
+                    "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                    "current_words": 0,
+                    "target_words": 300
+                }
+            ],
+            "pages_generated": [],
+            "deploy_results": [],
+            "seo_score_before": 64,
+            "errors": [],
+            "state": "completed",
+            "dry_run": false,
+            "engine_result": {
+                "audit": {
+                    "total_pages_crawled": 1,
+                    "total_clean_urls": 0,
+                    "issues": {
+                        "non_200": [
+                            "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/"
+                        ],
+                        "excluded_from_sitemap": [
+                            "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/"
+                        ]
+                    },
+                    "score": 60,
+                    "suggestions": [
+                        "Fix broken pages (404/500) or remove them from sitemap.",
+                        "Ensure all important pages are included in the sitemap."
+                    ]
+                },
+                "plan": [
+                    "internal_links",
+                    "crawl_budget",
+                    "canonical",
+                    "robots",
+                    "schema",
+                    "image_seo",
+                    "core_web_vitals",
+                    "keyword_gap",
+                    "page_speed",
+                    "heading_structure",
+                    "open_graph",
+                    "canonical_advanced",
+                    "broken_links",
+                    "content_quality",
+                    "mobile_seo",
+                    "page_experience",
+                    "structured_data_validator",
+                    "hreflang"
+                ],
+                "modules": {
+                    "internal_links": {
+                        "issues": {
+                            "orphan_pages": [],
+                            "low_internal_links": []
+                        },
+                        "suggestions": {}
+                    },
+                    "crawl_budget": {
+                        "issues": {
+                            "deep_pages": [],
+                            "wasted_crawl_budget": [
+                                "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/"
+                            ]
+                        },
+                        "suggestions": [
+                            {
+                                "type": "remove_or_fix",
+                                "target": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "reason": "Broken page consuming crawl budget"
+                            }
+                        ]
+                    },
+                    "canonical": {
+                        "urls": []
+                    },
+                    "robots": {
+                        "status": "success",
+                        "issues": [
+                            {
+                                "issue": "missing_sitemap_in_robots",
+                                "suggested_sitemap": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/sitemap.xml"
+                            }
+                        ],
+                        "current_content": "",
+                        "new_content": "User-agent: *\nAllow: /\n\nSitemap: https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/sitemap.xml"
+                    },
+                    "schema": {
+                        "issues": [
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "missing_schema"
+                            }
+                        ],
+                        "schemas": {
+                            "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/": {
+                                "@context": "https://schema.org",
+                                "@type": "WebPage",
+                                "name": "Untitled Page",
+                                "description": "",
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/"
+                            }
+                        }
+                    },
+                    "image_seo": {
+                        "issues": [],
+                        "fixes": {}
+                    },
+                    "core_web_vitals": {
+                        "issues": [
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "blocking_js",
+                                "script": "/_astro/page.D1FGnhRk.js"
+                            }
+                        ],
+                        "suggestions": {
+                            "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/": [
+                                {
+                                    "type": "defer_script",
+                                    "script": "/_astro/page.D1FGnhRk.js"
+                                }
+                            ]
+                        }
+                    },
+                    "keyword_gap": {
+                        "site_keywords": [],
+                        "competitor_keywords": {},
+                        "keyword_gap": {}
+                    },
+                    "page_speed": {
+                        "issues": [],
+                        "suggestions": {}
+                    },
+                    "heading_structure": {
+                        "issues": [
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "missing_h1"
+                            }
+                        ],
+                        "suggestions": {
+                            "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/": [
+                                {
+                                    "type": "add_h1",
+                                    "action": "generate_h1_from_title_or_slug"
+                                }
+                            ]
+                        }
+                    },
+                    "open_graph": {
+                        "issues": [
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "missing_og_title"
+                            },
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "missing_og_description"
+                            },
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "missing_og_url"
+                            },
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "missing_og_type"
+                            },
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "missing_og_image"
+                            },
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "missing_twitter_card"
+                            },
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "missing_twitter_title"
+                            },
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "missing_twitter_description"
+                            },
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "missing_twitter_image"
+                            }
+                        ],
+                        "suggestions": {
+                            "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/": [
+                                {
+                                    "type": "add_og_tag",
+                                    "tag": "<meta property=\"og:url\" content=\"https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/\">",
+                                    "action": "inject_into_head"
+                                },
+                                {
+                                    "type": "add_og_tag",
+                                    "tag": "<meta property=\"og:type\" content=\"website\">",
+                                    "action": "inject_into_head"
+                                },
+                                {
+                                    "type": "add_twitter_tag",
+                                    "tag": "<meta name=\"twitter:card\" content=\"summary_large_image\">",
+                                    "action": "inject_into_head"
+                                }
+                            ]
+                        }
+                    },
+                    "canonical_advanced": {
+                        "issues": [
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "missing_canonical"
+                            }
+                        ],
+                        "suggestions": {
+                            "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/": [
+                                {
+                                    "type": "add_canonical",
+                                    "tag": "<link rel=\"canonical\" href=\"https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/\">",
+                                    "action": "inject_into_head"
+                                }
+                            ]
+                        }
+                    },
+                    "broken_links": {
+                        "issues": [],
+                        "suggestions": {}
+                    },
+                    "content_quality": {
+                        "issues": [
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "thin_content",
+                                "word_count": 0
+                            }
+                        ],
+                        "suggestions": {
+                            "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/": [
+                                {
+                                    "type": "expand_content",
+                                    "current_words": 0,
+                                    "target_words": 300,
+                                    "action": "generate_additional_content_for_page"
+                                }
+                            ]
+                        }
+                    },
+                    "mobile_seo": {
+                        "issues": [],
+                        "suggestions": {}
+                    },
+                    "page_experience": {
+                        "issues": [
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "missing_x_frame_options"
+                            }
+                        ],
+                        "suggestions": {
+                            "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/": [
+                                {
+                                    "type": "add_security_header",
+                                    "header": "X-Frame-Options: SAMEORIGIN",
+                                    "action": "configure_in_server_or_cdn"
+                                }
+                            ]
+                        }
+                    },
+                    "structured_data_validator": {
+                        "issues": [],
+                        "suggestions": {}
+                    },
+                    "hreflang": {
+                        "issues": [],
+                        "suggestions": {}
+                    }
+                },
+                "fixed_urls": [],
+                "strategy": [
+                    "internal_links",
+                    "crawl_budget",
+                    "robots",
+                    "schema",
+                    "core_web_vitals",
+                    "heading_structure",
+                    "open_graph",
+                    "canonical_advanced",
+                    "content_quality",
+                    "page_experience"
+                ],
+                "actions": [
+                    {
+                        "type": "inject_schema",
+                        "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                        "schema": {
+                            "@context": "https://schema.org",
+                            "@type": "WebPage",
+                            "name": "Untitled Page",
+                            "description": "",
+                            "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/"
+                        }
+                    },
+                    {
+                        "type": "defer_script",
+                        "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                        "script": "/_astro/page.D1FGnhRk.js"
+                    },
+                    {
+                        "type": "heading_fix",
+                        "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                        "fix_type": "add_h1",
+                        "action": "generate_h1_from_title_or_slug"
+                    },
+                    {
+                        "type": "inject_into_head",
+                        "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                        "tag": "<meta property=\"og:url\" content=\"https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/\">"
+                    },
+                    {
+                        "type": "inject_into_head",
+                        "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                        "tag": "<meta property=\"og:type\" content=\"website\">"
+                    },
+                    {
+                        "type": "inject_into_head",
+                        "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                        "tag": "<meta name=\"twitter:card\" content=\"summary_large_image\">"
+                    },
+                    {
+                        "type": "add_canonical",
+                        "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                        "tag": "<link rel=\"canonical\" href=\"https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/\">"
+                    },
+                    {
+                        "type": "expand_content",
+                        "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                        "current_words": 0,
+                        "target_words": 300
+                    }
+                ],
+                "seo_score": 64
+            }
+        }
+    },
+    "pegl6wo66e": {
+        "status_msg": "Completed",
+        "status": "completed",
+        "results": {
+            "task_id": "pegl6wo66e",
+            "site_url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+            "started_at": "2026-03-27T08:49:00.598124",
+            "fixes_applied": [],
+            "suggested_actions": [
+                {
+                    "type": "inject_schema",
+                    "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                    "schema": {
+                        "@context": "https://schema.org",
+                        "@type": "WebPage",
+                        "name": "Home | PCAcademy",
+                        "description": "",
+                        "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/"
+                    }
+                },
+                {
+                    "type": "inject_schema",
+                    "url": "https://vibe.wix.com/?origin=site_banner",
+                    "schema": {
+                        "@context": "https://schema.org",
+                        "@type": "WebPage",
+                        "name": "Vibe Code a Website | From Text to Web Pages in Minutes | Wix",
+                        "description": "Just Describe your vision and watch it build a functioning website. Vibe code a website from simple prompts - no coding, no stress, just your style in minutes.",
+                        "url": "https://vibe.wix.com/?origin=site_banner"
+                    }
+                },
+                {
+                    "type": "defer_script",
+                    "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                    "script": "/_astro/page.D1FGnhRk.js"
+                },
+                {
+                    "type": "defer_script",
+                    "url": "https://vibe.wix.com/?origin=site_banner",
+                    "script": "https://static.parastorage.com/unpkg/@sentry/browser@5.30.0/build/bundle.min.js"
+                },
+                {
+                    "type": "inject_into_head",
+                    "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                    "tag": "<link rel=\"dns-prefetch\" href=\"https://static.parastorage.com\">"
+                },
+                {
+                    "type": "inject_into_head",
+                    "url": "https://vibe.wix.com/?origin=site_banner",
+                    "tag": "<link rel=\"dns-prefetch\" href=\"https://static.parastorage.com\">"
+                },
+                {
+                    "type": "heading_fix",
+                    "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                    "fix_type": "add_h1",
+                    "action": "generate_h1_from_title_or_slug"
+                },
+                {
+                    "type": "heading_fix",
+                    "url": "https://vibe.wix.com/?origin=site_banner",
+                    "fix_type": "add_h1",
+                    "action": "generate_h1_from_title_or_slug"
+                },
+                {
+                    "type": "inject_into_head",
+                    "url": "https://vibe.wix.com/?origin=site_banner",
+                    "tag": "<meta property=\"og:title\" content=\"Vibe Code a Website | From Text to Web Pages in Minutes | Wix\">"
+                },
+                {
+                    "type": "inject_into_head",
+                    "url": "https://vibe.wix.com/?origin=site_banner",
+                    "tag": "<meta property=\"og:description\" content=\"Just Describe your vision and watch it build a functioning website. Vibe code a website from simple prompts - no coding, no stress, just your style in minu\">"
+                },
+                {
+                    "type": "inject_into_head",
+                    "url": "https://vibe.wix.com/?origin=site_banner",
+                    "tag": "<meta property=\"og:url\" content=\"https://vibe.wix.com/?origin=site_banner\">"
+                },
+                {
+                    "type": "inject_into_head",
+                    "url": "https://vibe.wix.com/?origin=site_banner",
+                    "tag": "<meta property=\"og:type\" content=\"website\">"
+                },
+                {
+                    "type": "inject_into_head",
+                    "url": "https://vibe.wix.com/?origin=site_banner",
+                    "tag": "<meta name=\"twitter:card\" content=\"summary_large_image\">"
+                },
+                {
+                    "type": "inject_into_head",
+                    "url": "https://vibe.wix.com/?origin=site_banner",
+                    "tag": "<meta name=\"twitter:title\" content=\"Vibe Code a Website | From Text to Web Pages in Minutes | Wix\">"
+                },
+                {
+                    "type": "inject_into_head",
+                    "url": "https://vibe.wix.com/?origin=site_banner",
+                    "tag": "<meta name=\"twitter:description\" content=\"Just Describe your vision and watch it build a functioning website. Vibe code a website from simple prompts - no coding, no stress, just your style in minu\">"
+                },
+                {
+                    "type": "add_canonical",
+                    "url": "https://vibe.wix.com/?origin=site_banner",
+                    "tag": "<link rel=\"canonical\" href=\"https://vibe.wix.com/?origin=site_banner\">"
+                },
+                {
+                    "type": "expand_content",
+                    "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                    "current_words": 3,
+                    "target_words": 300
+                },
+                {
+                    "type": "expand_content",
+                    "url": "https://vibe.wix.com/?origin=site_banner",
+                    "current_words": 7,
+                    "target_words": 300
+                }
+            ],
+            "pages_generated": [],
+            "deploy_results": [],
+            "seo_score_before": 63,
+            "errors": [],
+            "state": "completed",
+            "dry_run": false,
+            "engine_result": {
+                "audit": {
+                    "total_pages_crawled": 2,
+                    "total_clean_urls": 1,
+                    "issues": {
+                        "has_query_params": [
+                            "https://vibe.wix.com/?origin=site_banner"
+                        ],
+                        "excluded_from_sitemap": [
+                            "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                            "https://vibe.wix.com/?origin=site_banner"
+                        ]
+                    },
+                    "score": 84,
+                    "suggestions": [
+                        "Remove tracking/query parameters (e.g., ?utm=) from URLs in sitemap.",
+                        "Ensure all important pages are included in the sitemap."
+                    ]
+                },
+                "plan": [
+                    "sitemap",
+                    "internal_links",
+                    "crawl_budget",
+                    "canonical",
+                    "robots",
+                    "schema",
+                    "image_seo",
+                    "core_web_vitals",
+                    "keyword_gap",
+                    "page_speed",
+                    "heading_structure",
+                    "open_graph",
+                    "canonical_advanced",
+                    "broken_links",
+                    "content_quality",
+                    "mobile_seo",
+                    "page_experience",
+                    "structured_data_validator",
+                    "hreflang"
+                ],
+                "modules": {
+                    "sitemap": {
+                        "urls": [
+                            "https://vibe.wix.com"
+                        ]
+                    },
+                    "internal_links": {
+                        "issues": {
+                            "orphan_pages": [
+                                "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/"
+                            ],
+                            "low_internal_links": [
+                                "https://vibe.wix.com/?origin=site_banner"
+                            ]
+                        },
+                        "suggestions": {
+                            "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/": [
+                                {
+                                    "from": "https://vibe.wix.com/?origin=site_banner",
+                                    "to": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/"
+                                }
+                            ]
+                        }
+                    },
+                    "crawl_budget": {
+                        "issues": {
+                            "deep_pages": [],
+                            "wasted_crawl_budget": []
+                        },
+                        "suggestions": []
+                    },
+                    "canonical": {
+                        "urls": [
+                            "https://vibe.wix.com"
+                        ]
+                    },
+                    "robots": {
+                        "status": "success",
+                        "issues": [
+                            {
+                                "issue": "missing_sitemap_in_robots",
+                                "suggested_sitemap": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/sitemap.xml"
+                            }
+                        ],
+                        "current_content": "",
+                        "new_content": "User-agent: *\nAllow: /\n\nSitemap: https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/sitemap.xml"
+                    },
+                    "schema": {
+                        "issues": [
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "missing_schema"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_schema"
+                            }
+                        ],
+                        "schemas": {
+                            "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/": {
+                                "@context": "https://schema.org",
+                                "@type": "WebPage",
+                                "name": "Home | PCAcademy",
+                                "description": "",
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/"
+                            },
+                            "https://vibe.wix.com/?origin=site_banner": {
+                                "@context": "https://schema.org",
+                                "@type": "WebPage",
+                                "name": "Vibe Code a Website | From Text to Web Pages in Minutes | Wix",
+                                "description": "Just Describe your vision and watch it build a functioning website. Vibe code a website from simple prompts - no coding, no stress, just your style in minutes.",
+                                "url": "https://vibe.wix.com/?origin=site_banner"
+                            }
+                        }
+                    },
+                    "image_seo": {
+                        "issues": [],
+                        "fixes": {}
+                    },
+                    "core_web_vitals": {
+                        "issues": [
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "blocking_js",
+                                "script": "/_astro/page.D1FGnhRk.js"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "render_blocking_css"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "blocking_js",
+                                "script": "https://static.parastorage.com/unpkg/@sentry/browser@5.30.0/build/bundle.min.js"
+                            }
+                        ],
+                        "suggestions": {
+                            "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/": [
+                                {
+                                    "type": "defer_script",
+                                    "script": "/_astro/page.D1FGnhRk.js"
+                                }
+                            ],
+                            "https://vibe.wix.com/?origin=site_banner": [
+                                {
+                                    "type": "optimize_css",
+                                    "action": "inline_critical_css_or_defer"
+                                },
+                                {
+                                    "type": "defer_script",
+                                    "script": "https://static.parastorage.com/unpkg/@sentry/browser@5.30.0/build/bundle.min.js"
+                                }
+                            ]
+                        }
+                    },
+                    "keyword_gap": {
+                        "site_keywords": [
+                            "home",
+                            "pcacademy",
+                            "built",
+                            "vibe",
+                            "code",
+                            "website",
+                            "text",
+                            "pages",
+                            "minutes"
+                        ],
+                        "competitor_keywords": {},
+                        "keyword_gap": {}
+                    },
+                    "page_speed": {
+                        "issues": [
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "missing_dns_prefetch",
+                                "domain": "https://static.parastorage.com"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_dns_prefetch",
+                                "domain": "https://static.parastorage.com"
+                            }
+                        ],
+                        "suggestions": {
+                            "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/": [
+                                {
+                                    "type": "add_dns_prefetch",
+                                    "tag": "<link rel=\"dns-prefetch\" href=\"https://static.parastorage.com\">",
+                                    "action": "inject_into_head"
+                                }
+                            ],
+                            "https://vibe.wix.com/?origin=site_banner": [
+                                {
+                                    "type": "add_dns_prefetch",
+                                    "tag": "<link rel=\"dns-prefetch\" href=\"https://static.parastorage.com\">",
+                                    "action": "inject_into_head"
+                                }
+                            ]
+                        }
+                    },
+                    "heading_structure": {
+                        "issues": [
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "missing_h1"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_h1"
+                            }
+                        ],
+                        "suggestions": {
+                            "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/": [
+                                {
+                                    "type": "add_h1",
+                                    "action": "generate_h1_from_title_or_slug"
+                                }
+                            ],
+                            "https://vibe.wix.com/?origin=site_banner": [
+                                {
+                                    "type": "add_h1",
+                                    "action": "generate_h1_from_title_or_slug"
+                                }
+                            ]
+                        }
+                    },
+                    "open_graph": {
+                        "issues": [
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "missing_og_description"
+                            },
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "missing_og_image"
+                            },
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "missing_twitter_description"
+                            },
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "missing_twitter_image"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_og_title"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_og_description"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_og_url"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_og_type"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_og_image"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_twitter_card"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_twitter_title"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_twitter_description"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_twitter_image"
+                            }
+                        ],
+                        "suggestions": {
+                            "https://vibe.wix.com/?origin=site_banner": [
+                                {
+                                    "type": "add_og_tag",
+                                    "tag": "<meta property=\"og:title\" content=\"Vibe Code a Website | From Text to Web Pages in Minutes | Wix\">",
+                                    "action": "inject_into_head"
+                                },
+                                {
+                                    "type": "add_og_tag",
+                                    "tag": "<meta property=\"og:description\" content=\"Just Describe your vision and watch it build a functioning website. Vibe code a website from simple prompts - no coding, no stress, just your style in minu\">",
+                                    "action": "inject_into_head"
+                                },
+                                {
+                                    "type": "add_og_tag",
+                                    "tag": "<meta property=\"og:url\" content=\"https://vibe.wix.com/?origin=site_banner\">",
+                                    "action": "inject_into_head"
+                                },
+                                {
+                                    "type": "add_og_tag",
+                                    "tag": "<meta property=\"og:type\" content=\"website\">",
+                                    "action": "inject_into_head"
+                                },
+                                {
+                                    "type": "add_twitter_tag",
+                                    "tag": "<meta name=\"twitter:card\" content=\"summary_large_image\">",
+                                    "action": "inject_into_head"
+                                },
+                                {
+                                    "type": "add_twitter_tag",
+                                    "tag": "<meta name=\"twitter:title\" content=\"Vibe Code a Website | From Text to Web Pages in Minutes | Wix\">",
+                                    "action": "inject_into_head"
+                                },
+                                {
+                                    "type": "add_twitter_tag",
+                                    "tag": "<meta name=\"twitter:description\" content=\"Just Describe your vision and watch it build a functioning website. Vibe code a website from simple prompts - no coding, no stress, just your style in minu\">",
+                                    "action": "inject_into_head"
+                                }
+                            ]
+                        }
+                    },
+                    "canonical_advanced": {
+                        "issues": [
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_canonical"
+                            }
+                        ],
+                        "suggestions": {
+                            "https://vibe.wix.com/?origin=site_banner": [
+                                {
+                                    "type": "add_canonical",
+                                    "tag": "<link rel=\"canonical\" href=\"https://vibe.wix.com/?origin=site_banner\">",
+                                    "action": "inject_into_head"
+                                }
+                            ]
+                        }
+                    },
+                    "broken_links": {
+                        "issues": [],
+                        "suggestions": {}
+                    },
+                    "content_quality": {
+                        "issues": [
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "thin_content",
+                                "word_count": 3
+                            },
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "keyword_stuffing",
+                                "keyword": "home",
+                                "density": 33.33
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "thin_content",
+                                "word_count": 7
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "keyword_stuffing",
+                                "keyword": "vibe",
+                                "density": 14.29
+                            }
+                        ],
+                        "suggestions": {
+                            "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/": [
+                                {
+                                    "type": "expand_content",
+                                    "current_words": 3,
+                                    "target_words": 300,
+                                    "action": "generate_additional_content_for_page"
+                                },
+                                {
+                                    "type": "reduce_keyword_density",
+                                    "keyword": "home",
+                                    "action": "replace_some_instances_with_synonyms"
+                                }
+                            ],
+                            "https://vibe.wix.com/?origin=site_banner": [
+                                {
+                                    "type": "expand_content",
+                                    "current_words": 7,
+                                    "target_words": 300,
+                                    "action": "generate_additional_content_for_page"
+                                },
+                                {
+                                    "type": "reduce_keyword_density",
+                                    "keyword": "vibe",
+                                    "action": "replace_some_instances_with_synonyms"
+                                }
+                            ]
+                        }
+                    },
+                    "mobile_seo": {
+                        "issues": [],
+                        "suggestions": {}
+                    },
+                    "page_experience": {
+                        "issues": [
+                            {
+                                "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                                "issue": "missing_x_frame_options"
+                            },
+                            {
+                                "url": "https://vibe.wix.com/?origin=site_banner",
+                                "issue": "missing_x_frame_options"
+                            }
+                        ],
+                        "suggestions": {
+                            "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/": [
+                                {
+                                    "type": "add_security_header",
+                                    "header": "X-Frame-Options: SAMEORIGIN",
+                                    "action": "configure_in_server_or_cdn"
+                                }
+                            ],
+                            "https://vibe.wix.com/?origin=site_banner": [
+                                {
+                                    "type": "add_security_header",
+                                    "header": "X-Frame-Options: SAMEORIGIN",
+                                    "action": "configure_in_server_or_cdn"
+                                }
+                            ]
+                        }
+                    },
+                    "structured_data_validator": {
+                        "issues": [],
+                        "suggestions": {
+                            "https://vibe.wix.com/?origin=site_banner": [
+                                {
+                                    "type": "inject_breadcrumb_schema",
+                                    "schema": {
+                                        "@context": "https://schema.org",
+                                        "@type": "BreadcrumbList",
+                                        "itemListElement": [
+                                            {
+                                                "@type": "ListItem",
+                                                "position": 1,
+                                                "name": "Home",
+                                                "item": "my-site-u3b7jde1-pradyumguha.wix-vibe.com"
+                                            },
+                                            {
+                                                "@type": "ListItem",
+                                                "position": 2,
+                                                "name": "Https:",
+                                                "item": "my-site-u3b7jde1-pradyumguha.wix-vibe.com/https:"
+                                            },
+                                            {
+                                                "@type": "ListItem",
+                                                "position": 3,
+                                                "name": "Vibe.Wix.Com",
+                                                "item": "my-site-u3b7jde1-pradyumguha.wix-vibe.com/https:/vibe.wix.com"
+                                            },
+                                            {
+                                                "@type": "ListItem",
+                                                "position": 4,
+                                                "name": "?Origin=Site_Banner",
+                                                "item": "my-site-u3b7jde1-pradyumguha.wix-vibe.com/https:/vibe.wix.com/?origin=site_banner"
+                                            }
+                                        ]
+                                    },
+                                    "action": "inject_breadcrumb_json_ld_into_head"
+                                }
+                            ]
+                        }
+                    },
+                    "hreflang": {
+                        "issues": [],
+                        "suggestions": {}
+                    }
+                },
+                "fixed_urls": [
+                    "https://vibe.wix.com"
+                ],
+                "strategy": [
+                    "internal_links",
+                    "crawl_budget",
+                    "robots",
+                    "schema",
+                    "core_web_vitals",
+                    "page_speed",
+                    "heading_structure",
+                    "open_graph",
+                    "canonical_advanced",
+                    "content_quality",
+                    "page_experience"
+                ],
+                "actions": [
+                    {
+                        "type": "inject_schema",
+                        "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                        "schema": {
+                            "@context": "https://schema.org",
+                            "@type": "WebPage",
+                            "name": "Home | PCAcademy",
+                            "description": "",
+                            "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/"
+                        }
+                    },
+                    {
+                        "type": "inject_schema",
+                        "url": "https://vibe.wix.com/?origin=site_banner",
+                        "schema": {
+                            "@context": "https://schema.org",
+                            "@type": "WebPage",
+                            "name": "Vibe Code a Website | From Text to Web Pages in Minutes | Wix",
+                            "description": "Just Describe your vision and watch it build a functioning website. Vibe code a website from simple prompts - no coding, no stress, just your style in minutes.",
+                            "url": "https://vibe.wix.com/?origin=site_banner"
+                        }
+                    },
+                    {
+                        "type": "defer_script",
+                        "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                        "script": "/_astro/page.D1FGnhRk.js"
+                    },
+                    {
+                        "type": "defer_script",
+                        "url": "https://vibe.wix.com/?origin=site_banner",
+                        "script": "https://static.parastorage.com/unpkg/@sentry/browser@5.30.0/build/bundle.min.js"
+                    },
+                    {
+                        "type": "inject_into_head",
+                        "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                        "tag": "<link rel=\"dns-prefetch\" href=\"https://static.parastorage.com\">"
+                    },
+                    {
+                        "type": "inject_into_head",
+                        "url": "https://vibe.wix.com/?origin=site_banner",
+                        "tag": "<link rel=\"dns-prefetch\" href=\"https://static.parastorage.com\">"
+                    },
+                    {
+                        "type": "heading_fix",
+                        "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                        "fix_type": "add_h1",
+                        "action": "generate_h1_from_title_or_slug"
+                    },
+                    {
+                        "type": "heading_fix",
+                        "url": "https://vibe.wix.com/?origin=site_banner",
+                        "fix_type": "add_h1",
+                        "action": "generate_h1_from_title_or_slug"
+                    },
+                    {
+                        "type": "inject_into_head",
+                        "url": "https://vibe.wix.com/?origin=site_banner",
+                        "tag": "<meta property=\"og:title\" content=\"Vibe Code a Website | From Text to Web Pages in Minutes | Wix\">"
+                    },
+                    {
+                        "type": "inject_into_head",
+                        "url": "https://vibe.wix.com/?origin=site_banner",
+                        "tag": "<meta property=\"og:description\" content=\"Just Describe your vision and watch it build a functioning website. Vibe code a website from simple prompts - no coding, no stress, just your style in minu\">"
+                    },
+                    {
+                        "type": "inject_into_head",
+                        "url": "https://vibe.wix.com/?origin=site_banner",
+                        "tag": "<meta property=\"og:url\" content=\"https://vibe.wix.com/?origin=site_banner\">"
+                    },
+                    {
+                        "type": "inject_into_head",
+                        "url": "https://vibe.wix.com/?origin=site_banner",
+                        "tag": "<meta property=\"og:type\" content=\"website\">"
+                    },
+                    {
+                        "type": "inject_into_head",
+                        "url": "https://vibe.wix.com/?origin=site_banner",
+                        "tag": "<meta name=\"twitter:card\" content=\"summary_large_image\">"
+                    },
+                    {
+                        "type": "inject_into_head",
+                        "url": "https://vibe.wix.com/?origin=site_banner",
+                        "tag": "<meta name=\"twitter:title\" content=\"Vibe Code a Website | From Text to Web Pages in Minutes | Wix\">"
+                    },
+                    {
+                        "type": "inject_into_head",
+                        "url": "https://vibe.wix.com/?origin=site_banner",
+                        "tag": "<meta name=\"twitter:description\" content=\"Just Describe your vision and watch it build a functioning website. Vibe code a website from simple prompts - no coding, no stress, just your style in minu\">"
+                    },
+                    {
+                        "type": "add_canonical",
+                        "url": "https://vibe.wix.com/?origin=site_banner",
+                        "tag": "<link rel=\"canonical\" href=\"https://vibe.wix.com/?origin=site_banner\">"
+                    },
+                    {
+                        "type": "expand_content",
+                        "url": "https://my-site-u3b7jde1-pradyumguha.wix-vibe.com/",
+                        "current_words": 3,
+                        "target_words": 300
+                    },
+                    {
+                        "type": "expand_content",
+                        "url": "https://vibe.wix.com/?origin=site_banner",
+                        "current_words": 7,
+                        "target_words": 300
+                    }
+                ],
+                "seo_score": 63
+            }
+        }
+    },
+    "hdm8xycsevt": {
+        "status_msg": "Completed",
+        "status": "completed",
+        "results": {
+            "task_id": "hdm8xycsevt",
+            "site_url": "https://almogod.github.io/PCAcademy-/",
+            "started_at": "2026-03-27T12:35:17.332177",
+            "fixes_applied": [
+                {
+                    "url": "https://almogod.github.io/PCAcademy-/",
+                    "actions": 11,
+                    "deploy": false
+                },
+                {
+                    "url": "https://almogod.github.io/PCAcademy-/",
+                    "actions": 11,
+                    "deploy": false
+                }
+            ],
+            "suggested_actions": [
+                {
+                    "type": "inject_schema",
+                    "url": "https://almogod.github.io/PCAcademy-/",
+                    "schema": {
+                        "@context": "https://schema.org",
+                        "@type": "WebPage",
+                        "name": "PCAcademy",
+                        "description": "PCAcademy - Learn Principal Component Analysis",
+                        "url": "https://almogod.github.io/PCAcademy-/"
+                    }
+                },
+                {
+                    "type": "heading_fix",
+                    "url": "https://almogod.github.io/PCAcademy-/",
+                    "fix_type": "add_h1",
+                    "action": "generate_h1_from_title_or_slug"
+                },
+                {
+                    "type": "inject_into_head",
+                    "url": "https://almogod.github.io/PCAcademy-/",
+                    "tag": "<meta property=\"og:title\" content=\"PCAcademy\">"
+                },
+                {
+                    "type": "inject_into_head",
+                    "url": "https://almogod.github.io/PCAcademy-/",
+                    "tag": "<meta property=\"og:description\" content=\"PCAcademy - Learn Principal Component Analysis\">"
+                },
+                {
+                    "type": "inject_into_head",
+                    "url": "https://almogod.github.io/PCAcademy-/",
+                    "tag": "<meta property=\"og:url\" content=\"https://almogod.github.io/PCAcademy-/\">"
+                },
+                {
+                    "type": "inject_into_head",
+                    "url": "https://almogod.github.io/PCAcademy-/",
+                    "tag": "<meta property=\"og:type\" content=\"website\">"
+                },
+                {
+                    "type": "inject_into_head",
+                    "url": "https://almogod.github.io/PCAcademy-/",
+                    "tag": "<meta name=\"twitter:card\" content=\"summary_large_image\">"
+                },
+                {
+                    "type": "inject_into_head",
+                    "url": "https://almogod.github.io/PCAcademy-/",
+                    "tag": "<meta name=\"twitter:title\" content=\"PCAcademy\">"
+                },
+                {
+                    "type": "inject_into_head",
+                    "url": "https://almogod.github.io/PCAcademy-/",
+                    "tag": "<meta name=\"twitter:description\" content=\"PCAcademy - Learn Principal Component Analysis\">"
+                },
+                {
+                    "type": "add_canonical",
+                    "url": "https://almogod.github.io/PCAcademy-/",
+                    "tag": "<link rel=\"canonical\" href=\"https://almogod.github.io/PCAcademy-/\">"
+                },
+                {
+                    "type": "expand_content",
+                    "url": "https://almogod.github.io/PCAcademy-/",
+                    "current_words": 1,
+                    "target_words": 300
+                }
+            ],
+            "pages_generated": [],
+            "deploy_results": [
+                {
+                    "success": false,
+                    "platform": "github",
+                    "file_path": "https:///PCAcademy-/index.html",
+                    "message": "Client error '404 Not Found' for url 'https://api.github.com/repos/https://github.com/Almogod/PCAcademy-/contents/https:///PCAcademy-/index.html'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+                },
+                {
+                    "success": false,
+                    "platform": "github",
+                    "file_path": "https:///PCAcademy-/index.html",
+                    "message": "github_token and github_repo are required for GitHub deployment"
+                }
+            ],
+            "seo_score_before": 76,
+            "errors": [],
+            "state": "completed",
+            "dry_run": false,
+            "engine_result": {
+                "audit": {
+                    "total_pages_crawled": 1,
+                    "total_clean_urls": 1,
+                    "issues": {
+                        "excluded_from_sitemap": [
+                            "https://almogod.github.io/PCAcademy-/"
+                        ]
+                    },
+                    "score": 90,
+                    "suggestions": [
+                        "Ensure all important pages are included in the sitemap."
+                    ]
+                },
+                "plan": [
+                    "internal_links",
+                    "crawl_budget",
+                    "canonical",
+                    "robots",
+                    "schema",
+                    "image_seo",
+                    "core_web_vitals",
+                    "keyword_gap",
+                    "page_speed",
+                    "heading_structure",
+                    "open_graph",
+                    "canonical_advanced",
+                    "broken_links",
+                    "content_quality",
+                    "mobile_seo",
+                    "page_experience",
+                    "structured_data_validator",
+                    "hreflang"
+                ],
+                "modules": {
+                    "internal_links": {
+                        "issues": {
+                            "orphan_pages": [],
+                            "low_internal_links": []
+                        },
+                        "suggestions": {}
+                    },
+                    "crawl_budget": {
+                        "issues": {
+                            "deep_pages": [],
+                            "wasted_crawl_budget": []
+                        },
+                        "suggestions": []
+                    },
+                    "canonical": {
+                        "urls": [
+                            "https://almogod.github.io/PCAcademy-"
+                        ]
+                    },
+                    "robots": {
+                        "status": "success",
+                        "issues": [
+                            {
+                                "issue": "missing_sitemap_in_robots",
+                                "suggested_sitemap": "https://almogod.github.io/sitemap.xml"
+                            }
+                        ],
+                        "current_content": "",
+                        "new_content": "User-agent: *\nAllow: /\n\nSitemap: https://almogod.github.io/sitemap.xml"
+                    },
+                    "schema": {
+                        "issues": [
+                            {
+                                "url": "https://almogod.github.io/PCAcademy-/",
+                                "issue": "missing_schema"
+                            }
+                        ],
+                        "schemas": {
+                            "https://almogod.github.io/PCAcademy-/": {
+                                "@context": "https://schema.org",
+                                "@type": "WebPage",
+                                "name": "PCAcademy",
+                                "description": "PCAcademy - Learn Principal Component Analysis",
+                                "url": "https://almogod.github.io/PCAcademy-/"
+                            }
+                        }
+                    },
+                    "image_seo": {
+                        "issues": [],
+                        "fixes": {}
+                    },
+                    "core_web_vitals": {
+                        "issues": [],
+                        "suggestions": {}
+                    },
+                    "keyword_gap": {
+                        "site_keywords": [
+                            "pcacademy"
+                        ],
+                        "competitor_keywords": {},
+                        "keyword_gap": {}
+                    },
+                    "page_speed": {
+                        "issues": [],
+                        "suggestions": {}
+                    },
+                    "heading_structure": {
+                        "issues": [
+                            {
+                                "url": "https://almogod.github.io/PCAcademy-/",
+                                "issue": "missing_h1"
+                            }
+                        ],
+                        "suggestions": {
+                            "https://almogod.github.io/PCAcademy-/": [
+                                {
+                                    "type": "add_h1",
+                                    "action": "generate_h1_from_title_or_slug"
+                                }
+                            ]
+                        }
+                    },
+                    "open_graph": {
+                        "issues": [
+                            {
+                                "url": "https://almogod.github.io/PCAcademy-/",
+                                "issue": "missing_og_title"
+                            },
+                            {
+                                "url": "https://almogod.github.io/PCAcademy-/",
+                                "issue": "missing_og_description"
+                            },
+                            {
+                                "url": "https://almogod.github.io/PCAcademy-/",
+                                "issue": "missing_og_url"
+                            },
+                            {
+                                "url": "https://almogod.github.io/PCAcademy-/",
+                                "issue": "missing_og_type"
+                            },
+                            {
+                                "url": "https://almogod.github.io/PCAcademy-/",
+                                "issue": "missing_og_image"
+                            },
+                            {
+                                "url": "https://almogod.github.io/PCAcademy-/",
+                                "issue": "missing_twitter_card"
+                            },
+                            {
+                                "url": "https://almogod.github.io/PCAcademy-/",
+                                "issue": "missing_twitter_title"
+                            },
+                            {
+                                "url": "https://almogod.github.io/PCAcademy-/",
+                                "issue": "missing_twitter_description"
+                            },
+                            {
+                                "url": "https://almogod.github.io/PCAcademy-/",
+                                "issue": "missing_twitter_image"
+                            }
+                        ],
+                        "suggestions": {
+                            "https://almogod.github.io/PCAcademy-/": [
+                                {
+                                    "type": "add_og_tag",
+                                    "tag": "<meta property=\"og:title\" content=\"PCAcademy\">",
+                                    "action": "inject_into_head"
+                                },
+                                {
+                                    "type": "add_og_tag",
+                                    "tag": "<meta property=\"og:description\" content=\"PCAcademy - Learn Principal Component Analysis\">",
+                                    "action": "inject_into_head"
+                                },
+                                {
+                                    "type": "add_og_tag",
+                                    "tag": "<meta property=\"og:url\" content=\"https://almogod.github.io/PCAcademy-/\">",
+                                    "action": "inject_into_head"
+                                },
+                                {
+                                    "type": "add_og_tag",
+                                    "tag": "<meta property=\"og:type\" content=\"website\">",
+                                    "action": "inject_into_head"
+                                },
+                                {
+                                    "type": "add_twitter_tag",
+                                    "tag": "<meta name=\"twitter:card\" content=\"summary_large_image\">",
+                                    "action": "inject_into_head"
+                                },
+                                {
+                                    "type": "add_twitter_tag",
+                                    "tag": "<meta name=\"twitter:title\" content=\"PCAcademy\">",
+                                    "action": "inject_into_head"
+                                },
+                                {
+                                    "type": "add_twitter_tag",
+                                    "tag": "<meta name=\"twitter:description\" content=\"PCAcademy - Learn Principal Component Analysis\">",
+                                    "action": "inject_into_head"
+                                }
+                            ]
+                        }
+                    },
+                    "canonical_advanced": {
+                        "issues": [
+                            {
+                                "url": "https://almogod.github.io/PCAcademy-/",
+                                "issue": "missing_canonical"
+                            }
+                        ],
+                        "suggestions": {
+                            "https://almogod.github.io/PCAcademy-/": [
+                                {
+                                    "type": "add_canonical",
+                                    "tag": "<link rel=\"canonical\" href=\"https://almogod.github.io/PCAcademy-/\">",
+                                    "action": "inject_into_head"
+                                }
+                            ]
+                        }
+                    },
+                    "broken_links": {
+                        "issues": [],
+                        "suggestions": {}
+                    },
+                    "content_quality": {
+                        "issues": [
+                            {
+                                "url": "https://almogod.github.io/PCAcademy-/",
+                                "issue": "thin_content",
+                                "word_count": 1
+                            },
+                            {
+                                "url": "https://almogod.github.io/PCAcademy-/",
+                                "issue": "keyword_stuffing",
+                                "keyword": "pcacademy",
+                                "density": 100.0
+                            }
+                        ],
+                        "suggestions": {
+                            "https://almogod.github.io/PCAcademy-/": [
+                                {
+                                    "type": "expand_content",
+                                    "current_words": 1,
+                                    "target_words": 300,
+                                    "action": "generate_additional_content_for_page"
+                                },
+                                {
+                                    "type": "reduce_keyword_density",
+                                    "keyword": "pcacademy",
+                                    "action": "replace_some_instances_with_synonyms"
+                                }
+                            ]
+                        }
+                    },
+                    "mobile_seo": {
+                        "issues": [],
+                        "suggestions": {}
+                    },
+                    "page_experience": {
+                        "issues": [
+                            {
+                                "url": "https://almogod.github.io/PCAcademy-/",
+                                "issue": "missing_x_frame_options"
+                            }
+                        ],
+                        "suggestions": {
+                            "https://almogod.github.io/PCAcademy-/": [
+                                {
+                                    "type": "add_security_header",
+                                    "header": "X-Frame-Options: SAMEORIGIN",
+                                    "action": "configure_in_server_or_cdn"
+                                }
+                            ]
+                        }
+                    },
+                    "structured_data_validator": {
+                        "issues": [],
+                        "suggestions": {
+                            "https://almogod.github.io/PCAcademy-/": [
+                                {
+                                    "type": "inject_breadcrumb_schema",
+                                    "schema": {
+                                        "@context": "https://schema.org",
+                                        "@type": "BreadcrumbList",
+                                        "itemListElement": [
+                                            {
+                                                "@type": "ListItem",
+                                                "position": 1,
+                                                "name": "Home",
+                                                "item": "almogod.github.io"
+                                            },
+                                            {
+                                                "@type": "ListItem",
+                                                "position": 2,
+                                                "name": "Https:",
+                                                "item": "almogod.github.io/https:"
+                                            },
+                                            {
+                                                "@type": "ListItem",
+                                                "position": 3,
+                                                "name": "Pcacademy ",
+                                                "item": "almogod.github.io/https:/PCAcademy-"
+                                            }
+                                        ]
+                                    },
+                                    "action": "inject_breadcrumb_json_ld_into_head"
+                                }
+                            ]
+                        }
+                    },
+                    "hreflang": {
+                        "issues": [],
+                        "suggestions": {}
+                    }
+                },
+                "fixed_urls": [
+                    "https://almogod.github.io/PCAcademy-"
+                ],
+                "strategy": [
+                    "internal_links",
+                    "crawl_budget",
+                    "robots",
+                    "schema",
+                    "heading_structure",
+                    "open_graph",
+                    "canonical_advanced",
+                    "content_quality",
+                    "page_experience"
+                ],
+                "actions": [
+                    {
+                        "type": "inject_schema",
+                        "url": "https://almogod.github.io/PCAcademy-/",
+                        "schema": {
+                            "@context": "https://schema.org",
+                            "@type": "WebPage",
+                            "name": "PCAcademy",
+                            "description": "PCAcademy - Learn Principal Component Analysis",
+                            "url": "https://almogod.github.io/PCAcademy-/"
+                        }
+                    },
+                    {
+                        "type": "heading_fix",
+                        "url": "https://almogod.github.io/PCAcademy-/",
+                        "fix_type": "add_h1",
+                        "action": "generate_h1_from_title_or_slug"
+                    },
+                    {
+                        "type": "inject_into_head",
+                        "url": "https://almogod.github.io/PCAcademy-/",
+                        "tag": "<meta property=\"og:title\" content=\"PCAcademy\">"
+                    },
+                    {
+                        "type": "inject_into_head",
+                        "url": "https://almogod.github.io/PCAcademy-/",
+                        "tag": "<meta property=\"og:description\" content=\"PCAcademy - Learn Principal Component Analysis\">"
+                    },
+                    {
+                        "type": "inject_into_head",
+                        "url": "https://almogod.github.io/PCAcademy-/",
+                        "tag": "<meta property=\"og:url\" content=\"https://almogod.github.io/PCAcademy-/\">"
+                    },
+                    {
+                        "type": "inject_into_head",
+                        "url": "https://almogod.github.io/PCAcademy-/",
+                        "tag": "<meta property=\"og:type\" content=\"website\">"
+                    },
+                    {
+                        "type": "inject_into_head",
+                        "url": "https://almogod.github.io/PCAcademy-/",
+                        "tag": "<meta name=\"twitter:card\" content=\"summary_large_image\">"
+                    },
+                    {
+                        "type": "inject_into_head",
+                        "url": "https://almogod.github.io/PCAcademy-/",
+                        "tag": "<meta name=\"twitter:title\" content=\"PCAcademy\">"
+                    },
+                    {
+                        "type": "inject_into_head",
+                        "url": "https://almogod.github.io/PCAcademy-/",
+                        "tag": "<meta name=\"twitter:description\" content=\"PCAcademy - Learn Principal Component Analysis\">"
+                    },
+                    {
+                        "type": "add_canonical",
+                        "url": "https://almogod.github.io/PCAcademy-/",
+                        "tag": "<link rel=\"canonical\" href=\"https://almogod.github.io/PCAcademy-/\">"
+                    },
+                    {
+                        "type": "expand_content",
+                        "url": "https://almogod.github.io/PCAcademy-/",
+                        "current_words": 1,
+                        "target_words": 300
+                    }
+                ],
+                "seo_score": 76
+            },
+            "seo_score_after": 80,
+            "completed_at": "2026-03-27T12:38:27.260781"
+        }
     }
 }

@@ -1,10 +1,13 @@
 import os
 import yaml
 import importlib
+from datetime import datetime
 from typing import List, Dict, Any
 from src.plugin.base import BaseSEOPlugin, PluginManifest
 from src.utils.logger import logger, audit_logger
 from src.services.task_store import TaskStore
+from src.services.html_rewriter import apply_fixes
+from src.services.deployer import deploy
 
 task_store = TaskStore()
 
@@ -59,6 +62,7 @@ def run_plugin(
     llm_config: dict,
     competitors: list,
     crawl_options: dict,
+    site_token: str = None,
     pipeline: List[str] = ["crawl", "analyze", "generate"],
     dry_run: bool = False
 ):
@@ -100,7 +104,7 @@ def run_plugin(
             progress(f"Starting phase: {phase}...")
             
             if phase == "crawl":
-                pages, clean_urls, domain, graph = _crawl(site_url, crawl_options)
+                pages, clean_urls, domain, graph = _crawl(site_url, crawl_options, site_token)
                 context_data.update({
                     "pages": pages,
                     "clean_urls": clean_urls,
@@ -183,7 +187,7 @@ def run_plugin(
         task_store.save_results(task_id, report)
 
 
-def apply_approved_plugin_fixes(task_id, approved_action_ids, approved_page_keywords, deploy_config):
+def apply_approved_plugin_fixes(task_id, approved_action_ids, approved_page_keywords, deploy_config, site_token=None):
     """
     Second phase of the plugin: apply only WHAT the user approved.
     """
@@ -225,14 +229,19 @@ def apply_approved_plugin_fixes(task_id, approved_action_ids, approved_page_keyw
         for url, url_actions in actions_by_url.items():
             original_html = page_html_map.get(url, "")
             if not original_html:
-                # If HTML is missing from engine_result, we can't apply fixes locally
-                # In a real scenario, we might re-fetch, but for this plugin we assume engine_result has it
-                continue
+                # Re-fetch the page if HTML is missing
+                progress(f"Re-fetching {url} for fix application...")
+                original_html = _refetch_page(url, site_token)
+                if not original_html:
+                    progress(f"Skipping {url} — could not fetch HTML")
+                    continue
             
             fixed_html = apply_fixes(original_html, url_actions)
-            file_path = _url_to_file_path(url, domain)
+            file_path = _url_to_file_path(url, report["site_url"])
+            progress(f"Targeting repo path: {file_path}")
             deploy_result = deploy(file_path, fixed_html, deploy_config)
-            report["fixes_applied"].append({"url": url, "actions": len(url_actions)})
+            report["deploy_results"].append(deploy_result)
+            report["fixes_applied"].append({"url": url, "actions": len(url_actions), "deploy": deploy_result.get("success", False)})
 
         # 2. Deploy Generated Pages
         pages_to_gen = [p for p in report.get("pages_generated", []) if p["keyword"] in approved_page_keywords]
@@ -240,10 +249,23 @@ def apply_approved_plugin_fixes(task_id, approved_action_ids, approved_page_keyw
         
         for pg in pages_to_gen:
             file_path = f"{pg['slug']}/index.html"
-            deploy(file_path, pg["html"], deploy_config)
-            pg["deployed"] = True
+            progress(f"Targeting new page path: {file_path}")
+            deploy_result = deploy(file_path, pg["html"], deploy_config)
+            report["deploy_results"].append(deploy_result)
+            pg["deployed"] = deploy_result.get("success", False)
+
+        # 3. Flush Vercel batch if using Vercel
+        if deploy_config.get("platform") == "vercel":
+            from src.services.deployer import vercel_flush_deploy
+            progress("Creating Vercel deployment...")
+            vercel_result = vercel_flush_deploy(deploy_config)
+            report["deploy_results"].append(vercel_result)
 
         report["state"] = "completed"
+        report["seo_score_after"] = _estimate_score_after(
+            report.get("seo_score_before"),
+            len(report.get("fixes_applied", []))
+        )
         report["completed_at"] = datetime.utcnow().isoformat()
         progress("Deployment finished successfully.")
         task_store.save_results(task_id, report)
@@ -259,9 +281,14 @@ def apply_approved_plugin_fixes(task_id, approved_action_ids, approved_page_keyw
 # HELPERS
 # ─────────────────────────────────────────────────────────
 
-def _crawl(site_url, crawl_options):
+def _crawl(site_url, crawl_options, site_token=None):
     from urllib.parse import urlparse
     from src.utils.url_utils import build_clean_urls
+
+    headers = {}
+    if site_token:
+        headers["X-Site-Token"] = site_token # Or Authorization? User said "the token", I'll use X-Site-Token and suggest Authorization if needed.
+        headers["Authorization"] = f"Bearer {site_token}" # Adding both for robustness
     
     use_js = crawl_options.get("use_js", False)
     limit = crawl_options.get("limit", 100)
@@ -270,11 +297,11 @@ def _crawl(site_url, crawl_options):
     if use_js:
         from src.crawler_engine.js_crawler import crawl_js_sync
         from src.crawler_engine.graph import CrawlGraph
-        pages = crawl_js_sync(site_url, limit=limit)
+        pages = crawl_js_sync(site_url, limit=limit, headers=headers)
         graph = CrawlGraph()
     else:
         from src.crawler_engine.crawler import crawl
-        pages, graph = crawl(site_url, limit=limit)
+        pages, graph = crawl(site_url, limit=limit, extra_headers=headers)
     
     # Also add sitemap URLs but respect limit
     from src.services.sitemap_parser import get_sitemap_urls
@@ -300,13 +327,54 @@ def _group_actions_by_url(actions):
     return by_url
 
 
-def _url_to_file_path(url, domain):
-    path = url.replace(domain, "").strip("/")
+def _refetch_page(url, site_token=None):
+    """Re-fetch a page's HTML when it's missing from the engine result."""
+    import httpx
+    headers = {}
+    if site_token:
+        headers["Authorization"] = f"Bearer {site_token}"
+    try:
+        with httpx.Client(timeout=15, headers=headers, follow_redirects=True) as client:
+            resp = client.get(url)
+            if resp.status_code == 200:
+                return resp.text
+    except Exception as e:
+        logger.warning("Failed to re-fetch %s: %s", url, e)
+    return ""
+
+
+def _url_to_file_path(url, base_url):
+    """
+    Converts a full URL to a relative repository path by stripping the base_url.
+    Example:
+        url: https://user.github.io/repo/sub/page.html
+        base: https://user.github.io/repo/
+        result: sub/page.html
+    """
+    from urllib.parse import urlparse
+    
+    parsed_url = urlparse(url)
+    parsed_base = urlparse(base_url)
+    
+    # Strip protocol/domain if they match (or just take the path)
+    # The relative path is based on the difference between URL path and Base path
+    u_path = parsed_url.path.strip("/")
+    b_path = parsed_base.path.strip("/")
+    
+    if u_path.startswith(b_path):
+        path = u_path[len(b_path):].strip("/")
+    else:
+        path = u_path
+    
     if not path:
         return "index.html"
-    if not path.endswith(".html"):
-        path = f"{path}/index.html"
-    return path
+    
+    # If path is a directory (no ext), make it index.html
+    if not os.path.splitext(path)[1]:
+        # Handle trailing slash case
+        path = path.rstrip("/") + "/index.html"
+        
+    return path.strip("/")
 
 
 def _extract_keyword_gaps(results, competitors):

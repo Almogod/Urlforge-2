@@ -12,12 +12,13 @@ class JSCrawler:
     Used when normal HTTP crawler cannot discover links.
     """
 
-    def __init__(self, start_url, limit=50, concurrency=3, delay=2.0, check_robots=True):
+    def __init__(self, start_url, limit=50, concurrency=3, delay=2.0, check_robots=True, headers=None):
         self.start_url = start_url
         self.limit = limit
         self.concurrency = concurrency
         self.delay = delay
         self.check_robots = check_robots
+        self.headers = headers or {}
 
         self.visited = set()
         self.to_visit = {start_url}
@@ -88,6 +89,9 @@ class JSCrawler:
                             await asyncio.sleep(self.delay)
 
                         try:
+                            if self.headers:
+                                await page.set_extra_http_headers(self.headers)
+                                
                             await page.goto(
                                 url,
                                 timeout=30000,
@@ -180,11 +184,11 @@ class JSCrawler:
         }
 
 
-def crawl_js_sync(start_url, limit=50, delay=2.0, check_robots=True):
+def crawl_js_sync(start_url, limit=50, delay=2.0, check_robots=True, headers=None):
     """
     Synchronous wrapper for FastAPI usage. Safe for Windows threads.
     """
-    crawler = JSCrawler(start_url, limit, delay=delay, check_robots=check_robots)
+    crawler = JSCrawler(start_url, limit, delay=delay, check_robots=check_robots, headers=headers)
     try:
         return asyncio.run(crawler.crawl())
     except RuntimeError:

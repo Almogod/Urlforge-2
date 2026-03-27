@@ -246,6 +246,7 @@ def run_plugin_task(
     openai_key: Optional[str] = Form(None),
     gemini_key: Optional[str] = Form(None),
     ollama_host: Optional[str] = Form(None),
+    site_token: Optional[str] = Form(None),
     task_id: Optional[str] = Form(None)
 ):
     # Ensure at least 1 page
@@ -271,6 +272,7 @@ def run_plugin_task(
         competitors=comp_list,
         llm_config=llm_config,
         crawl_options={"limit": limit},
+        site_token=site_token,
         deploy_config={} # Empty until approved
     )
     
@@ -286,15 +288,20 @@ def approve_plugin_fixes(
     approved_pages: str = Form(""),   # comma separated keywords
     method: str = Form("github"),
     github_token: Optional[str] = Form(None),
+    github_repo: Optional[str] = Form(None),
+    github_branch: Optional[str] = Form("main"),
     vercel_token: Optional[str] = Form(None),
     vercel_project_id: Optional[str] = Form(None),
     vercel_team_id: Optional[str] = Form(None),
     hostinger_api_key: Optional[str] = Form(None),
+    hostinger_host: Optional[str] = Form(None),
+    hostinger_user: Optional[str] = Form(None),
     hostinger_site_id: Optional[str] = Form(None),
     ftp_host: Optional[str] = Form(None),
     ftp_user: Optional[str] = Form(None),
     ftp_pass: Optional[str] = Form(None),
-    webhook_url: Optional[str] = Form(None)
+    webhook_url: Optional[str] = Form(None),
+    site_token: Optional[str] = Form(None)
 ):
     action_ids = [a.strip() for a in approved_actions.split(",") if a.strip()]
     page_keywords = [p.strip() for p in approved_pages.split(",") if p.strip()]
@@ -302,10 +309,14 @@ def approve_plugin_fixes(
     deploy_config = {
         "platform": method,
         "github_token": github_token,
+        "github_repo": github_repo,
+        "github_branch": github_branch or "main",
         "vercel_token": vercel_token,
         "vercel_project_id": vercel_project_id,
         "vercel_team_id": vercel_team_id,
         "hostinger_api_key": hostinger_api_key,
+        "hostinger_host": hostinger_host,
+        "hostinger_user": hostinger_user,
         "hostinger_site_id": hostinger_site_id,
         "ftp_host": ftp_host,
         "ftp_user": ftp_user,
@@ -319,7 +330,8 @@ def approve_plugin_fixes(
         task_id=task_id,
         approved_action_ids=action_ids,
         approved_page_keywords=page_keywords,
-        deploy_config=deploy_config
+        deploy_config=deploy_config,
+        site_token=site_token
     )
     
     return JSONResponse(content={"status": "deployment_started", "task_id": task_id})

@@ -9,7 +9,7 @@ from src.config import config
 from src.utils.logger import logger
 
 
-async def run_workers(frontier, parser, graph, limit=200, concurrency=10, delay=1.0, check_robots=True):
+async def run_workers(frontier, parser, graph, limit=200, concurrency=10, delay=1.0, check_robots=True, extra_headers=None):
     results = []
     rp = None
     
@@ -47,6 +47,9 @@ async def run_workers(frontier, parser, graph, limit=200, concurrency=10, delay=
     elif config.CRAWLER_BASIC_AUTH:
         encoded = base64.b64encode(config.CRAWLER_BASIC_AUTH.encode()).decode()
         headers["Authorization"] = f"Basic {encoded}"
+    
+    if extra_headers:
+        headers.update(extra_headers)
 
     async with httpx.AsyncClient(
         timeout=config.CRAWL_TIMEOUT, 

@@ -19,3 +19,4 @@ secure
 redis
 pydantic[email]
 psutil
+paramiko

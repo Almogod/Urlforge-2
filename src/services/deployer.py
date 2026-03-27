@@ -1,14 +1,17 @@
 # src/services/deployer.py
 """
 Deploys fixed HTML files back to the target website.
-Supports four deployment strategies:
+Supports six deployment strategies:
   - filesystem: write directly to a local path
   - github:     commit files via the GitHub API
+  - vercel:     deploy via Vercel Deployments API
+  - hostinger:  upload via SFTP (paramiko)
   - ftp:        upload via ftplib
   - webhook:    POST file content to a configured endpoint
 """
 
 import os
+import json
 import base64
 from pathlib import Path
 from src.utils.logger import logger
@@ -33,6 +36,10 @@ def deploy(file_path: str, content: str, config: dict) -> dict:
             return _deploy_filesystem(file_path, content, config)
         elif platform == "github":
             return _deploy_github(file_path, content, config)
+        elif platform == "vercel":
+            return _deploy_vercel(file_path, content, config)
+        elif platform == "hostinger":
+            return _deploy_hostinger(file_path, content, config)
         elif platform == "ftp":
             return _deploy_ftp(file_path, content, config)
         elif platform == "webhook":
@@ -184,3 +191,158 @@ def _deploy_webhook(file_path: str, content: str, config: dict) -> dict:
         "file_path": file_path,
         "message": f"Webhook responded: {response.status_code}"
     }
+
+
+# ─────────────────────────────────────────────────────────
+# VERCEL DEPLOYMENTS API
+# ─────────────────────────────────────────────────────────
+
+# Vercel collects ALL files, then creates ONE deployment.
+# We accumulate files in a class-level buffer and flush on demand.
+
+_vercel_file_buffer: list = []
+
+
+def vercel_add_file(file_path: str, content: str):
+    """Buffer a file for a batch Vercel deployment."""
+    _vercel_file_buffer.append({"file": file_path, "data": content})
+
+
+def vercel_flush_deploy(config: dict) -> dict:
+    """Create a single Vercel deployment with all buffered files."""
+    import httpx
+
+    token = config.get("vercel_token", "")
+    project_id = config.get("vercel_project_id", "")
+    team_id = config.get("vercel_team_id")
+
+    if not token or not project_id:
+        raise ValueError("vercel_token and vercel_project_id are required")
+
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json",
+    }
+
+    # Build the files array for Vercel
+    files = []
+    for entry in _vercel_file_buffer:
+        encoded = base64.b64encode(entry["data"].encode("utf-8")).decode("utf-8")
+        files.append({
+            "file": entry["file"],
+            "data": encoded,
+            "encoding": "base64"
+        })
+
+    payload = {
+        "name": project_id,
+        "files": files,
+        "projectSettings": {
+            "framework": None  # static deployment
+        }
+    }
+
+    params = {}
+    if team_id:
+        params["teamId"] = team_id
+
+    with httpx.Client(timeout=60) as client:
+        response = client.post(
+            "https://api.vercel.com/v13/deployments",
+            headers=headers,
+            json=payload,
+            params=params
+        )
+        response.raise_for_status()
+        result = response.json()
+
+    _vercel_file_buffer.clear()
+
+    return {
+        "success": True,
+        "platform": "vercel",
+        "deployment_url": result.get("url", ""),
+        "deployment_id": result.get("id", ""),
+        "message": f"Deployed to Vercel: https://{result.get('url', '')}"
+    }
+
+
+def _deploy_vercel(file_path: str, content: str, config: dict) -> dict:
+    """
+    Buffer the file. For Vercel, we collect all files and deploy them in one
+    batch at the end. The caller (plugin_runner) calls vercel_flush_deploy()
+    after all files are buffered.
+    """
+    vercel_add_file(file_path, content)
+    return {
+        "success": True,
+        "platform": "vercel",
+        "file_path": file_path,
+        "message": "File buffered for Vercel deployment"
+    }
+
+
+# ─────────────────────────────────────────────────────────
+# HOSTINGER (SFTP via paramiko)
+# ─────────────────────────────────────────────────────────
+
+def _deploy_hostinger(file_path: str, content: str, config: dict) -> dict:
+    import paramiko
+    from io import BytesIO
+
+    host = config.get("hostinger_host", "")
+    username = config.get("hostinger_user", "")
+    api_key = config.get("hostinger_api_key", "")  # used as SSH password or key passphrase
+    site_id = config.get("hostinger_site_id", "")
+    base_dir = config.get("hostinger_base_dir", f"/home/{username}/public_html")
+
+    if not host or not username:
+        raise ValueError("hostinger_host and hostinger_user are required for Hostinger SFTP deployment")
+
+    remote_path = f"{base_dir}/{file_path}"
+
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+    try:
+        # Try password-based auth with the API key
+        ssh.connect(hostname=host, username=username, password=api_key, timeout=15)
+
+        sftp = ssh.open_sftp()
+
+        # Ensure remote directory exists
+        dirs = remote_path.rsplit("/", 1)[0]
+        _sftp_mkdir_p(sftp, dirs)
+
+        # Upload the file
+        file_obj = BytesIO(content.encode("utf-8"))
+        sftp.putfo(file_obj, remote_path)
+
+        sftp.close()
+        logger.info("Hostinger SFTP: uploaded %s", remote_path)
+
+    finally:
+        ssh.close()
+
+    return {
+        "success": True,
+        "platform": "hostinger",
+        "file_path": remote_path,
+        "site_id": site_id,
+        "message": "Uploaded via Hostinger SFTP"
+    }
+
+
+def _sftp_mkdir_p(sftp, remote_dir):
+    """Recursively create directories on the remote server."""
+    if remote_dir == "/" or remote_dir == "":
+        return
+    try:
+        sftp.stat(remote_dir)
+    except FileNotFoundError:
+        parent = remote_dir.rsplit("/", 1)[0]
+        _sftp_mkdir_p(sftp, parent)
+        try:
+            sftp.mkdir(remote_dir)
+        except IOError:
+            pass  # race condition or already exists
