@@ -1,25 +1,50 @@
 def compute_score(engine_results):
-    score = 100
+    """
+    Weighted SEO Score computation based on module importance.
+    Critical: Meta, Broken Links, Mobile SEO
+    Major: Headings, CWV, Schema
+    Minor: OG, Hreflang, Page Speed
+    """
     
-    # 1. Deductions from modules (Cap at 50% to avoid score 0 just from modules)
-    total_module_deduction = 0
+    weights = {
+        "meta": 15,
+        "broken_links": 20,
+        "mobile_seo": 10,
+        "heading_structure": 10,
+        "core_web_vitals": 10,
+        "structured_data_validator": 10,
+        "image_seo": 5,
+        "open_graph": 5,
+        "page_speed": 5,
+        "hreflang": 5,
+        "content_quality": 5
+    }
+    
+    total_score = 100
+    deduction = 0
+    
     modules = engine_results.get("modules", {})
-    for module_name, result in modules.items():
+    for module_name, weight in weights.items():
+        result = modules.get(module_name)
         if not result:
             continue
-        issues = result.get("issues")
+            
+        issues = result.get("issues", [])
         if not issues:
             continue
-        # Subtract based on issue count, but cap deduction per module at 10
-        total_module_deduction += min(len(issues) * 2, 10)
+            
+        # Deduct proportional to issue count, capped at the module weight
+        # 1 issue = 50% of module weight, 2+ issues = 100% of weight
+        issue_count = len(issues)
+        if issue_count == 1:
+            deduction += weight * 0.5
+        elif issue_count > 1:
+            deduction += weight
 
-    score -= min(total_module_deduction, 50)
+    final_score = int(total_score - deduction)
     
-    # Audit component score (if available)
-    audit = engine_results.get("audit", {})
-    audit_score = audit.get("score", 100)
+    # Mix with audit baseline (40/60 split)
+    audit_baseline = engine_results.get("audit", {}).get("score", 100)
+    weighted_final = int((final_score * 0.7) + (audit_baseline * 0.3))
     
-    # Final weight: 60% engine modules, 40% audit baseline
-    final_score = int((score * 0.6) + (audit_score * 0.4))
-    
-    return max(0, min(100, final_score))
+    return max(0, min(100, weighted_final))

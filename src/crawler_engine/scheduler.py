@@ -9,8 +9,9 @@ from src.config import config
 from src.utils.logger import logger
 
 
-async def run_workers(frontier, parser, graph, limit=200, concurrency=10, delay=1.0, check_robots=True, extra_headers=None):
+async def run_workers(frontier, parser, graph, limit=200, concurrency=10, delay=1.0, check_robots=True, extra_headers=None, broken_links_only=False):
     results = []
+    broken_links = []
     rp = None
     
     # 1. Asynchronous robots.txt handling
@@ -82,11 +83,19 @@ async def run_workers(frontier, parser, graph, limit=200, concurrency=10, delay=
                     logger.warning(f"Worker failed to fetch: {url}")
                     continue
 
-                results.append(page)
-                logger.info(f"Worker fetched {url} (Status: {page.get('status')}). Progress: {len(results)}/{limit}")
+                status = page.get("status")
+                # If in broken links mode, we mainly care about Non-200s
+                if broken_links_only:
+                    if status and status != 200:
+                        results.append(page)
+                        logger.info(f"Worker found broken link: {url} (Status: {status})")
+                else:
+                    results.append(page)
+                    logger.info(f"Worker fetched {url} (Status: {status}). Progress: {len(results)}/{limit}")
 
-                # Only parse successfully fetched pages
-                if page.get("status") == 200 and page.get("html"):
+                # Specialist: Even if broken links only, we might want to crawl to find them
+                # But if it's 200, and we ARE in broken_links_only, we don't ADD to results, just parse links.
+                if status == 200 and page.get("html"):
                     extracted = parser(page["html"], page["url"])
                     
                     page["hreflangs"] = extracted.get("hreflangs", [])
@@ -95,6 +104,7 @@ async def run_workers(frontier, parser, graph, limit=200, concurrency=10, delay=
 
                     for link in extracted.get("links", []):
                         graph.add_edge(page["url"], link)
+                        # The frontier itself now handles domain locking
                         frontier.add(link)
 
         workers = [worker() for _ in range(concurrency)]

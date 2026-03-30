@@ -132,33 +132,41 @@ def run_plugin(
                 report["suggested_actions"] = results.get("actions", [])
                 progress(f"Analysis complete. Score: {report['seo_score_before']}")
 
-            elif phase == "generate":
-                if not context_data["results"]:
-                    progress("Skipping generation: No analysis results available.")
-                    continue
+                from src.content.engine import run_content_engine
+                content_res = run_content_engine(
+                    context_data["pages"], 
+                    competitors, 
+                    llm_config, 
+                    domain=context_data["domain"]
+                )
                 
-                keyword_gaps = _extract_keyword_gaps(context_data["results"], competitors)
+                keyword_gaps = content_res.get("recommendations", [])
+                # Store in report for UI
+                report["keyword_gap"] = content_res.get("keyword_gap", {})
+                report["site_keywords"] = content_res.get("site_keywords", [])
+                
                 existing_pages_list = [{"url": p["url"], "title": _get_title(p)} for p in context_data["pages"]]
 
                 if keyword_gaps and (llm_config.get("api_key") or llm_config.get("provider") == "ollama"):
-                    from src.content.competitor_analyzer import analyze_competitors
-                    from src.content.page_generator import generate_page
-
-                    for keyword in keyword_gaps[:5]:
+                    for rec in keyword_gaps[:5]:
+                        keyword = rec["keyword"]
+                        source_comp = rec["source"]
                         try:
-                            progress(f"Generating content for: {keyword}")
-                            brief = analyze_competitors(competitors, keyword, context_data["domain"])
-                            brief.internal_links = existing_pages_list[:10]
-                            generated = generate_page(brief, llm_config, existing_pages_list)
-
-                            report["pages_generated"].append({
-                                "keyword": keyword,
-                                "slug": generated["slug"],
-                                "title": generated["meta_title"],
-                                "word_count": generated["word_count"],
-                                "html": generated["html"],
-                                "approved": True
-                            })
+                            progress(f"Generating content for: {keyword} (Source: {source_comp})")
+                            from src.content.engine import generate_content_for_keyword
+                            generated = generate_content_for_keyword(keyword, [source_comp], llm_config, existing_pages_list)
+                            
+                            if "error" not in generated:
+                                report["pages_generated"].append({
+                                    "keyword": keyword,
+                                    "slug": generated["slug"],
+                                    "title": generated["meta_title"],
+                                    "word_count": generated["word_count"],
+                                    "html": generated["html"],
+                                    "approved": True
+                                })
+                            else:
+                                report["errors"].append({"phase": "generate", "item": keyword, "error": generated["error"]})
                         except Exception as e:
                             report["errors"].append({
                                 "phase": "generate",

@@ -3,20 +3,33 @@ import redis
 import json
 from src.config import config
 
+from urllib.parse import urlparse
+
 class URLFrontier:
-    def __init__(self):
+    def __init__(self, base_domain=None):
         self.queue = deque()
         self.visited = set()
+        self.base_domain = base_domain
+        if base_domain and "://" in base_domain:
+            self.base_domain = urlparse(base_domain).netloc
 
     def add(self, url):
+        if not url:
+            return
+        
+        # Domain locking: only add if same domain
+        if self.base_domain:
+            parsed = urlparse(url)
+            if parsed.netloc and parsed.netloc != self.base_domain:
+                return
+
         if url not in self.visited:
             self.queue.append(url)
+            self.visited.add(url) # Mark as visited immediately to avoid multiple additions
 
     def get(self):
         if self.queue:
-            url = self.queue.popleft()
-            self.visited.add(url)
-            return url
+            return self.queue.popleft()
         return None
 
     def size(self):

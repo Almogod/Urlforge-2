@@ -108,7 +108,7 @@ def health_check():
         "timestamp": datetime.utcnow().isoformat()
     }
 
-def run_analysis_task(task_id: str, domain: str, limit: int, use_js: bool, fix_canonical: bool, delay: float = 1.0, check_robots: bool = True, generate_sitemap: bool = True):
+def run_analysis_task(task_id: str, domain: str, limit: int, use_js: bool, fix_canonical: bool, delay: float = 1.0, check_robots: bool = True, generate_sitemap: bool = True, broken_links_only: bool = False):
     try:
         cache_key = f"analysis:{domain}:{limit}"
         cached_res = cache_service.get(cache_key)
@@ -124,17 +124,18 @@ def run_analysis_task(task_id: str, domain: str, limit: int, use_js: bool, fix_c
         else:
             # Note: We need a slight modification to how 'crawl' passes arguments if we want to be strict
             # but for now we'll assume the scheduler.run_workers is what we want to tune.
+            logger.info("Initializing frontier and graph with domain locking...")
             from src.crawler_engine.frontier import URLFrontier
             from src.crawler_engine.parser import extract_links
             from src.crawler_engine.scheduler import run_workers
             from src.crawler_engine.graph import CrawlGraph
             
-            logger.info("Initializing frontier and graph...")
-            frontier = URLFrontier()
+            # Domain locking enabled here
+            frontier = URLFrontier(base_domain=domain)
             frontier.add(domain)
             graph = CrawlGraph()
-            logger.info("Starting run_workers...")
-            pages = asyncio.run(run_workers(frontier, extract_links, graph, limit=limit, delay=delay, check_robots=check_robots))
+            logger.info(f"Starting run_workers (Broken Links Only: {broken_links_only})...")
+            pages = asyncio.run(run_workers(frontier, extract_links, graph, limit=limit, delay=delay, check_robots=check_robots, broken_links_only=broken_links_only))
         logger.info(f"Crawl completed. Found {len(pages)} pages.")
         
         task_store.set_status(task_id, "Checking existing sitemap...")
@@ -212,6 +213,7 @@ def generate(
     delay: float = Form(1.0),
     check_robots: bool = Form(True),
     generate_sitemap: bool = Form(True),
+    broken_links_only: bool = Form(False),
     task_id: Optional[str] = Form(None)
 ):
     # Ensure at least 1 page
@@ -227,7 +229,8 @@ def generate(
         fix_canonical=False,
         delay=delay,
         check_robots=check_robots,
-        generate_sitemap=generate_sitemap
+        generate_sitemap=generate_sitemap,
+        broken_links_only=broken_links_only
     )
     return JSONResponse(content={"status": "started", "task_id": task_id})
 

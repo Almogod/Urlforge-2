@@ -18,33 +18,35 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
         :root, html[data-theme="light"] {
-            /* Light Theme Options - Crème / Pearl */
-            --bg-color: #dccfb4;
-            --text-color: #2d3748;
-            --text-muted: #718096;
-            --card-bg: rgba(255, 255, 255, 0.6);
-            --card-border: rgba(0, 0, 0, 0.04);
-            --primary-color: #10b981; /* Emerald 500 */
-            --primary-hover: #059669; /* Emerald 600 */
+            /* Light Theme - Refined Sand & Pearl */
+            --bg-color: #fdfbf7;
+            --text-color: #1a202c;
+            --text-muted: #64748b;
+            --card-bg: rgba(255, 255, 255, 0.7);
+            --card-border: rgba(0, 0, 0, 0.05);
+            --primary-color: #10b981;
+            --primary-hover: #059669;
+            --secondary-color: #8b5cf6;
             --error-color: #ef4444;
-            --hover-glow: rgba(16, 185, 129, 0.15); /* Intentionally more prevalent */
-            --glow-size: 800px;
-            --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.02), 0 4px 6px -2px rgba(0, 0, 0, 0.01);
+            --hover-glow: rgba(16, 185, 129, 0.12);
+            --glow-size: 600px;
+            --card-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
         }
 
         html[data-theme="dark"] {
-            /* Dark Theme Options - Slate */
-            --bg-color: #0f172a; 
-            --text-color: #f8fafc;
+            /* Dark Theme - Midnight Slate */
+            --bg-color: #020617; 
+            --text-color: #f1f5f9;
             --text-muted: #94a3b8;
-            --card-bg: rgba(30, 41, 59, 0.4);
-            --card-border: rgba(255, 255, 255, 0.05);
-            --primary-color: #34d399; /* Emerald 400 */
-            --primary-hover: #10b981; /* Emerald 500 */
+            --card-bg: rgba(15, 23, 42, 0.6);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --primary-color: #10b981;
+            --primary-hover: #34d399;
+            --secondary-color: #a78bfa;
             --error-color: #f87171;
-            --hover-glow: rgba(52, 211, 153, 0.08); /* Intentionally more prevalent */
-            --glow-size: 800px;
-            --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+            --hover-glow: rgba(16, 185, 129, 0.06);
+            --glow-size: 600px;
+            --card-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
         }
 
         * {
@@ -73,13 +75,20 @@
             top: 0; left: 0;
             width: 100vw; height: 100vh;
             background: radial-gradient(
-                var(--glow-size) circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+                var(--glow-size, 600px) circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
                 var(--hover-glow),
-                transparent 50%
+                transparent 70%
             );
             z-index: -1;
             pointer-events: none;
-            transition: background-image 0.4s ease, background-color 0.4s ease;
+            transition: opacity 0.5s ease;
+        }
+
+        /* Ambient animated gradient background */
+        body {
+            background: radial-gradient(circle at bottom right, rgba(139, 92, 246, 0.03), transparent 40%),
+                        radial-gradient(circle at top left, rgba(16, 185, 129, 0.03), transparent 40%),
+                        var(--bg-color);
         }
 
         /* Subtle dot pattern overlaid universally */
@@ -434,8 +443,44 @@
             margin: 20px 0;
             background: rgba(16, 185, 129, 0.02);
         }
-        .approved-only {
-            display: none;
+        .hidden {
+            display: none !important;
+        }
+
+        .deploy-group {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed var(--card-border);
+            animation: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .collapsible-trigger {
+            background: var(--card-border);
+            border: none;
+            color: var(--text-color);
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .collapsible-content.open {
+            max-height: 500px;
         }
 
     </style>
@@ -472,6 +517,11 @@
                     <input type="number" name="limit" value="50" min="1" required>
                 </div>
 
+                <div class="checkbox-group">
+                    <input type="checkbox" id="broken_links_only" name="broken_links_only" value="true">
+                    <label for="broken_links_only">Only report/crawl broken links</label>
+                </div>
+
                 <button type="submit" class="submit-btn" id="submit-btn">Run Engine</button>
             </form>
         </div>
@@ -497,23 +547,32 @@
                     <input type="number" name="limit" value="100" min="1" required>
                 </div>
 
+                <div class="checkbox-group">
+                    <input type="checkbox" id="plugin_broken_links" name="broken_links_only" value="true">
+                    <label for="plugin_broken_links">Deep focus on fixing broken links</label>
+                </div>
+
                 <div style="border-top: 1px solid var(--card-border); margin-top: 20px; padding-top: 20px;">
-                    <h3 style="font-size: 1rem; margin-bottom: 15px;">Advanced: Access & AI</h3>
-                    <div class="form-group">
-                        <label>Site Access Token (Optional)</label>
-                        <input type="password" name="site_token" placeholder="Bearer or custom token">
-                    </div>
-                    <div class="form-group">
-                        <label>OpenAI API Key (Optional)</label>
-                        <input type="password" name="openai_key" placeholder="sk-...">
-                    </div>
-                    <div class="form-group">
-                        <label>Gemini API Key (Optional)</label>
-                        <input type="password" name="gemini_key" placeholder="AIza...">
-                    </div>
-                    <div class="form-group">
-                        <label>Ollama Host (Optional)</label>
-                        <input type="text" name="ollama_host" placeholder="http://localhost:11434">
+                    <button type="button" class="collapsible-trigger" onclick="toggleAdvanced(this)">
+                        <span>⚙️</span> Advanced: Access & AI
+                    </button>
+                    <div class="collapsible-content">
+                        <div class="form-group">
+                            <label>Site Access Token (Optional)</label>
+                            <input type="password" name="site_token" placeholder="Bearer or custom token">
+                        </div>
+                        <div class="form-group">
+                            <label>OpenAI API Key (Optional)</label>
+                            <input type="password" name="openai_key" placeholder="sk-...">
+                        </div>
+                        <div class="form-group">
+                            <label>Gemini API Key (Optional)</label>
+                            <input type="password" name="gemini_key" placeholder="AIza...">
+                        </div>
+                        <div class="form-group">
+                            <label>Ollama Host (Optional)</label>
+                            <input type="text" name="ollama_host" placeholder="http://localhost:11434">
+                        </div>
                     </div>
                 </div>
 
@@ -663,19 +722,26 @@
 
                 <div id="github-fields" class="deploy-group">
                     <div class="form-group">
-                        <label>GitHub Personal Access Token</label>
-                        <input type="password" name="github_token" placeholder="ghp_...">
+                        <label>GitHub Personal Access Token (PAT)</label>
+                        <input type="password" name="github_token" placeholder="ghp_xxxxxxxxxxxx">
                     </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                        <div class="form-group">
-                            <label>Repository (owner/repo)</label>
-                            <input type="text" name="github_repo" placeholder="username/my-site" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Branch</label>
-                            <input type="text" name="github_branch" value="main" placeholder="main">
+                    <!-- Hidden unless needed for specialist push -->
+                    <div class="advanced-deploy-fields hidden">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div class="form-group">
+                                <label>Repository (owner/repo)</label>
+                                <input type="text" name="github_repo" placeholder="username/my-site">
+                            </div>
+                            <div class="form-group">
+                                <label>Branch</label>
+                                <input type="text" name="github_branch" value="main">
+                            </div>
                         </div>
                     </div>
+                    <button type="button" class="collapsible-trigger" style="background: transparent; padding: 0; color: var(--primary-color);" onclick="this.nextElementSibling.classList.toggle('hidden')">
+                        + Show Repo/Branch Settings
+                    </button>
+                    <div class="hidden"></div> <!-- spacer -->
                 </div>
 
                 <div id="vercel-fields" class="deploy-group hidden">
@@ -952,27 +1018,45 @@
         });
     }
 
-    // --- Antigravity Global Mouse Hover Effect ---
-    // Attached to document to track universally across the screen
-    let glowSize = 800;
-    document.addEventListener("mousemove", e => {
-        document.body.style.setProperty("--mouse-x", `${e.clientX}px`);
-        document.body.style.setProperty("--mouse-y", `${e.clientY}px`);
-        document.body.style.setProperty("--glow-size", `${glowSize}px`);
-    });
+    // --- Antigravity Global Mouse Hover Effect (Fluid) ---
+    const coords = { x: 0, y: 0 };
+    const glowPos = { x: 0, y: 0 };
+    let glowSize = 600;
     
-    // Add Click Burst Effect
-    document.addEventListener("mousedown", () => {
-        glowSize = 1200;
+    document.addEventListener("mousemove", e => {
+        coords.x = e.clientX;
+        coords.y = e.clientY;
+    });
+
+    function animateGlow() {
+        const dx = coords.x - glowPos.x;
+        const dy = coords.y - glowPos.y;
+        
+        glowPos.x += dx * 0.15; // Inertia / lagging effect
+        glowPos.y += dy * 0.15;
+        
+        document.body.style.setProperty("--mouse-x", `${glowPos.x}px`);
+        document.body.style.setProperty("--mouse-y", `${glowPos.y}px`);
         document.body.style.setProperty("--glow-size", `${glowSize}px`);
-        document.body.style.setProperty("--hover-glow", document.documentElement.getAttribute('data-theme') === 'dark' ? 'rgba(52, 211, 153, 0.15)' : 'rgba(16, 185, 129, 0.35)');
+        
+        requestAnimationFrame(animateGlow);
+    }
+    animateGlow();
+    
+    document.addEventListener("mousedown", () => {
+        glowSize = 900;
+        document.body.style.setProperty("--hover-glow", document.documentElement.getAttribute('data-theme') === 'dark' ? 'rgba(16, 185, 129, 0.12)' : 'rgba(16, 185, 129, 0.35)');
     });
     
     document.addEventListener("mouseup", () => {
-        glowSize = 800;
-        document.body.style.setProperty("--glow-size", `${glowSize}px`);
-        document.body.style.setProperty("--hover-glow", document.documentElement.getAttribute('data-theme') === 'dark' ? 'rgba(52, 211, 153, 0.08)' : 'rgba(16, 185, 129, 0.15)');
+        glowSize = 600;
+        document.body.style.setProperty("--hover-glow", document.documentElement.getAttribute('data-theme') === 'dark' ? 'rgba(16, 185, 129, 0.06)' : 'rgba(16, 185, 129, 0.12)');
     });
+
+    function toggleAdvanced(btn) {
+        const content = btn.nextElementSibling;
+        content.classList.toggle('open');
+    }
 
     // --- Tab Switching ---
     function switchTab(tabId) {
