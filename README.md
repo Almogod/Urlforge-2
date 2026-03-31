@@ -86,18 +86,6 @@ https://example.com/page/
 * Preprocessing data for sitemap generation
 * Fixing inconsistent internal linking structures
 * Improving crawl efficiency for bots
-
-## Future Improvements
-
-* Integration with sitemap generators
-* Graph-based link structure optimization
-* Automated internal linking suggestions
-* Web crawler integration
-* CLI enhancements with more flags and filters
-
-## License
-
-MIT License
-
+* Generating pages on the ranking keywords in category
 ```
 ```
