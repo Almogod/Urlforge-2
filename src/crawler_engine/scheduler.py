@@ -9,7 +9,7 @@ from src.config import config
 from src.utils.logger import logger
 
 
-async def run_workers(frontier, parser, graph, limit=200, concurrency=10, delay=1.0, check_robots=True, extra_headers=None, broken_links_only=False):
+async def run_workers(frontier, parser, graph, limit=200, concurrency=10, delay=1.0, check_robots=True, extra_headers=None, broken_links_only=False, max_depth=10, crawl_assets=False, custom_selectors=None):
     results = []
     broken_links = []
     rp = None
@@ -63,9 +63,12 @@ async def run_workers(frontier, parser, graph, limit=200, concurrency=10, delay=
 
         async def worker():
             while frontier.size() and len(results) < limit:
-                url = frontier.get()
-                if not url:
+                item = frontier.get()
+                if not item:
                     break
+
+                url = item["url"]
+                depth = item["depth"]
 
                 # Robots.txt check
                 if rp and not rp.can_fetch("*", url):
@@ -76,7 +79,7 @@ async def run_workers(frontier, parser, graph, limit=200, concurrency=10, delay=
                     if delay > 0:
                         await asyncio.sleep(delay)
                     
-                    logger.info(f"Worker fetching: {url}")
+                    logger.info(f"Worker fetching: {url} (Depth: {depth})")
                     page = await fetch(client, url)
 
                 if not page:
@@ -84,6 +87,13 @@ async def run_workers(frontier, parser, graph, limit=200, concurrency=10, delay=
                     continue
 
                 status = page.get("status")
+                
+                # Check if it's an external link
+                is_external = False
+                parsed_u = urlparse(url)
+                if frontier.base_domain and parsed_u.netloc and parsed_u.netloc != frontier.base_domain:
+                    is_external = True
+
                 # If in broken links mode, we mainly care about Non-200s
                 if broken_links_only:
                     if status and status != 200:
@@ -93,19 +103,34 @@ async def run_workers(frontier, parser, graph, limit=200, concurrency=10, delay=
                     results.append(page)
                     logger.info(f"Worker fetched {url} (Status: {status}). Progress: {len(results)}/{limit}")
 
-                # Specialist: Even if broken links only, we might want to crawl to find them
-                # But if it's 200, and we ARE in broken_links_only, we don't ADD to results, just parse links.
-                if status == 200 and page.get("html"):
-                    extracted = parser(page["html"], page["url"])
+                # Only parse if it's 200, not external, and within depth
+                if status == 200 and page.get("html") and not is_external and depth < max_depth:
+                    extracted = parser(page["html"], page["url"], custom_selectors=custom_selectors)
                     
                     page["hreflangs"] = extracted.get("hreflangs", [])
                     page["images"] = extracted.get("images", [])
                     page["videos"] = extracted.get("videos", [])
+                    page["canonical"] = extracted.get("canonical", "")
+                    page["meta"] = extracted.get("meta", {})
+                    page["headings"] = extracted.get("headings", {})
+                    page["custom"] = extracted.get("custom", {})
 
                     for link in extracted.get("links", []):
                         graph.add_edge(page["url"], link)
-                        # The frontier itself now handles domain locking
-                        frontier.add(link)
+                        
+                        is_target_external = False
+                        parsed_link = urlparse(link)
+                        if frontier.base_domain and parsed_link.netloc and parsed_link.netloc != frontier.base_domain:
+                            is_target_external = True
+                            
+                        # External links get max_depth+1 so they are fetched but never parsed
+                        target_depth = max_depth + 1 if is_target_external else depth + 1
+                        frontier.add(link, depth=target_depth, force_add=is_target_external)
+                        
+                    if crawl_assets:
+                        for asset in extracted.get("assets", []):
+                            graph.add_edge(page["url"], asset)
+                            frontier.add(asset, depth=max_depth + 1, force_add=True) # Assets are fetched but not parsed
 
         workers = [worker() for _ in range(concurrency)]
         await asyncio.gather(*workers)

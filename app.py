@@ -108,7 +108,7 @@ def health_check():
         "timestamp": datetime.utcnow().isoformat()
     }
 
-def run_analysis_task(task_id: str, domain: str, limit: int, use_js: bool, fix_canonical: bool, delay: float = 1.0, check_robots: bool = True, generate_sitemap: bool = True, broken_links_only: bool = False):
+def run_analysis_task(task_id: str, domain: str, limit: int, use_js: bool, fix_canonical: bool, delay: float = 1.0, check_robots: bool = True, generate_sitemap: bool = True, broken_links_only: bool = False, max_depth: int = 10, crawl_assets: bool = False, crawler_backend: str = "memory", concurrency: int = 10, custom_selectors: dict = None):
     try:
         cache_key = f"analysis:{domain}:{limit}"
         cached_res = cache_service.get(cache_key)
@@ -125,17 +125,20 @@ def run_analysis_task(task_id: str, domain: str, limit: int, use_js: bool, fix_c
             # Note: We need a slight modification to how 'crawl' passes arguments if we want to be strict
             # but for now we'll assume the scheduler.run_workers is what we want to tune.
             logger.info("Initializing frontier and graph with domain locking...")
-            from src.crawler_engine.frontier import URLFrontier
+            from src.crawler_engine.frontier import URLFrontier, SQLiteURLFrontier
             from src.crawler_engine.parser import extract_links
             from src.crawler_engine.scheduler import run_workers
             from src.crawler_engine.graph import CrawlGraph
             
-            # Domain locking enabled here
-            frontier = URLFrontier(base_domain=domain)
+            if crawler_backend == "sqlite":
+                frontier = SQLiteURLFrontier(base_domain=domain)
+            else:
+                frontier = URLFrontier(base_domain=domain)
+                
             frontier.add(domain)
             graph = CrawlGraph()
-            logger.info(f"Starting run_workers (Broken Links Only: {broken_links_only})...")
-            pages = asyncio.run(run_workers(frontier, extract_links, graph, limit=limit, delay=delay, check_robots=check_robots, broken_links_only=broken_links_only))
+            logger.info(f"Starting run_workers (Backend: {crawler_backend}, Max Depth: {max_depth}, Concurrency: {concurrency})...")
+            pages = asyncio.run(run_workers(frontier, extract_links, graph, limit=limit, delay=delay, check_robots=check_robots, broken_links_only=broken_links_only, max_depth=max_depth, crawl_assets=crawl_assets, concurrency=concurrency, custom_selectors=custom_selectors))
         logger.info(f"Crawl completed. Found {len(pages)} pages.")
         
         task_store.set_status(task_id, "Checking existing sitemap...")
@@ -214,6 +217,11 @@ def generate(
     check_robots: bool = Form(True),
     generate_sitemap: bool = Form(True),
     broken_links_only: bool = Form(False),
+    max_depth: int = Form(10),
+    crawl_assets: bool = Form(False),
+    crawler_backend: str = Form("memory"),
+    concurrency: int = Form(10),
+    custom_selectors: Optional[str] = Form(None),
     task_id: Optional[str] = Form(None)
 ):
     # Ensure at least 1 page
@@ -230,7 +238,12 @@ def generate(
         delay=delay,
         check_robots=check_robots,
         generate_sitemap=generate_sitemap,
-        broken_links_only=broken_links_only
+        broken_links_only=broken_links_only,
+        max_depth=max_depth,
+        crawl_assets=crawl_assets,
+        crawler_backend=crawler_backend,
+        concurrency=concurrency,
+        custom_selectors=json.loads(custom_selectors) if custom_selectors else None
     )
     return JSONResponse(content={"status": "started", "task_id": task_id})
 
@@ -250,6 +263,8 @@ def run_plugin_task(
     gemini_key: Optional[str] = Form(None),
     ollama_host: Optional[str] = Form(None),
     site_token: Optional[str] = Form(None),
+    concurrency: int = Form(10),
+    custom_selectors: Optional[str] = Form(None),
     task_id: Optional[str] = Form(None)
 ):
     # Ensure at least 1 page
@@ -274,7 +289,14 @@ def run_plugin_task(
         task_id=task_id,
         competitors=comp_list,
         llm_config=llm_config,
-        crawl_options={"limit": limit},
+        crawl_options={
+            "limit": limit, 
+            "max_depth": max_depth, 
+            "crawl_assets": crawl_assets, 
+            "backend": crawler_backend,
+            "concurrency": concurrency,
+            "custom_selectors": json.loads(custom_selectors) if custom_selectors else None
+        },
         site_token=site_token,
         deploy_config={} # Empty until approved
     )

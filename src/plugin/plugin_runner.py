@@ -147,7 +147,7 @@ def run_plugin(
                 
                 existing_pages_list = [{"url": p["url"], "title": _get_title(p)} for p in context_data["pages"]]
 
-                if keyword_gaps and (llm_config.get("api_key") or llm_config.get("provider") == "ollama"):
+                if keyword_gaps:
                     for rec in keyword_gaps[:5]:
                         keyword = rec["keyword"]
                         source_comp = rec["source"]
@@ -300,6 +300,11 @@ def _crawl(site_url, crawl_options, site_token=None):
     
     use_js = crawl_options.get("use_js", False)
     limit = crawl_options.get("limit", 100)
+    max_depth = crawl_options.get("max_depth", 10)
+    crawl_assets = crawl_options.get("crawl_assets", False)
+    backend = crawl_options.get("backend", "memory")
+    concurrency = crawl_options.get("concurrency", 10)
+    custom_selectors = crawl_options.get("custom_selectors", None)
     domain = urlparse(site_url).netloc
 
     if use_js:
@@ -309,7 +314,16 @@ def _crawl(site_url, crawl_options, site_token=None):
         graph = CrawlGraph()
     else:
         from src.crawler_engine.crawler import crawl
-        pages, graph = crawl(site_url, limit=limit, extra_headers=headers)
+        pages, graph = crawl(
+            site_url, 
+            limit=limit, 
+            extra_headers=headers,
+            max_depth=max_depth,
+            crawl_assets=crawl_assets,
+            backend=backend,
+            concurrency=concurrency,
+            custom_selectors=custom_selectors
+        )
     
     # Also add sitemap URLs but respect limit
     from src.services.sitemap_parser import get_sitemap_urls

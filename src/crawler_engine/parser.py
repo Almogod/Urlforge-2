@@ -1,22 +1,42 @@
 from bs4 import BeautifulSoup
+from lxml import html as lxml_html
 from urllib.parse import urljoin, urlparse
 
 
-def extract_links(html, base_url):
+def extract_links(html, base_url, custom_selectors=None):
     soup = BeautifulSoup(html, "lxml")
+    dom = lxml_html.fromstring(html) if html else None
     
     links = []
+    assets = []
     hreflangs = []
     images = []
     videos = []
     
+    # Canonical
+    canonical = ""
+    can_tag = soup.find("link", rel="canonical", href=True)
+    if can_tag:
+        canonical = urljoin(base_url, can_tag["href"])
+
     # 1. Links
     for a in soup.find_all("a", href=True):
         url = urljoin(base_url, a["href"])
         if urlparse(url).scheme.startswith("http"):
             links.append(url)
+
+    # 2. Assets (CSS/JS)
+    for link in soup.find_all("link", rel="stylesheet", href=True):
+        url = urljoin(base_url, link["href"])
+        if urlparse(url).scheme.startswith("http"):
+            assets.append(url)
             
-    # 2. Hreflang
+    for script in soup.find_all("script", src=True):
+        url = urljoin(base_url, script["src"])
+        if urlparse(url).scheme.startswith("http"):
+            assets.append(url)
+            
+    # 3. Hreflang
     for link in soup.find_all("link", rel="alternate", hreflang=True, href=True):
         hreflangs.append({
             "rel": "alternate",
@@ -24,25 +44,69 @@ def extract_links(html, base_url):
             "href": urljoin(base_url, link["href"])
         })
         
-    # 3. Images
+    # 4. Images
     for img in soup.find_all("img", src=True):
         img_url = urljoin(base_url, img["src"])
+        if urlparse(img_url).scheme.startswith("http"):
+            assets.append(img_url)
         images.append({
             "loc": img_url,
             "title": img.get("alt", ""),
             "caption": img.get("title", "")
         })
         
-    # 4. Videos (basic support for <video> and <iframe>)
-    for video in soup.find_all(["video", "source"], src=True):
-        videos.append({
-            "content_loc": urljoin(base_url, video["src"]),
-            "title": "Video Content" # Placeholder or can be improved
-        })
+    # 6. SEO Meta Audit
+    meta_title = soup.title.string.strip() if soup.title else ""
+    meta_desc = ""
+    desc_tag = soup.find("meta", attrs={"name": "description"})
+    if desc_tag:
+        meta_desc = desc_tag.get("content", "").strip()
         
+    meta_robots = ""
+    robots_tag = soup.find("meta", attrs={"name": "robots"})
+    if robots_tag:
+        meta_robots = robots_tag.get("content", "").strip()
+        
+    # 7. Heading Hierarchy
+    headings = {
+        "h1": [h.get_text().strip() for h in soup.find_all("h1")],
+        "h2": [h.get_text().strip() for h in soup.find_all("h2")],
+        "h3": [h.get_text().strip() for h in soup.find_all("h3")],
+        "h4": [h.get_text().strip() for h in soup.find_all("h4")],
+    }
+    
+    # 8. Custom Selectors (CSS/XPath)
+    custom_data = {}
+    if custom_selectors:
+        for field, selector in custom_selectors.items():
+            try:
+                if selector.startswith(("/", "(")): # Simple XPath detect
+                    if dom is not None:
+                        res = dom.xpath(selector)
+                        custom_data[field] = [str(r.text) if hasattr(r, "text") else str(r) for r in res]
+                else: # CSS Selector
+                    res = soup.select(selector)
+                    custom_data[field] = [r.get_text().strip() for r in res]
+            except Exception as e:
+                custom_data[field] = f"Error: {str(e)}"
+
+    # 9. Word Count (Approximate)
+    text = soup.get_text()
+    word_count = len(text.split())
+    
     return {
         "links": list(set(links)),
+        "assets": list(set(assets)),
+        "canonical": canonical,
         "hreflangs": hreflangs,
         "images": images,
-        "videos": videos
+        "videos": videos,
+        "meta": {
+            "title": meta_title,
+            "description": meta_desc,
+            "robots": meta_robots,
+            "word_count": word_count
+        },
+        "headings": headings,
+        "custom": custom_data
     }
