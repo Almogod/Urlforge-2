@@ -45,6 +45,7 @@ from src.engine.engine import run_engine
 from src.automation.automation_engine import run_automation
 from src.plugin.plugin_runner import run_plugin
 from src.services.cache_service import cache_service
+from src.utils.security import is_safe_path
 
 if sys.platform == 'win32':
     asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
@@ -410,6 +411,10 @@ def show_results(request: Request, task_id: str):
 
 @app.get("/plugin/download_report")
 def download_plugin_report(task_id: str):
+    # Sanitize task_id to prevent path traversal
+    if ".." in task_id or "/" in task_id or "\\" in task_id:
+         raise HTTPException(status_code=400, detail="Invalid task_id")
+         
     results = task_store.get_results(task_id)
     if not results:
         return JSONResponse(status_code=404, content={"error": "Report not found"})
@@ -477,4 +482,12 @@ def generate_keyword_content(
 
 @app.get("/download")
 def download_file(file: str):
-    return FileResponse(os.path.abspath(file), filename=os.path.basename(file))
+    base_dir = os.getcwd()
+    if not is_safe_path(file, base_dir):
+        raise HTTPException(status_code=403, detail="Access denied")
+        
+    file_path = os.path.abspath(os.path.join(base_dir, file))
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="File not found")
+        
+    return FileResponse(file_path, filename=os.path.basename(file_path))

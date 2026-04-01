@@ -6,6 +6,7 @@ import re
 import httpx
 
 from src.content.stopwords import STOPWORDS
+from src.utils.security import is_safe_url
 
 
 def run(context):
@@ -88,6 +89,8 @@ def fetch_competitor_pages(domain):
     pages = []
 
     for url in urls:
+        if not is_safe_url(url):
+            continue
 
         try:
 

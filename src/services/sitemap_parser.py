@@ -1,10 +1,15 @@
 import httpx
 from bs4 import BeautifulSoup
 
+from src.utils.security import is_safe_url
+
 
 def get_sitemap_urls(domain):
     sitemap_url = domain.rstrip("/") + "/sitemap.xml"
     urls = []
+
+    if not is_safe_url(sitemap_url):
+        return []
 
     try:
         r = httpx.get(sitemap_url, timeout=10)

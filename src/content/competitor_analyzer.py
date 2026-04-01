@@ -21,6 +21,7 @@ from src.content.content_brief import (
     TONE_EDUCATIONAL, TONE_PERSUASIVE,
 )
 from src.content.stopwords import STOPWORDS, filter_stopwords_min_length
+from src.utils.security import is_safe_url
 
 
 # ── Power words — emotionally engaging words that boost CTR ──────────
@@ -274,6 +275,9 @@ def analyze_competitors(competitor_urls: list, target_keyword: str, domain: str)
 # ─────────────────────────────────────────────────────────────────────
 
 def _fetch_page(url: str) -> str | None:
+    if not is_safe_url(url):
+        return None
+
     try:
         r = httpx.get(
             url, timeout=12, follow_redirects=True,
