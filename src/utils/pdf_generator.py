@@ -1,6 +1,7 @@
 from fpdf import FPDF
 import datetime
 import os
+import textwrap
 
 class SEOReportPDF(FPDF):
     def header(self):
@@ -57,13 +58,17 @@ def generate_seo_pdf(report: dict, output_path: str):
             pdf.cell(0, 8, clean_text(f'{idx}. {action.get("type", "General").title()}'), ln=True)
             pdf.set_font('helvetica', '', 10)
             url_str = action.get("url", "Site-wide")
-            # Truncate URL if too long
-            if len(url_str) > 70:
-                url_str = url_str[:67] + "..."
-            pdf.multi_cell(0, 6, clean_text(f'Page: {url_str}'))
+            
+            wrapped_url = textwrap.wrap(clean_text(f'Page: {url_str}'), width=85)
+            for line in wrapped_url:
+                pdf.cell(0, 6, line, ln=True)
             
             desc = action.get("description", action.get("fix_type", "Apply SEO optimization"))
-            pdf.multi_cell(0, 6, clean_text(f'Description: {desc}'))
+            if not isinstance(desc, str):
+                desc = str(desc)
+            wrapped_desc = textwrap.wrap(clean_text(f'Description: {desc}'), width=85)
+            for line in wrapped_desc:
+                pdf.cell(0, 6, line, ln=True)
             pdf.ln(2)
 
     # Generated Pages section (Plugin Only)
@@ -85,8 +90,14 @@ def generate_seo_pdf(report: dict, output_path: str):
             slug = pg.get('slug', meta.get('slug', ''))
             
             pdf.set_font('helvetica', '', 10)
-            pdf.cell(0, 6, clean_text(f"Title: {title}"), ln=True)
-            pdf.cell(0, 6, clean_text(f"Target Slug: /{slug}"), ln=True)
+            wrapped_title = textwrap.wrap(clean_text(f"Title: {title}"), width=80)
+            for line in wrapped_title:
+                pdf.cell(0, 6, line, ln=True)
+            
+            wrapped_slug = textwrap.wrap(clean_text(f"Target Slug: /{slug}"), width=80)
+            for line in wrapped_slug:
+                pdf.cell(0, 6, line, ln=True)
+                
             pdf.cell(0, 6, clean_text(f"Word Count: {pg.get('word_count', 0)}"), ln=True)
             pdf.ln(4)
 

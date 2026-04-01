@@ -233,9 +233,14 @@ def apply_approved_plugin_fixes(task_id, approved_action_ids, approved_page_keyw
         progress(f"Deploying {len(pages_to_gen)} new pages...")
         
         for pg in pages_to_gen:
-            file_path = f"{pg['slug']}/index.html"
+            # Output as a React Component instead of an HTML page
+            file_path = f"pages/{pg['slug']}.jsx"
             progress(f"Targeting new page path: {file_path}")
-            deploy_result = deploy(file_path, pg["html"], deploy_config)
+            
+            # Prefer the modular react jsx payload, fallback to html if not available for some reason
+            payload = pg.get("react_jsx") or pg.get("html", "")
+            
+            deploy_result = deploy(file_path, payload, deploy_config)
             report["deploy_results"].append(deploy_result)
             pg["deployed"] = deploy_result.get("success", False)
 

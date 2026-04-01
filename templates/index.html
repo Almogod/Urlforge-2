@@ -1060,13 +1060,13 @@
 
             {% if pages_generated %}
             <h3 style="margin-top: 25px;">New AI Pages</h3>
-            <table class="suggestions-table">
+            <table class="suggestions-table" style="table-layout: fixed; width: 100%;">
                 <thead>
                     <tr>
-                        <th><input type="checkbox" checked onchange="toggleAllPages(this)"></th>
-                        <th>Keyword</th>
-                        <th>Title</th>
-                        <th>Action</th>
+                        <th style="width: 40px; text-align: center;"><input type="checkbox" checked onchange="toggleAllPages(this)"></th>
+                        <th style="width: 30%;">Keyword</th>
+                        <th style="width: 50%;">Title</th>
+                        <th style="width: 110px;">Action</th>
                     </tr>
                 </thead>
                 <tbody id="pages-body">

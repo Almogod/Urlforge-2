@@ -26,8 +26,14 @@ def run_content_engine(site_pages, competitor_urls, llm_config, limit=3, domain=
     """
     logger.info("Content Generation Engine started")
 
-    if not competitor_urls and domain:
-        competitor_urls = discover_competitors(domain, llm_config)
+    if not competitor_urls:
+        logger.info("No competitors provided. Skipping competitor gap analysis.")
+        return {
+            "keyword_gap": {},
+            "site_keywords": [],
+            "site_bigrams": [],
+            "recommendations": []
+        }
 
     # ── Extract site keywords (unigrams + bigrams) ────────────────────
     site_keywords = _extract_bulk_keywords(site_pages)
@@ -127,8 +133,9 @@ def generate_content_for_keyword(keyword, competitor_urls, llm_config, existing_
         result["quality_score"] = quality
 
         # Add HTML to the result payload for UI/Deployment use
-        from src.content.page_generator import render_content_to_html
+        from src.content.page_generator import render_content_to_html, render_content_to_react
         result["html"] = render_content_to_html(result.get("schema_data", {}))
+        result["react_jsx"] = render_content_to_react(result.get("schema_data", {}))
 
         logger.info(
             f"Content generated for '{keyword}': "

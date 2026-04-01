@@ -729,7 +729,7 @@ def render_content_to_html(schema_dict: dict) -> str:
     <link rel="canonical" href="/{meta.get("slug", "")}">
     <script type="application/ld+json">
 {schema_json}
-    </script>
+</script>
 </head>
 <body>
 <article>
@@ -737,6 +737,96 @@ def render_content_to_html(schema_dict: dict) -> str:
 </article>
 </body>
 </html>"""
+
+
+# ─────────────────────────────────────────────────────────────────────
+# REACT WRAPPER FOR DEPLOYMENT
+# ─────────────────────────────────────────────────────────────────────
+
+def render_content_to_react(schema_dict: dict) -> str:
+    """Convert the JSON StructuredContent back into a React component for deployment."""
+    meta = schema_dict.get("meta", {})
+    hero = schema_dict.get("hero", {})
+    sections = schema_dict.get("sections", [])
+    faqs = schema_dict.get("faq", [])
+    
+    parts = []
+    
+    # Hero
+    parts.append(f"        <h1 className=\"hero-title\">{hero.get('headline', '')}</h1>")
+    if hero.get("subheadline"):
+        parts.append(f"        <p className=\"hero-sub\">{hero.get('subheadline')}</p>")
+        
+    # Sections
+    for sec in sections:
+        if sec.get("type") != "intro":
+            parts.append(f"        <h2 className=\"section-heading\">{sec.get('heading', '')}</h2>")
+            
+        for p in sec.get("body_paragraphs", []):
+            parts.append(f"        <p className=\"body-text\">{p}</p>")
+            
+        if sec.get("callout"):
+            callout = sec.get("callout")
+            parts.append(f"        <blockquote className=\"callout callout-{callout.get('type', 'note')}\">")
+            parts.append(f"          <strong>{callout.get('type', 'Note').title()}:</strong> {callout.get('text', '')}")
+            parts.append(f"        </blockquote>")
+            
+        for link in sec.get("internal_links", []):
+            parts.append(f"        <p className=\"related-link\">Related: <a href=\"{link.get('url', '')}\">{link.get('title', '')}</a></p>")
+            
+    # FAQ
+    if faqs:
+        parts.append("        <h2 className=\"faq-heading\">Frequently Asked Questions</h2>")
+        parts.append("        <div className=\"faq-list\">")
+        for faq in faqs:
+            parts.append(f"          <h3 className=\"faq-question\">{faq.get('question', '')}</h3>")
+            parts.append(f"          <p className=\"faq-answer\">{faq.get('answer', '')}</p>")
+        parts.append("        </div>")
+            
+    body_content = "\n".join(parts)
+    
+    try:
+        schema_json = json.dumps(_build_schemas(ContentBrief(**{
+            "target_keyword": schema_dict.get("content_metadata", {}).get("keyword", ""),
+            "url_slug": meta.get("slug", ""),
+            "page_title": meta.get("title", ""),
+            "meta_description": meta.get("description", ""),
+        })), indent=2)
+    except:
+        schema_json = "{}"
+
+    # Using dangerouslySetInnerHTML for JSON-LD because it's required in React
+    react_code = f"""import React from 'react';
+
+export default function SEOPage() {{
+  return (
+    <>
+      <head>
+        <title>{meta.get("title", "")}</title>
+        <meta name="description" content="{meta.get("description", "")}" />
+        <meta name="robots" content="index, follow" />
+        <meta property="og:title" content="{meta.get("title", "")}" />
+        <meta property="og:description" content="{meta.get("description", "")}" />
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content="/{meta.get("slug", "")}" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="{meta.get("title", "")}" />
+        <meta name="twitter:description" content="{meta.get("description", "")}" />
+        <link rel="canonical" href="/{meta.get("slug", "")}" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{{{ __html: `{schema_json}` }}}}
+        />
+      </head>
+
+      <article className="seo-content-page">
+{body_content}
+      </article>
+    </>
+  );
+}}
+"""
+    return react_code
 
 
 # ─────────────────────────────────────────────────────────────────────

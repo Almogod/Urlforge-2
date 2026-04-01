@@ -477,6 +477,7 @@ def generate_keyword_content(
                 "title": new_page.get("meta_title", ""),
                 "word_count": new_page.get("word_count", 0),
                 "html": new_page.get("html", ""),
+                "react_jsx": new_page.get("react_jsx", ""),
                 "schema_data": new_page.get("schema_data", {}),
                 "approved": True
             })
@@ -506,9 +507,10 @@ def update_keyword_content(
             
         parsed_schema = json.loads(schema_data)
         
-        # Re-render HTML from updated schema
-        from src.content.page_generator import render_content_to_html
+        # Re-render HTML & React from updated schema
+        from src.content.page_generator import render_content_to_html, render_content_to_react
         new_html = render_content_to_html(parsed_schema)
+        new_react = render_content_to_react(parsed_schema)
         
         # Update word count
         word_count = parsed_schema.get("content_metadata", {}).get("word_count", 0)
@@ -519,6 +521,7 @@ def update_keyword_content(
             if page["keyword"] == keyword:
                 page["schema_data"] = parsed_schema
                 page["html"] = new_html
+                page["react_jsx"] = new_react
                 page["word_count"] = word_count
                 page["title"] = parsed_schema.get("meta", {}).get("title", "")
                 page["slug"] = parsed_schema.get("meta", {}).get("slug", "")
