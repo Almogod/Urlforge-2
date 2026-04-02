@@ -21,10 +21,38 @@ async def run_plugin_task(
     task_id = data.task_id or str(uuid.uuid4())[:10]
     task_store.set_status(task_id, "In Progress", domain=data.site_url)
     
+    # ── API Key Merging Logic ────────────────────────────────────────
+    # 1. Take from frontend (data)
+    # 2. Fallback to .env (config)
+    # 3. Use None if both are missing (Engine handles fallback to builtin)
+    
+    frontend_openai = data.openai_key.get_secret_value() if data.openai_key else None
+    frontend_gemini = data.gemini_key.get_secret_value() if data.gemini_key else None
+    
+    final_openai = frontend_openai or (config.OPENAI_API_KEY.get_secret_value() if config.OPENAI_API_KEY else None)
+    final_gemini = frontend_gemini or (config.GEMINI_API_KEY.get_secret_value() if config.GEMINI_API_KEY else None)
+    final_ollama = data.ollama_host or config.OLLAMA_HOST
+    
+    # Determine primary provider based on availability
+    if final_openai:
+        provider = "openai"
+        api_key = final_openai
+    elif final_gemini:
+        provider = "gemini"
+        api_key = final_gemini
+    elif final_ollama and "localhost" not in final_ollama: # Basic heuristic for active Ollama
+        provider = "ollama"
+        api_key = "ollama" # placeholder
+    else:
+        provider = "builtin"
+        api_key = None
+
     llm_config = {
-        "provider": data.openai_key.get_secret_value() if data.openai_key else ("gemini" if data.gemini_key else "ollama"),
-        "api_key": (data.openai_key or data.gemini_key).get_secret_value() if (data.openai_key or data.gemini_key) else None,
-        "ollama_host": data.ollama_host or "http://localhost:11434"
+        "provider": provider,
+        "api_key": api_key,
+        "ollama_host": final_ollama,
+        "openai_key": final_openai,
+        "gemini_key": final_gemini
     }
 
     background_tasks.add_task(
@@ -88,19 +116,49 @@ def download_plugin_report(task_id: str):
     generate_seo_pdf(results, file_path)
     return FileResponse(file_path, filename=report_file)
 
-@router.post("/generate_content", dependencies=[Depends(verify_token)])
-async def generate_keyword_content(
-    background_tasks: BackgroundTasks,
-    task_id: str = Form(...),
-    keyword: str = Form(...),
-    competitors: str = Form(""),
-    openai_key: Optional[str] = Form(None),
-    gemini_key: Optional[str] = Form(None),
-    ollama_host: Optional[str] = Form(None)
-):
-    # This was a legacy route with many Form fields, kept for compatibility if needed
-    # but normally should use a Pydantic model. 
-    # For now, let's keep it but at least secure it.
-    pass # Actual implementation moved from app.py if needed, 
+    from src.content.engine import generate_content_for_keyword
+    
+    # Merging logic for standalone generation
+    final_openai = openai_key or (config.OPENAI_API_KEY.get_secret_value() if config.OPENAI_API_KEY else None)
+    final_gemini = gemini_key or (config.GEMINI_API_KEY.get_secret_value() if config.GEMINI_API_KEY else None)
+    final_ollama = ollama_host or config.OLLAMA_HOST
+    
+    provider = "openai" if final_openai else ("gemini" if final_gemini else "ollama")
+    api_key = final_openai or final_gemini or (final_ollama if provider == "ollama" else None)
+
+    llm_config = {
+        "provider": provider,
+        "api_key": api_key,
+        "ollama_host": final_ollama
+    }
+
+    background_tasks.add_task(
+        _run_and_save_keyword_content,
+        task_id=task_id,
+        keyword=keyword,
+        competitors=competitors.split(",") if competitors else [],
+        llm_config=llm_config
+    )
+    
+    return JSONResponse(content={"status": "generation_started", "task_id": task_id})
+
+async def _run_and_save_keyword_content(task_id, keyword, competitors, llm_config):
+    from src.content.engine import generate_content_for_keyword
+    try:
+        report = task_store.get_results(task_id) or {}
+        pages = report.get("existing_pages_list", [])
+        
+        result = generate_content_for_keyword(keyword, competitors, llm_config, existing_pages=pages)
+        
+        if "error" not in result:
+            if "pages_generated" not in report:
+                report["pages_generated"] = []
+            
+            result["keyword"] = keyword
+            report["pages_generated"].append(result)
+            task_store.save_results(task_id, report)
+            task_store.set_status(task_id, f"Generated content for {keyword}")
+    except Exception as e:
+        logger.error(f"Background generation failed: {e}")
          # but for modularity I'll just refactor it in a follow up if requested.
          # For now I'm just focusing on the core routers.

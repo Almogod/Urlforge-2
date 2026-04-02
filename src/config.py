@@ -7,7 +7,7 @@ from typing import Optional, List
 class Settings(BaseSettings):
     # App Settings
     APP_ENV: str = Field(default="enterprise", env="APP_ENV") # development, production, enterprise
-    APP_NAME: str = "SEO Enterprise Platform"
+    APP_NAME: str = "UrlForge | Autonomous SEO Engine"
     DEBUG: bool = Field(default=False, env="DEBUG")
     
     # Timeouts & Retries (Profile specific)
