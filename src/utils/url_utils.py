@@ -3,7 +3,6 @@ import ipaddress
 from urllib.parse import urlparse
 from src.services.extractor import extract_metadata
 from src.services.normalizer import normalize
-from src.services.filter import is_valid
 from src.utils.logger import logger
 
 def is_ssrf_safe(url: str) -> bool:
@@ -37,7 +36,7 @@ def build_clean_urls(pages, fix_canonical=False):
     for p in pages:
         try:
             meta = extract_metadata(p)
-            if not is_valid(meta):
+            if meta.get("status") != 200 or meta.get("noindex", False):
                 continue
             
             chosen = meta["url"]
