@@ -158,7 +158,7 @@ def run_plugin(
                 progress("Generating sitewide AI FAQs for citation...")
                 from src.content.faq_generator import generate_site_faqs
                 site_faqs = generate_site_faqs(context_data["pages"], context_data["domain"], llm_config)
-                report["site_faqs"] = site_faqs
+                report["site_faqs"] = [faq.model_dump() for faq in site_faqs]
                 progress(f"Generated {len(site_faqs)} FAQs for search citation.")
                 
                 # ── Proactive Content Generation (Auto-Pilot) ────────
@@ -178,21 +178,25 @@ def run_plugin(
                         all_keywords_to_gen.append(pk)
 
                 for kw in all_keywords_to_gen:
-                    progress(f"Auto-generating page for: '{kw}'")
-                    from src.content.engine import generate_content_for_keyword
-                    page_result = generate_content_for_keyword(
-                        kw, 
-                        competitors, 
-                        llm_config, 
-                        existing_pages=existing_pages_list
-                    )
-                    if "error" not in page_result:
-                        page_result["keyword"] = kw
-                        report["pages_generated"].append(page_result)
-                        progress(f"Generated SEO page for '{kw}'")
-                    else:
-                        progress(f"Auto-generation failed for '{kw}': {page_result.get('error')}")
-                        report["errors"].append({"phase": "auto_gen", "keyword": kw, "error": page_result.get("error")})
+                    try:
+                        progress(f"Auto-generating page for: '{kw}'")
+                        from src.content.engine import generate_content_for_keyword
+                        page_result = generate_content_for_keyword(
+                            kw, 
+                            competitors, 
+                            llm_config, 
+                            existing_pages=existing_pages_list
+                        )
+                        if "error" not in page_result:
+                            page_result["keyword"] = kw
+                            report["pages_generated"].append(page_result)
+                            progress(f"Generated SEO page for '{kw}'")
+                        else:
+                            progress(f"Auto-generation failed for '{kw}': {page_result.get('error')}")
+                            report["errors"].append({"phase": "auto_gen", "keyword": kw, "error": page_result.get("error")})
+                    except Exception as gen_ex:
+                        progress(f"Critical generation error for '{kw}': {gen_ex}")
+                        report["errors"].append({"phase": "auto_gen", "keyword": kw, "error": str(gen_ex)})
 
         if dry_run:
             progress("Dry run complete. No changes would be applied.")

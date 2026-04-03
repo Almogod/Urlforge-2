@@ -1,6 +1,6 @@
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from fastapi.responses import JSONResponse, FileResponse
-from src.schemas.request import PluginRunRequest, PluginApproveRequest, KeywordGenerationRequest, ContentUpdateRequest, StandaloneContentRequest
+from src.schemas.request import PluginRunRequest, PluginApproveRequest, KeywordGenerationRequest, ContentUpdateRequest, StandaloneContentRequest, FAQUpdateRequest
 from src.services.task_store import task_store
 from src.plugin.plugin_runner import run_plugin, apply_approved_plugin_fixes
 from src.utils.logger import logger
@@ -258,3 +258,34 @@ async def update_content(
     except Exception as e:
         logger.error(f"Failed to update content: {e}")
         return JSONResponse(status_code=500, content={"error": str(e)})
+@router.post("/update_faq")
+async def update_plugin_faq(data: FAQUpdateRequest):
+    """Update a specific FAQ in the task result report."""
+    report = task_store.get_results(data.task_id)
+    if not report:
+        raise HTTPException(status_code=404, detail="Task result not found")
+    
+    faqs = report.get("site_faqs", [])
+    if 0 <= data.faq_index < len(faqs):
+        faqs[data.faq_index] = {"question": data.question, "answer": data.answer}
+        report["site_faqs"] = faqs
+        task_store.save_results(data.task_id, report)
+        return {"status": "success"}
+    else:
+        raise HTTPException(status_code=400, detail="Invalid FAQ index")
+
+@router.post("/delete_faq")
+async def delete_plugin_faq(task_id: str, faq_index: int):
+    """Remove an FAQ from the task result report."""
+    report = task_store.get_results(task_id)
+    if not report:
+        raise HTTPException(status_code=404, detail="Task result not found")
+    
+    faqs = report.get("site_faqs", [])
+    if 0 <= faq_index < len(faqs):
+        faqs.pop(faq_index)
+        report["site_faqs"] = faqs
+        task_store.save_results(task_id, report)
+        return {"status": "success"}
+    else:
+        raise HTTPException(status_code=400, detail="Invalid FAQ index")

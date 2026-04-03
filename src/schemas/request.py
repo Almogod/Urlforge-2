@@ -73,3 +73,13 @@ class ContentUpdateRequest(BaseModel):
     task_id: str
     keyword: str
     schema_data: str
+
+class FAQItemSchema(BaseModel):
+    question: str
+    answer: str
+
+class FAQUpdateRequest(BaseModel):
+    task_id: str
+    faq_index: int
+    question: str
+    answer: str

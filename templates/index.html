@@ -487,8 +487,12 @@
             {% if plugin_report.site_faqs %}
             <div style="display: flex; flex-direction: column; gap: 12px;">
                 {% for faq in plugin_report.site_faqs %}
-                <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--card-border); border-radius: 12px; padding: 15px;">
-                    <p style="font-weight: 700; color: #fff; margin-bottom: 8px; font-size: 0.95rem;">Q: {{ faq.question }}</p>
+                <div class="faq-item-card" data-index="{{ loop.index0 }}" data-question="{{ faq.question|e }}" data-answer="{{ faq.answer|e }}" style="background: rgba(255,255,255,0.03); border: 1px solid var(--card-border); border-radius: 12px; padding: 15px; position: relative; margin-bottom: 12px;">
+                    <div style="position: absolute; top: 10px; right: 10px; display: flex; gap: 8px;">
+                        <button onclick="openFAQEditor(this)" class="btn-sm" style="background: rgba(255,255,255,0.1); border: none; color: #fff; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Edit</button>
+                        <button onclick="deleteFAQ({{ loop.index0 }})" class="btn-sm" style="background: rgba(239, 68, 68, 0.1); border: none; color: #ef4444; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Delete</button>
+                    </div>
+                    <p style="font-weight: 700; color: #fff; margin-bottom: 8px; font-size: 0.95rem; padding-right: 80px;">Q: {{ faq.question }}</p>
                     <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; margin: 0;">{{ faq.answer }}</p>
                 </div>
                 {% endfor %}
@@ -1435,7 +1439,95 @@
             authSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     }
+
+    // FAQ Editor Functions
+    function openFAQEditor(btn) {
+        const card = btn.closest('.faq-item-card');
+        const index = card.getAttribute('data-index');
+        const question = card.getAttribute('data-question');
+        const answer = card.getAttribute('data-answer');
+        
+        document.getElementById('faq-editor-index').value = index;
+        document.getElementById('faq-editor-question').value = question;
+        document.getElementById('faq-editor-answer').value = answer;
+        document.getElementById('faq-editor-modal').classList.remove('hidden');
+    }
+
+    function closeFAQEditor() {
+        document.getElementById('faq-editor-modal').classList.add('hidden');
+    }
+
+    async function saveFAQ() {
+        const index = document.getElementById('faq-editor-index').value;
+        const question = document.getElementById('faq-editor-question').value;
+        const answer = document.getElementById('faq-editor-answer').value;
+        const taskId = new URLSearchParams(window.location.search).get('task_id');
+        
+        const saveBtn = document.getElementById('faq-save-btn');
+        saveBtn.innerText = 'Saving...';
+        saveBtn.disabled = true;
+
+        try {
+            const res = await fetch('/plugin/update_faq', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    task_id: taskId,
+                    faq_index: parseInt(index),
+                    question: question,
+                    answer: answer
+                })
+            });
+            if (res.ok) {
+                location.reload(); // Refresh to show updated content
+            } else {
+                alert("Failed to save FAQ");
+            }
+        } catch (err) {
+            alert("Error saving FAQ: " + err.message);
+        } finally {
+            saveBtn.innerText = 'Save Changes';
+            saveBtn.disabled = false;
+        }
+    }
+
+    async function deleteFAQ(index) {
+        if (!confirm("Are you sure you want to remove this FAQ?")) return;
+        const taskId = new URLSearchParams(window.location.search).get('task_id');
+        try {
+            const res = await fetch(`/plugin/delete_faq?task_id=${taskId}&faq_index=${index}`, {
+                method: 'POST'
+            });
+            if (res.ok) {
+                location.reload();
+            } else {
+                alert("Failed to delete FAQ");
+            }
+        } catch (err) {
+            alert("Error deleting FAQ: " + err.message);
+        }
+    }
 </script>
+
+<!-- FAQ Editor Modal -->
+<div id="faq-editor-modal" class="modal-overlay hidden">
+    <div class="modal-content glass-card" style="max-width: 600px; padding: 30px; margin: 100px auto; position: relative;">
+        <h2 class="section-title">Edit FAQ Item</h2>
+        <input type="hidden" id="faq-editor-index">
+        <div class="form-group" style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 8px; color: var(--text-muted);">Question</label>
+            <input type="text" id="faq-editor-question" style="width:100%; padding:12px; border-radius:8px; background: rgba(0,0,0,0.2); border: 1px solid var(--card-border); color: #fff;">
+        </div>
+        <div class="form-group" style="margin-top: 15px;">
+            <label style="display: block; margin-bottom: 8px; color: var(--text-muted);">Answer</label>
+            <textarea id="faq-editor-answer" style="width:100%; height:150px; padding:12px; border-radius:8px; background: rgba(0,0,0,0.2); border: 1px solid var(--card-border); color: #fff; resize:vertical;"></textarea>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 30px; justify-content: flex-end;">
+            <button onclick="closeFAQEditor()" class="btn-sm" style="background:transparent; border:1px solid var(--card-border); color:var(--text-muted); padding: 10px 20px; border-radius: 8px; cursor: pointer;">Cancel</button>
+            <button onclick="saveFAQ()" id="faq-save-btn" class="submit-btn" style="width:auto; margin-top:0; padding:12px 30px; background: var(--primary); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Save Changes</button>
+        </div>
+    </div>
+</div>
     </div><!-- End content-area -->
 
     <div id="loading-overlay" class="hidden" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; pointer-events: none;">
