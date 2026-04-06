@@ -14,7 +14,7 @@ USER_AGENTS = [
 
 ACCEPT_ENCODINGS = ["gzip, deflate, br", "gzip, deflate", "br"]
 
-async def fetch(client, url, retries=5, backoff_factor=2.0):
+async def fetch(client, url, retries=5, backoff_factor=2.0, follow_redirects=True):
     """
     Highly robust fetcher with exponential backoff and 429 respect.
     """
@@ -36,7 +36,7 @@ async def fetch(client, url, retries=5, backoff_factor=2.0):
             }
             
             t0 = time.time()
-            response = await client.get(url, headers=headers, follow_redirects=True)
+            response = await client.get(url, headers=headers, follow_redirects=follow_redirects)
             t1 = time.time()
 
             # Handle 429 Too Many Requests
