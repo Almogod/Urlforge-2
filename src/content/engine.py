@@ -213,9 +213,17 @@ STRICT JSON OUTPUT:
 """
         try:
             provider = llm_config.get("provider", "openai").lower()
+            
+            # Smart dispatch: skip provider if its key is known to be a placeholder
+            api_key = llm_config.get("api_key", "")
+            if "your_sk" in api_key and provider == "openai" and llm_config.get("gemini_key"):
+                logger.info("Switching to Gemini as OpenAI key is a placeholder.")
+                provider = "gemini"
+                api_key = llm_config.get("gemini_key")
+
             res = None
             if provider == "openai": res = _call_openai(prompt, llm_config)
-            elif provider == "gemini": res = _call_gemini(prompt, llm_config)
+            elif provider == "gemini": res = _call_gemini(prompt, {**llm_config, "api_key": api_key})
             elif provider == "ollama": res = _call_ollama(prompt, llm_config)
             
             data = _extract_json_from_llm(res)

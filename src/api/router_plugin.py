@@ -29,19 +29,30 @@ async def run_plugin_task(
     final_gemini = frontend_gemini or (config.GEMINI_API_KEY.get_secret_value() if config.GEMINI_API_KEY else None)
     final_ollama = data.ollama_host or config.OLLAMA_HOST
     
-    # Determine primary provider based on availability
-    if final_openai:
+    # Determine primary provider based on explicit user choice and availability
+    if frontend_gemini:
+        provider = "gemini"
+        api_key = frontend_gemini
+    elif frontend_openai:
         provider = "openai"
-        api_key = final_openai
-    elif final_gemini:
+        api_key = frontend_openai
+    elif final_gemini and ("your_sk" not in final_gemini):
         provider = "gemini"
         api_key = final_gemini
-    elif final_ollama and "localhost" not in final_ollama: # Basic heuristic for active Ollama
+    elif final_openai and ("your_sk" not in final_openai):
+        provider = "openai"
+        api_key = final_openai
+    elif final_ollama and "localhost" not in final_ollama:
         provider = "ollama"
-        api_key = "ollama" # placeholder
+        api_key = "ollama"
     else:
-        provider = "builtin"
-        api_key = None
+        # Fallback to whatever is available, preferring Gemini if OpenAI looks like a placeholder
+        if final_gemini:
+            provider = "gemini"
+            api_key = final_gemini
+        else:
+            provider = "openai"
+            api_key = final_openai
 
     llm_config = {
         "provider": provider,
