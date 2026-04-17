@@ -27,6 +27,7 @@ class JSCrawler:
         self.visited = set()
         self.to_visit = {start_url}
         self.results = []
+        self.checked_pages = 0
         self.graph = CrawlGraph()
 
         self.domain = urlparse(start_url).netloc
@@ -80,7 +81,7 @@ class JSCrawler:
                 ua_string = getattr(USER_AGENTS, self.user_agent, USER_AGENTS.chrome) if hasattr(USER_AGENTS, self.user_agent) else self.user_agent
                 page = await browser.new_page(user_agent=ua_string)
 
-                while self.to_visit and len(self.results) < self.limit:
+                while self.to_visit and self.checked_pages < self.limit:
                     try:
                         url = self.to_visit.pop()
                     except KeyError:
@@ -92,6 +93,8 @@ class JSCrawler:
                     if self.rp and not self.rp.can_fetch("*", url):
                         print(f"JS Crawler skipping {url} due to robots.txt")
                         continue
+                    
+                    self.checked_pages += 1
 
                     async with semaphore:
                         if self.delay > 0:

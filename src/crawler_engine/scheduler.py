@@ -57,26 +57,27 @@ async def run_workers(frontier, parser, graph, start_url=None, limit=200, concur
         semaphore = asyncio.Semaphore(concurrency)
         cv = asyncio.Condition()
         active_workers = 0
-
+        checked_pages = 0
 
         async def worker():
-            nonlocal active_workers
+            nonlocal active_workers, checked_pages
             while True:
                 item = None
                 async with cv:
-                    while not frontier.size() and len(results) < limit:
+                    while not frontier.size() and checked_pages < limit:
                         if active_workers == 0:
                             cv.notify_all()
                             return
                         await cv.wait()
                     
-                    if len(results) >= limit:
+                    if checked_pages >= limit:
                         cv.notify_all()
                         return
                     
                     item = frontier.get()
                     if item:
                         active_workers += 1
+                        checked_pages += 1
 
                 if not item: continue
 
@@ -128,9 +129,12 @@ async def run_workers(frontier, parser, graph, start_url=None, limit=200, concur
                     if broken_links_only:
                         if (url == comp_url) or (status and status not in [200, 304]):
                             results.append(page)
+                            logger.info(f"Fetched {url} ({status}). Broken links found: {len(results)}")
+                        else:
+                            logger.info(f"Fetched {url} ({status}). Skipped OK link.")
                     else:
                         results.append(page)
-                        logger.info(f"Fetched {url} ({status}). Progress: {len(results)}/{limit}")
+                        logger.info(f"Fetched {url} ({status}). Progress: {checked_pages}/{limit}")
 
                     # FIX: Metadata collection and link extraction must work for internal pages
                     if status == 200 and page.get("html") and not is_external and depth < max_depth:
