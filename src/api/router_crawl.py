@@ -17,7 +17,7 @@ from urllib.parse import urlparse
 
 router = APIRouter()
 
-def run_analysis_task(task_id: str, domain: str, limit: int, use_js: bool, fix_canonical: bool, delay: float = 1.0, check_robots: bool = True, generate_sitemap: bool = True, broken_links_only: bool = False, max_depth: int = 10, crawl_assets: bool = False, crawler_backend: str = "memory", concurrency: int = 10, custom_selectors: dict = None):
+def run_analysis_task(task_id: str, domain: str, limit: int, use_js: bool, fix_canonical: bool, delay: float = 1.0, check_robots: bool = True, generate_sitemap: bool = True, broken_links_only: bool = False, max_depth: int = 10, crawl_assets: bool = False, crawler_backend: str = "memory", concurrency: int = 10, custom_selectors: dict = None, user_agent: str = "chrome"):
     try:
         cache_key = f"analysis:{domain}:{limit}"
         cached_res = cache_service.get(cache_key)
@@ -28,8 +28,7 @@ def run_analysis_task(task_id: str, domain: str, limit: int, use_js: bool, fix_c
 
         logger.info(f"Starting crawl for {domain} with limit {limit} (JS: {use_js})...")
         if use_js:
-            pages = crawl_js_sync(domain, limit=limit, delay=delay, check_robots=check_robots)
-            graph = None
+            pages, graph = crawl_js_sync(domain, limit=limit, delay=delay, check_robots=check_robots, broken_links_only=broken_links_only, user_agent=user_agent)
         else:
             from src.crawler_engine.frontier import URLFrontier, SQLiteURLFrontier
             from src.crawler_engine.parser import extract_links
@@ -43,7 +42,7 @@ def run_analysis_task(task_id: str, domain: str, limit: int, use_js: bool, fix_c
                 
             frontier.add(domain)
             graph = CrawlGraph()
-            pages = asyncio.run(run_workers(frontier, extract_links, graph, limit=limit, delay=delay, check_robots=check_robots, broken_links_only=broken_links_only, max_depth=max_depth, crawl_assets=crawl_assets, concurrency=concurrency, custom_selectors=custom_selectors))
+            pages = asyncio.run(run_workers(frontier, extract_links, graph, limit=limit, delay=delay, check_robots=check_robots, broken_links_only=broken_links_only, max_depth=max_depth, crawl_assets=crawl_assets, concurrency=concurrency, custom_selectors=custom_selectors, user_agent=user_agent))
         
         task_store.set_status(task_id, "Checking existing sitemap...")
         sitemap_urls = get_sitemap_urls(domain)
@@ -112,6 +111,7 @@ async def generate(
         crawl_assets=data.crawl_assets,
         crawler_backend=data.crawler_backend,
         concurrency=data.concurrency,
-        custom_selectors=data.custom_selectors
+        custom_selectors=data.custom_selectors,
+        user_agent=data.user_agent
     )
     return JSONResponse(content={"status": "started", "task_id": task_id})

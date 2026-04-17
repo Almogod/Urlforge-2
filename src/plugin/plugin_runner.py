@@ -502,6 +502,7 @@ def _crawl(site_url, crawl_options, site_token=None):
     delay = crawl_options.get("delay", 1.0)
     custom_selectors = crawl_options.get("custom_selectors", None)
     broken_links_only = crawl_options.get("broken_links_only", False)
+    user_agent = crawl_options.get("user_agent", "chrome")
     domain = urlparse(site_url).netloc
 
     if use_js:
@@ -512,7 +513,8 @@ def _crawl(site_url, crawl_options, site_token=None):
             delay=delay,
             headers=headers, 
             crawl_assets=crawl_assets, 
-            broken_links_only=broken_links_only
+            broken_links_only=broken_links_only,
+            user_agent=user_agent
         )
     else:
         from src.crawler_engine.crawler import crawl
@@ -525,7 +527,8 @@ def _crawl(site_url, crawl_options, site_token=None):
             backend=backend,
             concurrency=concurrency,
             custom_selectors=custom_selectors,
-            broken_links_only=broken_links_only
+            broken_links_only=broken_links_only,
+            user_agent=user_agent
         )
     
     # Also add sitemap URLs but respect limit

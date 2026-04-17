@@ -9,8 +9,13 @@ from src.config import config
 from src.utils.logger import logger
 
 
-async def run_workers(frontier, parser, graph, start_url=None, limit=200, concurrency=10, delay=1.0, check_robots=True, extra_headers=None, broken_links_only=False, max_depth=10, crawl_assets=False, custom_selectors=None):
+async def run_workers(frontier, parser, graph, start_url=None, limit=200, concurrency=10, delay=1.0, check_robots=True, extra_headers=None, broken_links_only=False, max_depth=10, crawl_assets=False, custom_selectors=None, user_agent="chrome"):
     results = []
+    class USER_AGENTS:
+        chrome = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        googlebot = "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
+        googlebot_mobile = "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
+        bingbot = "Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)"
     rp = None
     from .frontier import ensure_scheme, is_internal_domain
     comp_url = ensure_scheme(start_url)
@@ -42,6 +47,10 @@ async def run_workers(frontier, parser, graph, start_url=None, limit=200, concur
     elif config.CRAWLER_BASIC_AUTH:
         encoded = base64.b64encode(config.CRAWLER_BASIC_AUTH.encode()).decode()
         headers["Authorization"] = f"Basic {encoded}"
+    # Map user agent string
+    ua_string = getattr(USER_AGENTS, user_agent, USER_AGENTS.chrome) if hasattr(USER_AGENTS, user_agent) else user_agent
+    headers["User-Agent"] = ua_string
+    
     if extra_headers: headers.update(extra_headers)
 
     async with httpx.AsyncClient(timeout=config.CRAWL_TIMEOUT, headers=headers, mounts=mounts, follow_redirects=False) as client:

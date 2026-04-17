@@ -12,6 +12,7 @@ class BaseCrawlRequest(BaseModel):
     custom_selectors: Optional[Dict[str, str]] = None
     broken_links_only: bool = False
     task_id: Optional[str] = None
+    user_agent: Optional[str] = "chrome"
 
 class GenerateRequest(BaseCrawlRequest):
     domain: str # Standard URL or domain

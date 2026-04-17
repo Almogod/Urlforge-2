@@ -77,7 +77,8 @@ async def run_plugin_task(
             "use_js": data.use_js,
             "delay": data.delay,
             "custom_selectors": data.custom_selectors,
-            "broken_links_only": data.broken_links_only
+            "broken_links_only": data.broken_links_only,
+            "user_agent": data.user_agent
         },
         target_keyword=data.target_keyword,
         site_token=None,

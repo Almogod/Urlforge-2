@@ -13,7 +13,7 @@ class JSCrawler:
     Used when normal HTTP crawler cannot discover links.
     """
 
-    def __init__(self, start_url, limit=50, concurrency=3, delay=2.0, check_robots=True, headers=None, crawl_assets=False, broken_links_only=False):
+    def __init__(self, start_url, limit=50, concurrency=3, delay=2.0, check_robots=True, headers=None, crawl_assets=False, broken_links_only=False, user_agent="chrome"):
         self.start_url = start_url
         self.limit = limit
         self.concurrency = concurrency
@@ -22,6 +22,7 @@ class JSCrawler:
         self.headers = headers or {}
         self.crawl_assets = crawl_assets
         self.broken_links_only = broken_links_only
+        self.user_agent = user_agent
 
         self.visited = set()
         self.to_visit = {start_url}
@@ -69,8 +70,15 @@ class JSCrawler:
             browser = await p.chromium.launch(headless=True)
             semaphore = asyncio.Semaphore(self.concurrency)
 
+            class USER_AGENTS:
+                chrome = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                googlebot = "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
+                googlebot_mobile = "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
+                bingbot = "Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)"
+
             async def worker():
-                page = await browser.new_page()
+                ua_string = getattr(USER_AGENTS, self.user_agent, USER_AGENTS.chrome) if hasattr(USER_AGENTS, self.user_agent) else self.user_agent
+                page = await browser.new_page(user_agent=ua_string)
 
                 while self.to_visit and len(self.results) < self.limit:
                     try:
@@ -234,7 +242,7 @@ class JSCrawler:
         }
 
 
-def crawl_js_sync(start_url, limit=50, delay=2.0, check_robots=True, headers=None, crawl_assets=False, broken_links_only=False):
+def crawl_js_sync(start_url, limit=50, delay=2.0, check_robots=True, headers=None, crawl_assets=False, broken_links_only=False, user_agent="chrome"):
     """
     Synchronous wrapper for FastAPI usage. Safe for Windows threads.
     """
@@ -245,7 +253,8 @@ def crawl_js_sync(start_url, limit=50, delay=2.0, check_robots=True, headers=Non
         check_robots=check_robots, 
         headers=headers, 
         crawl_assets=crawl_assets, 
-        broken_links_only=broken_links_only
+        broken_links_only=broken_links_only,
+        user_agent=user_agent
     )
     try:
         return asyncio.run(crawler.crawl())
