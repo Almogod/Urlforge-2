@@ -9,6 +9,8 @@ from src.services.task_store import TaskStore
 from src.services.html_rewriter import apply_fixes
 from src.services.deployer import deploy
 from src.services.gsc_service import GSCService
+from src.services.data_processing_service import process_html_content
+from src.services.site_analysis_service import synthesize_business_analysis
 
 task_store = TaskStore()
 
@@ -56,7 +58,7 @@ def run_plugin(
     pass
 
 
-def run_plugin(
+async def run_plugin(
     site_url: str,
     task_id: str,
     deploy_config: dict,
@@ -107,7 +109,7 @@ def run_plugin(
             progress(f"Starting phase: {phase}...")
             
             if phase == "crawl":
-                pages, clean_urls, domain, graph = _crawl(site_url, crawl_options, site_token)
+                pages, clean_urls, domain, graph = await _crawl(site_url, crawl_options, site_token)
                 context_data.update({
                     "pages": pages,
                     "clean_urls": clean_urls,
@@ -189,6 +191,23 @@ def run_plugin(
                 
                 # NEW: Generate and save the persistent Site Profile Markdown
                 site_profile_md = generate_markdown_site_profile(domain_context)
+                
+                # NEW: Deep Strategic Site Analysis (Homepage Only)
+                progress("Synthesizing Strategic Site Analysis (Business Focus)...")
+                homepage_page = next((p for p in context_data["pages"] if p["url"].rstrip("/") == site_url.rstrip("/")), None)
+                if not homepage_page and context_data["pages"]:
+                     homepage_page = context_data["pages"][0] # Fallback to first page
+                
+                if homepage_page and homepage_page.get("html"):
+                    try:
+                        processed_bus = await process_html_content(site_url, homepage_page["html"])
+                        site_analysis_report = synthesize_business_analysis(context_data["domain"], processed_bus.get("structured_data", []))
+                        report["site_analysis_report"] = site_analysis_report
+                        progress("Strategic Site Analysis generated.")
+                    except Exception as sae:
+                        logger.error(f"Site analysis failed: {sae}")
+                        report["site_analysis_report"] = f"# Site Analysis Error\n\nCould not generate business analysis: {sae}"
+                
                 report["site_profile_md"] = site_profile_md
                 report["domain_context"] = domain_context # Keep raw for logic
                 
@@ -484,7 +503,7 @@ def apply_approved_plugin_fixes(task_id, approved_action_ids, approved_page_keyw
 
 
 
-def _crawl(site_url, crawl_options, site_token=None):
+async def _crawl(site_url, crawl_options, site_token=None):
     from urllib.parse import urlparse
     from src.utils.url_utils import build_clean_urls
 
@@ -517,8 +536,8 @@ def _crawl(site_url, crawl_options, site_token=None):
             user_agent=user_agent
         )
     else:
-        from src.crawler_engine.crawler import crawl
-        pages, graph = crawl(
+        from src.crawler_engine.crawler import crawl_async
+        pages, graph = await crawl_async(
             site_url, 
             limit=limit, 
             extra_headers=headers,

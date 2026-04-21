@@ -165,6 +165,7 @@ def show_results(request: Request, task_id: str):
         "link_issues": modules.get("broken_links", {}).get("issues", []),
         "keyword_gap": modules.get("keyword_gap", {}).get("keyword_gap", {}),
         "site_keywords": results.get("site_keywords", []) if is_plugin else modules.get("keyword_gap", {}).get("site_keywords", []),
+        "site_analysis_report": results.get("site_analysis_report"),
         "pages_generated": results.get("pages_generated", []),
         "active_tab": "plugin-tab" if is_plugin else "standard-tab",
         "timestamp": int(time.time())

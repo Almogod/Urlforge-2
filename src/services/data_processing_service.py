@@ -7,20 +7,12 @@ from src.content.page_generator import _call_openai, _call_gemini, _call_ollama,
 from src.config import config
 from src.utils.logger import logger
 
-async def process_site_homepage(url: str):
+    return await process_html_content(url, html)
+
+async def process_html_content(url: str, html: str):
     """
-    Scrapes the homepage, cleans it, chunks it, and structures the business analysis.
+    Cleans, chunks, and structures the business analysis from provided HTML.
     """
-    logger.info(f"Analysis Pipeline: Starting process for {url}")
-    
-    async with httpx.AsyncClient(timeout=30) as client:
-        result = await fetch(client, url)
-        
-    if result.get("status") != 200:
-        logger.error(f"Failed to fetch {url}: {result.get('error')}")
-        return {"error": f"Failed to fetch: {result.get('status')}"}
-    
-    html = result.get("html", "")
     clean_text = clean_html(html)
     chunks = chunk_text(clean_text, chunk_size=4000)
     

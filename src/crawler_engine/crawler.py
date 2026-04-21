@@ -65,3 +65,32 @@ def crawl(start_url, limit=200, extra_headers=None, max_depth=10, crawl_assets=F
         )
 
     return pages, graph
+
+async def crawl_async(start_url, limit=200, extra_headers=None, max_depth=10, crawl_assets=False, backend="memory", concurrency=10, custom_selectors=None, broken_links_only=False, user_agent="chrome"):
+    if limit > 500 and backend == "memory":
+        backend = "sqlite"
+
+    if backend == "sqlite":
+        frontier = SQLiteURLFrontier(base_domain=start_url)
+    else:
+        frontier = URLFrontier(base_domain=start_url)
+        
+    frontier.add(start_url)
+    graph = CrawlGraph()
+
+    pages = await run_workers(
+        frontier, 
+        extract_links, 
+        graph, 
+        start_url=start_url,
+        limit=limit, 
+        concurrency=concurrency,
+        extra_headers=extra_headers,
+        max_depth=max_depth,
+        crawl_assets=crawl_assets,
+        custom_selectors=custom_selectors,
+        broken_links_only=broken_links_only,
+        user_agent=user_agent
+    )
+
+    return pages, graph
