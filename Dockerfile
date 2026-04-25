@@ -15,37 +15,23 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Create data directory for persistent storage
+# Create data directory for persistent storage (optional if on free tier)
 RUN mkdir -p /data && chmod 777 /data
 
-# Install runtime dependencies for playwright
-RUN apt-get update && apt-get install -y \
-    libnss3 \
-    libnspr4 \
-    libatk1.0-0 \
-    libatk-bridge2.0-0 \
-    libcups2 \
-    libdrm2 \
-    libxkbcommon0 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxext6 \
-    libxfixes3 \
-    librandr2 \
-    libgbm1 \
-    libasound2 \
-    libpango-1.0-0 \
-    libcairo2 \
-    && rm -rf /var/lib/apt/lists/*
+ENV PATH=/root/.local/bin:$PATH
+ENV PYTHONUNBUFFERED=1
+ENV DEBIAN_FRONTEND=noninteractive
 
 COPY --from=builder /root/.local /root/.local
 COPY . .
 
-ENV PATH=/root/.local/bin:$PATH
-ENV PYTHONUNBUFFERED=1
-
-# Install playwright browsers
-RUN playwright install chromium --with-deps
+# Install system dependencies for Playwright & browsers
+RUN apt-get update && apt-get install -y \
+    wget \
+    gnupg \
+    && playwright install-deps chromium \
+    && playwright install chromium \
+    && rm -rf /var/lib/apt/lists/*
 
 EXPOSE 8000
 
