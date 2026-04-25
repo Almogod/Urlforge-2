@@ -73,6 +73,7 @@ async def run_plugin(
     """
     Autonomous SEO plugin run with configurable phases.
     """
+    import asyncio
     from datetime import datetime
     from src.engine.engine import run_engine
 
@@ -160,7 +161,8 @@ async def run_plugin(
                         logger.error(f"Homepage processing failed: {e}")
 
                     # Synthesize business analysis from homepage data only
-                    site_analysis = synthesize_business_analysis(
+                    site_analysis = await asyncio.to_thread(
+                        synthesize_business_analysis,
                         context_data["domain"], homepage_structured, llm_config=llm_config
                     )
                     site_analysis_report = site_analysis.get("report", "")
@@ -176,7 +178,7 @@ async def run_plugin(
                 # ═══════════════════════════════════════════════════
                 if not context_data["pages"] or len(context_data["pages"]) < 2:
                     progress("Collecting sitemap URLs for SEO audit...")
-                    sitemap_urls = get_sitemap_urls(site_url)
+                    sitemap_urls = await asyncio.to_thread(get_sitemap_urls, site_url)
                     if sitemap_urls:
                         progress(f"Found {len(sitemap_urls)} URLs in sitemap.")
                         # Add sitemap URLs as lightweight entries (no HTML needed for audit)
@@ -191,7 +193,8 @@ async def run_plugin(
                 from src.content.engine import run_content_engine
                 
                 # Standard audit for score
-                results = run_engine(
+                results = await asyncio.to_thread(
+                    run_engine,
                     pages=context_data["pages"],
                     clean_urls=context_data["clean_urls"],
                     domain=context_data["domain"],
@@ -226,7 +229,8 @@ async def run_plugin(
                     pages_with_content = [p for p in context_data["pages"] if p.get("url") == site_url]
                 
                 progress(f"Analyzing keywords from {len(pages_with_content)} pages with content...")
-                content_res = run_content_engine(
+                content_res = await asyncio.to_thread(
+                    run_content_engine,
                     pages_with_content, 
                     competitors, 
                     llm_config, 
@@ -250,7 +254,8 @@ async def run_plugin(
                 from src.content.faq_generator import generate_site_faqs
                 # Use phrase-aware keywords for FAQ generation
                 faq_keywords = site_phrases[:10] if site_phrases else content_res.get("site_keywords", [])
-                site_faqs = generate_site_faqs(
+                site_faqs = await asyncio.to_thread(
+                    generate_site_faqs,
                     faq_keywords, 
                     context_data["domain"], 
                     llm_config, 
@@ -278,7 +283,8 @@ async def run_plugin(
                     try:
                         progress(f"Generating page for '{kw}' (Category: {business_context.get('category')})")
                         from src.content.engine import generate_content_for_keyword
-                        page_result = generate_content_for_keyword(
+                        page_result = await asyncio.to_thread(
+                            generate_content_for_keyword,
                             kw, 
                             competitors, 
                             llm_config, 

@@ -201,34 +201,36 @@
                     <div id="ai-config-forms" class="ai-config-forms hidden">
                         <div class="form-group" style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--primary-color);">
                             <label style="color: var(--primary-color); font-weight: 700;">Primary AI Engine (User Choice)</label>
-                            <select name="primary_provider" style="width:100%; padding:12px; border-radius:8px; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); color: #fff; font-weight: 600;">
-                                <option value="gemini">Google Gemini (Deep Reasoning)</option>
+                            <select name="primary_provider" onchange="updateAIFields()" style="width:100%; padding:12px; border-radius:8px; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); color: #fff; font-weight: 600;">
+                                <option value="gemini">Google Gemini (Use Google AI Studio API)</option>
                                 <option value="ollama">Ollama (Local / Private)</option>
                                 <option value="openai">OpenAI (Creative Content)</option>
                                 <option value="openrouter">OpenRouter (Universal Choice)</option>
                             </select>
                             <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px;">UrlForge will use this engine as the lead brain for your analysis.</p>
                         </div>
-                        <div class="form-group">
+                        <div id="openai-config" class="form-group ai-field-group">
                             <label>OpenAI API Key (Optional)</label>
                             <input type="password" name="openai_key" placeholder="sk-...">
                         </div>
-                        <div class="form-group">
+                        <div id="gemini-config" class="form-group ai-field-group">
                             <label>Gemini API Key (Optional)</label>
                             <input type="password" name="gemini_key" placeholder="AIza...">
                         </div>
-                        <div class="form-group">
+                        <div id="openrouter-config" class="form-group ai-field-group">
                             <label>OpenRouter API Key (Optional)</label>
                             <input type="password" name="openrouter_key" placeholder="sk-or-...">
                         </div>
-                        <div style="display: flex; gap: 15px;">
-                            <div class="form-group" style="flex: 2;">
-                                <label>Ollama Host (Optional)</label>
-                                <input type="text" name="ollama_host" placeholder="http://localhost:11434">
-                            </div>
-                            <div class="form-group" style="flex: 1;">
-                                <label>Local Model</label>
-                                <input type="text" name="ollama_model" placeholder="llama3" value="llama3">
+                        <div id="ollama-config" class="ai-field-group">
+                            <div style="display: flex; gap: 15px;">
+                                <div class="form-group" style="flex: 2;">
+                                    <label>Ollama Host (Optional)</label>
+                                    <input type="text" name="ollama_host" placeholder="http://localhost:11434">
+                                </div>
+                                <div class="form-group" style="flex: 1;">
+                                    <label>Local Model</label>
+                                    <input type="text" name="ollama_model" placeholder="llama3" value="llama3">
+                                </div>
                             </div>
                         </div>
                         <div class="form-group">
@@ -1135,6 +1137,22 @@
     function revealAIForms() {
         document.getElementById('ai-discovery-card').classList.add('hidden');
         document.getElementById('ai-config-forms').classList.remove('hidden');
+        updateAIFields(); // Initialize visibility
+    }
+
+    function updateAIFields() {
+        const provider = document.querySelector('select[name="primary_provider"]').value;
+        
+        // Hide all fields first
+        document.querySelectorAll('.ai-field-group').forEach(group => {
+            group.classList.add('hidden');
+        });
+        
+        // Show specific field based on selection
+        const target = document.getElementById(provider + '-config');
+        if (target) {
+            target.classList.remove('hidden');
+        }
     }
 
 
