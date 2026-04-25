@@ -35,5 +35,5 @@ RUN apt-get update && apt-get install -y \
 
 EXPOSE 8000
 
-# Use gunicorn with uvicorn workers for production
-CMD ["gunicorn", "app:app", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "-b", "0.0.0.0:8000", "--timeout", "120"]
+# Use gunicorn with 1 worker to stay within Free Tier memory limits (512MB)
+CMD ["gunicorn", "app:app", "-w", "1", "-k", "uvicorn.workers.UvicornWorker", "-b", "0.0.0.0:8000", "--timeout", "300"]
