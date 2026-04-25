@@ -8,13 +8,15 @@ services:
       - key: APP_ENV
         value: production
       - key: DATABASE_URL
-        value: sqlite:////data/database.db
+        value: sqlite:///database.db
       - key: PORT
         value: 8000
-    disk:
-      name: urlforge-data
-      mountPath: /data
-      sizeGB: 1
+    # Note: Persistent disks are not supported on the 'free' plan.
+    # To enable persistence, upgrade to 'starter' and uncomment the 'disk' section below.
+    # disk:
+    #   name: urlforge-data
+    #   mountPath: /data
+    #   sizeGB: 1
     autoDeploy: true
 
 # Note: Ensure you add your API keys (OPENAI_API_KEY, GEMINI_API_KEY, etc.) 
