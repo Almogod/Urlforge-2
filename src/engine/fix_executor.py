@@ -111,7 +111,7 @@ def apply_canonical_fixes(result):
     for url, page_suggestions in suggestions.items():
         for s in page_suggestions:
             t = s.get("type")
-            if t in ("add_canonical", "fix_canonical"):
+            if t in ("add_canonical", "fix_canonical", "add_pagination_hints"):
                 actions.append({
                     "type": t,
                     "url": url,

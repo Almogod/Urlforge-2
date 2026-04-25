@@ -14,9 +14,7 @@ def run(context):
     # Standardized enriched issue format
     enriched_issues = [
         {"type": "missing_title", "severity": "critical", "pages": []},
-        {"type": "missing_description", "severity": "major", "pages": []},
-        {"type": "missing_h1", "severity": "major", "pages": []},
-        {"type": "multiple_h1", "severity": "minor", "pages": []}
+        {"type": "missing_description", "severity": "major", "pages": []}
     ]
 
     # Helper to find issue in list
@@ -48,12 +46,6 @@ def run(context):
             description = _api_generate_description(url, soup, context)
         else:
             description = desc_tag.get("content")
-
-        if not h1_tags:
-            get_issue("missing_h1")["pages"].append(url)
-
-        if len(h1_tags) > 1:
-            get_issue("multiple_h1")["pages"].append(url)
 
         fixes[url] = {
             "title": title[:60],

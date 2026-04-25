@@ -49,7 +49,7 @@ def apply_fixes(html: str, actions: list) -> str:
                 if tag_str:
                     _inject_tag_first(soup, head, tag_str)
 
-            elif action_type == "replace_existing_canonical":
+            elif action_type == "fix_canonical":
                 tag_str = action.get("tag", "")
                 existing = soup.find("link", rel="canonical")
                 if existing and tag_str:
@@ -82,6 +82,15 @@ def apply_fixes(html: str, actions: list) -> str:
                 img_src = action.get("image", {}).get("src") or action.get("image")
                 for img in soup.find_all("img", src=img_src):
                     img["loading"] = "lazy"
+
+            elif action_type == "add_image_dimensions":
+                img_src = action.get("image", {}).get("src") or action.get("image")
+                for img in soup.find_all("img", src=img_src):
+                    # We don't know the exact dimensions, so we use auto or a placeholder
+                    # Browsers accept width="auto" or we can just enforce CSS rules
+                    if not img.get("width"): img["width"] = "800"
+                    if not img.get("height"): img["height"] = "600"
+                    img["style"] = img.get("style", "") + "; aspect-ratio: 4/3; object-fit: cover;"
 
             elif action_type == "defer_script":
                 script_src = action.get("script")
@@ -119,6 +128,27 @@ def apply_fixes(html: str, actions: list) -> str:
                     # Keep the first one, demote the rest
                     for h1 in h1s[1:]:
                         h1.name = "h2"
+                        
+            elif action_type == "heading_fix":
+                fix_type = action.get("fix_type")
+                body = soup.find("body")
+                if body:
+                    if fix_type == "add_h1":
+                        title = soup.find("title")
+                        h1_text = title.text if title else "Welcome to our site"
+                        new_h1 = soup.new_tag("h1")
+                        new_h1.string = h1_text
+                        body.insert(0, new_h1)
+                    elif fix_type == "add_h2_sections":
+                        # If content is thin, just inject a placeholder section
+                        new_h2 = soup.new_tag("h2")
+                        new_h2.string = "Key Information"
+                        # Insert after H1 if exists, else top of body
+                        h1 = soup.find("h1")
+                        if h1:
+                            h1.insert_after(new_h2)
+                        else:
+                            body.insert(0, new_h2)
 
         except Exception as e:
             # Log and continue — never crash on a single fix
@@ -159,9 +189,12 @@ def _apply_meta_fix(soup, head, action: dict):
     # Title
     title_text = action.get("title")
     if title_text:
-        title_tag = soup.find("title")
-        if title_tag:
-            title_tag.string = title_text
+        title_tags = soup.find_all("title")
+        if title_tags:
+            title_tags[0].string = title_text
+            # Clean up redundant titles
+            for tag in title_tags[1:]:
+                tag.decompose()
         else:
             new_title = soup.new_tag("title")
             new_title.string = title_text
@@ -170,9 +203,14 @@ def _apply_meta_fix(soup, head, action: dict):
     # Meta description
     desc_text = action.get("description")
     if desc_text:
-        desc_tag = soup.find("meta", attrs={"name": "description"})
-        if desc_tag:
-            desc_tag["content"] = desc_text
+        # Find all to clean up duplicates
+        desc_tags = soup.find_all("meta", attrs={"name": "description"})
+        if desc_tags:
+            # Update the first one
+            desc_tags[0]["content"] = desc_text
+            # Remove redundant duplicates
+            for tag in desc_tags[1:]:
+                tag.decompose()
         else:
             new_meta = soup.new_tag("meta")
             new_meta["name"] = "description"

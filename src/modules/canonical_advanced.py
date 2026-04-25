@@ -87,8 +87,25 @@ def run(context):
 
             if not has_prev and not has_next:
                 issues.append({"url": url, "issue": "missing_pagination_links"})
+                
+                # Try to synthesize prev/next from the URL if it has a page parameter
+                import re
+                page_match = re.search(r"([?&/](?:page|p|pg)=?)(\d+)", url, re.IGNORECASE)
+                tag_str = ""
+                if page_match:
+                    prefix = page_match.group(1)
+                    current_page = int(page_match.group(2))
+                    if current_page > 1:
+                        prev_url = url.replace(f"{prefix}{current_page}", f"{prefix}{current_page - 1}")
+                        tag_str += f'<link rel="prev" href="{prev_url}">\n'
+                    next_url = url.replace(f"{prefix}{current_page}", f"{prefix}{current_page + 1}")
+                    tag_str += f'<link rel="next" href="{next_url}">'
+                else:
+                    tag_str = f'<link rel="next" href="{url}?page=2">'
+                
                 page_suggestions.append({
                     "type": "add_pagination_hints",
+                    "tag": tag_str,
                     "action": "inject rel=prev and rel=next into head"
                 })
 
