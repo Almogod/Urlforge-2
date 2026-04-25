@@ -50,23 +50,39 @@ MAX_FILE_SIZE_BYTES = 100_000  # 100KB
 
 def is_github_repo_url(url: str) -> bool:
     """Check if a URL points to a GitHub repository."""
+    # Handle shorthand owner/repo
+    if not url.startswith(('http://', 'https://')):
+        if '/' in url and len(url.split('/')) == 2:
+            return True
+        url = 'https://' + url
+        
     parsed = urlparse(url)
-    if "github.com" not in parsed.netloc:
-        return False
-    
-    path_parts = parsed.path.strip("/").split("/")
-    # Must have at least owner/repo
-    return len(path_parts) >= 2
+    if parsed.netloc.endswith(".github.io"):
+        return True
+        
+    if "github.com" in parsed.netloc:
+        path_parts = parsed.path.strip("/").split("/")
+        # Must have at least owner/repo
+        return len(path_parts) >= 2
+        
+    return False
 
 
 def parse_github_url(url: str) -> Tuple[str, str, str]:
     """
     Parse a GitHub URL into (owner, repo, branch).
     Handles:
+        - owner/repo
         - https://github.com/owner/repo
         - https://github.com/owner/repo/tree/branch
         - https://owner.github.io/repo  (GitHub Pages)
     """
+    if not url.startswith(('http://', 'https://')):
+        if '/' in url and len(url.split('/')) == 2:
+            owner, repo = url.split('/')
+            return owner, repo, "main"
+        url = 'https://' + url
+        
     parsed = urlparse(url)
     
     # Handle GitHub Pages URLs (owner.github.io)
