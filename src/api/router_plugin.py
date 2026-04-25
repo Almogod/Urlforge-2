@@ -34,72 +34,62 @@ async def run_plugin_task(
     final_ollama = data.ollama_host or config.OLLAMA_HOST
 
     # ── Selection & Fallback Logic ────────────────────────────────────
-    # User's Explicit Choice is the Starting Point
-    provider = data.primary_provider or "gemini"
-    api_key = None
-
     # Helper to check if a key is "real" (not a placeholder)
     def is_valid(k): return k and "your_" not in k and len(k) > 10
 
-    # 1. Attempt the User's Choice
-    if provider == "openai" and is_valid(final_openai): api_key = final_openai
-    elif provider == "gemini" and is_valid(final_gemini): api_key = final_gemini
-    elif provider == "openrouter" and is_valid(final_openrouter): api_key = final_openrouter
-    elif provider == "ollama": api_key = "ollama"
+    # Define the potential providers in priority order
+    provider_options = [
+        ("openai", final_openai),
+        ("gemini", final_gemini),
+        ("openrouter", final_openrouter),
+        ("ollama", "ollama")
+    ]
 
-    # 2. Automated Fallback Chain (if choice is unavailable)
-    if not api_key:
-        if is_valid(final_openai): 
-            provider, api_key = "openai", final_openai
-        elif is_valid(final_gemini): 
-            provider, api_key = "gemini", final_gemini
-        elif is_valid(final_openrouter): 
-            provider, api_key = "openrouter", final_openrouter
-        else:
-            provider, api_key = "ollama", "ollama"
+    # Move primary provider to the front if specified
+    primary = data.primary_provider
+    if primary:
+        match = next((opt for opt in provider_options if opt[0] == primary), None)
+        if match:
+            provider_options.remove(match)
+            provider_options.insert(0, match)
+
+    provider = "ollama" # Final fallback
+    api_key = "ollama"
+
+    for p_name, p_key in provider_options:
+        if p_name == "ollama" or is_valid(p_key):
+            # Special case: Gemini validation (gentle check, no hard fail)
+            if p_name == "gemini" and p_key and p_key.startswith("AIza"):
+                import google.generativeai as genai
+                try:
+                    genai.configure(api_key=p_key)
+                    list(genai.list_models()) # Test connectivity
+                except Exception as e:
+                    logger.warning(f"Gemini validation failed for {p_key[:8]}...: {e}. Moving to next provider.")
+                    continue # Try next option
             
-    logger.info(f"Engine selected provider: {provider} (Lead: {data.primary_provider})")
+            # If we reach here, the provider is considered valid enough to try
+            provider = p_name
+            api_key = p_key
+            break
+            
+    logger.info(f"Engine selected provider: {provider} (Lead: {data.primary_provider or 'None'})")
 
-    # ── API Key Pre-Validation ──────────────────────────────────────
-    if provider == "gemini" and api_key and api_key.startswith("AIza"):
-        import google.generativeai as genai
-        try:
-            genai.configure(api_key=api_key)
-            # Just test the connection
-            list(genai.list_models())
-        except Exception as e:
-            err_msg = f"Gemini API Key Validation Failed: {str(e)}. Please check your key at aistudio.google.com."
-            if "404" in str(e) or "403" in str(e):
-                 err_msg = f"Gemini API Error: Your key is either invalid or the 'Generative Language API' is not enabled. (Details: {str(e)})"
-            raise HTTPException(status_code=400, detail=err_msg)
-    elif provider == "gemini" and api_key and "your_aiza" in api_key:
-        # User left placeholder, but chose Gemini. We'll let it fail later or use fallback
-        pass
-    elif provider == "ollama":
+    # ── Provider Specific Setup (Non-Blocking) ──────────────────────
+    if provider == "ollama":
         import httpx
         try:
             host = final_ollama.rstrip('/')
             models_res = httpx.get(f"{host}/api/tags", timeout=5.0)
             if models_res.status_code == 200:
                 available = [m['name'] for m in models_res.json().get('models', [])]
-                if not available:
-                    raise HTTPException(status_code=400, detail="No Ollama models found. Please run 'ollama pull' to get a local model.")
-                
-                # If user didn't specify a model, or it's just the default string, use the first one available
-                if not data.ollama_model or data.ollama_model == "llama3":
-                    data.ollama_model = available[0]
-                    logger.info(f"Ollama: Utilizing locally available model: '{data.ollama_model}'")
-                
-                # Ensure the selected model actually exists
-                if not any(data.ollama_model in m for m in available):
-                     data.ollama_model = available[0]
-                     logger.info(f"Ollama: Requested model not found. Utilizing: '{data.ollama_model}'")
-            else:
-                 raise HTTPException(status_code=400, detail=f"Ollama returned error {models_res.status_code}")
+                if available:
+                    if not data.ollama_model or data.ollama_model == "llama3":
+                        data.ollama_model = available[0]
+                    elif not any(data.ollama_model in m for m in available):
+                        data.ollama_model = available[0]
         except Exception as e:
-            logger.error(f"Ollama connection/discovery failed: {e}")
-            raise HTTPException(status_code=400, detail=f"Ollama Error: Could not verify models at {final_ollama}. Details: {str(e)}")
-        api_key = "ollama"
+            logger.error(f"Ollama connection/discovery failed: {e}. Keeping defaults.")
 
     task_store.set_status(task_id, "In Progress", domain=data.site_url)
 
@@ -195,14 +185,31 @@ async def generate_keyword_content(
     final_openai = data.openai_key or (config.OPENAI_API_KEY.get_secret_value() if config.OPENAI_API_KEY else None)
     final_gemini = data.gemini_key or (config.GEMINI_API_KEY.get_secret_value() if config.GEMINI_API_KEY else None)
     final_ollama = data.ollama_host or config.OLLAMA_HOST
+
+    # ── Unified Selection Logic ──────────────────────────────────────
+    def is_valid(k): return k and "your_" not in k and len(k) > 10
     
-    provider = "openai" if final_openai else ("gemini" if final_gemini else "ollama")
-    api_key = final_openai or final_gemini or (final_ollama if provider == "ollama" else None)
+    provider_options = [
+        ("openai", final_openai),
+        ("gemini", final_gemini),
+        ("ollama", "ollama")
+    ]
+    
+    provider = "ollama"
+    api_key = "ollama"
+    
+    for p_name, p_key in provider_options:
+        if p_name == "ollama" or is_valid(p_key):
+            provider = p_name
+            api_key = p_key
+            break
 
     llm_config = {
         "provider": provider,
         "api_key": api_key,
-        "ollama_host": final_ollama
+        "ollama_host": final_ollama,
+        "openai_key": final_openai,
+        "gemini_key": final_gemini
     }
 
     background_tasks.add_task(

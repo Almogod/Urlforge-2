@@ -1,13 +1,20 @@
 # src/content/engine.py
 """
-The Content Generation Engine (REWRITTEN).
-Orchestrates High-Fidelity Keyword Discovery and Strategic DNA Extraction.
-Elimates generic filler through strict site-fragment analysis.
+The Content Generation Engine (REWRITTEN v2).
+Orchestrates High-Fidelity Keyword Discovery with Compound Phrase Awareness.
+Uses PMI-scored collocations to keep semantically meaningful phrases intact.
+Eliminates generic filler through strict site-fragment analysis.
 """
 
 from src.content.competitor_analyzer import analyze_competitors
 from src.content.page_generator import generate_page
 from src.content.stopwords import STOPWORDS
+from src.content.phrase_extractor import (
+    extract_phrases_from_pages, 
+    extract_meaningful_phrases,
+    group_related_keywords,
+    KNOWN_COMPOUNDS
+)
 from src.utils.logger import logger
 import re
 import math
@@ -16,20 +23,46 @@ from bs4 import BeautifulSoup
 
 def run_content_engine(site_pages, competitor_urls, llm_config, limit=3, domain=None):
     """
-    High-Fidelity content-gap pipeline.
+    High-Fidelity content-gap pipeline with compound phrase awareness.
+    Keywords like "tls handshake" are kept as single semantic units.
     """
-    logger.info("UrlForge Engine: Starting Strategic Content Discovery")
+    logger.info("UrlForge Engine: Starting Strategic Content Discovery (v2 - Phrase Aware)")
     
-    # 1. Advanced DNA Clustering
+    # 1. Advanced Phrase-Aware Keyword Extraction
+    site_phrases = extract_phrases_from_pages(site_pages, max_phrases=60)
+    
+    # Also extract weighted single-term keywords for gap analysis
     site_keywords = _extract_bulk_keywords(site_pages)
     site_bigrams = _extract_bulk_bigrams(site_pages)
     
-    # Ranked weighted terms
-    prime_keywords = [kw for kw, _ in site_keywords.most_common(12)]
+    # Merge: phrases take priority over isolated words
+    # Use a larger pool (100) to ensure we find parts of compounds for grouping
+    raw_pool = [kw for kw, _ in site_keywords.most_common(100)]
+    grouped_prime = group_related_keywords(raw_pool)
     
-    # 2. Competitor Gap Analysis
+    # Final ranked list: phrase-extracted terms first, then grouped singles
+    prime_keywords = []
+    seen = set()
+    
+    # Priority 1: High-fidelity phrases
+    for phrase in site_phrases[:20]:
+        phrase_norm = phrase.lower().strip()
+        if phrase_norm not in seen and len(phrase_norm) > 3:
+            prime_keywords.append(phrase)
+            seen.add(phrase_norm)
+            
+    # Priority 2: Grouped unigrams (merged into compounds where possible)
+    for kw in grouped_prime:
+        kw_norm = kw.lower().strip()
+        if kw_norm not in seen and len(kw_norm) > 3:
+            prime_keywords.append(kw)
+            seen.add(kw_norm)
+            
+    prime_keywords = prime_keywords[:15]
+    
+    # 2. Competitor Gap Analysis (Phrase-Aware)
     gaps = {}
-    all_site_terms = set(site_keywords.keys()) | set(site_bigrams.keys())
+    all_site_terms = set(site_phrases) | set(site_keywords.keys()) | set(site_bigrams.keys())
     
     if competitor_urls:
         for comp_url in competitor_urls[:5]:
@@ -37,38 +70,70 @@ def run_content_engine(site_pages, competitor_urls, llm_config, limit=3, domain=
                 from src.content.competitor_analyzer import _fetch_page, _tokenize, _extract_ngrams
                 page_html = _fetch_page(comp_url)
                 if page_html:
+                    # Extract phrases from competitor page
+                    comp_phrases = extract_meaningful_phrases(page_html, max_phrases=30)
+                    
+                    # Also get traditional tokens for gap analysis
                     soup = BeautifulSoup(page_html, "lxml")
                     text = soup.get_text(" ", strip=True)
                     tokens = _tokenize(text)
-                    comp_terms = set(tokens) | set(_extract_ngrams(tokens, 2))
+                    comp_terms = set(tokens) | set(_extract_ngrams(tokens, 2)) | set(comp_phrases)
                     
-                    gap_terms = [t for t in comp_terms if t not in all_site_terms and len(t) > 5]
+                    # Find gaps: terms competitor has that we don't
+                    gap_terms = [
+                        t for t in comp_terms 
+                        if t not in all_site_terms 
+                        and len(t) > 3 
+                        and not _is_noise_term(t)
+                    ]
                     if gap_terms:
-                        gaps[comp_url] = sorted(gap_terms, key=len, reverse=True)[:10]
+                        # Rank: multi-word phrases first, then by length
+                        gap_terms.sort(key=lambda t: (len(t.split()), len(t)), reverse=True)
+                        gaps[comp_url] = gap_terms[:10]
             except Exception as e:
                 logger.warning(f"Gap Analysis failed for {comp_url}: {e}")
                 
+    # Build unified keyword list for output
+    all_site_kw = list(set(site_phrases) | set(kw for kw, _ in site_keywords.most_common(40)))
+    
     return {
         "keyword_gap": gaps,
-        "site_keywords": [kw for kw, _ in site_keywords.most_common(40)],
+        "site_keywords": all_site_kw[:50],
         "site_bigrams": [bg for bg, _ in site_bigrams.most_common(30)],
+        "site_phrases": site_phrases,  # New: semantically grouped phrases
         "prime_keywords": prime_keywords,
         "recommendations": [{"keyword": kw, "source": url} for url, kws in gaps.items() for kw in kws[:3]]
     }
 
+
+def _is_noise_term(term: str) -> bool:
+    """Check if a term is noise/filler."""
+    if len(term) < 4:
+        return True
+    # Pure numbers
+    if term.replace(" ", "").isdigit():
+        return True
+    # Very generic
+    generic = {"click here", "read more", "learn more", "get started", "find out"}
+    return term.lower() in generic
+
+
 def is_noise(word: str) -> bool:
     """Returns True if the word looks like random gibberish or noise."""
-    if len(word) < 5: return True
+    from src.content.phrase_extractor import _is_technical_abbreviation
+    if len(word) < 3: return True
+    if _is_technical_abbreviation(word): return False
+    if len(word) < 4: return True # Non-technical 3-letter words are often noise
     if not any(v in word for v in "aeiouy"): return True # No vowels
     # Basic entropy check: low vowel ratio (less than 15%)
     vowels = sum(1 for c in word if c in "aeiouy")
-    if vowels / len(word) < 0.15: return True
+    if vowels / len(word) < 0.12: return True
     # Too many repeated characters (e.g., "aaaaa")
     if any(word.count(c) > len(word) / 2 for c in set(word)): return True
     return False
 
 def _extract_bulk_keywords(pages) -> Counter:
-    """TF-IDF adjacent weighted keyword extraction with Noise Filter."""
+    """TF-IDF adjacent weighted keyword extraction with minimal stripping."""
     counts = Counter()
     total_pages = len(pages)
     if total_pages == 0: return counts
@@ -80,16 +145,16 @@ def _extract_bulk_keywords(pages) -> Counter:
         body_text = ""
         if html:
             soup = BeautifulSoup(html, "lxml")
-            # Decompose common noise containers
-            for s in soup(["script", "style", "nav", "footer", "header", "aside", "noscript", "svg", "form"]): 
+            # Only remove script/style, KEEP nav/footer/header for keywords
+            for s in soup(["script", "style", "noscript", "svg", "form", "iframe"]): 
                 s.decompose()
-            body_text = soup.get_text(" ", strip=True)[:3000]
+            body_text = soup.get_text(" ", strip=True)[:15000]
             
-        title = p.get('title', '')
-        meta_desc = p.get('meta_description', '')
+        title = p.get('title', '') or ''
+        meta_desc = p.get('meta_description', '') or ''
         combined_text = f"{title} {meta_desc} {body_text}".lower()
-        # Find all alpha strings
-        raw_words = re.findall(r'\b[a-z]{4,}\b', combined_text)
+        # Find all alpha strings (relaxed length to 3 to catch 'api', 'tls')
+        raw_words = re.findall(r'\b[a-z]{3,}\b', combined_text)
         words = [w for w in raw_words if w not in STOPWORDS and not is_noise(w)]
         
         unique_words = set(words)
@@ -114,13 +179,22 @@ def _extract_bulk_keywords(pages) -> Counter:
     return counts
 
 def _extract_bulk_bigrams(pages) -> Counter:
-    """High-signal phrase extraction with Noise Filter."""
+    """High-signal phrase extraction from full page content."""
     bigrams = Counter()
     for p in pages:
-        text = f"{p.get('title', '')} {p.get('meta_description', '')}".lower()
-        words = [w for w in re.findall(r'\b[a-z]{4,}\b', text) if w not in STOPWORDS and not is_noise(w)]
+        html = p.get("html", "")
+        if not html: continue
+        
+        soup = BeautifulSoup(html, "lxml")
+        for s in soup(["script", "style"]): s.decompose()
+        text = soup.get_text(" ", strip=True).lower()
+        
+        raw_words = re.findall(r'\b[a-z]{3,}\b', text)
+        words = [w for w in raw_words if w not in STOPWORDS and not is_noise(w)]
+        
         for i in range(len(words) - 1):
-            bigrams[f"{words[i]} {words[i+1]}"] += 1
+            w1, w2 = words[i], words[i+1]
+            bigrams[f"{w1} {w2}"] += 1
     return bigrams
 
 def _find_strategic_pages(pages):
@@ -173,6 +247,7 @@ def analyze_site_content(pages, domain, llm_config=None):
     No API? Refuses to guess 'General' if keyword signals are strong.
     """
     from src.content.page_generator import _call_openai, _call_gemini, _call_ollama, _call_openrouter, _extract_json_from_llm
+    from src.utils.llm_resolver import resolve_api_key, is_valid_key
     
     if not pages:
         return {"domain": domain, "niche": "None", "error": "No pages detected"}
@@ -189,10 +264,12 @@ def analyze_site_content(pages, domain, llm_config=None):
             
     combined_dna = "\n\n---\n\n".join(dna_blocks)
     
-    # API Sanity Check: Skip placeholders/defaults
-    api_key = llm_config.get("api_key", "")
-    is_placeholder = "your_sk" in api_key or "placeholder" in api_key or len(api_key) < 15
-    has_api = llm_config and not is_placeholder and (bool(api_key) or llm_config.get("provider") == "ollama")
+    # Use centralized resolver for API key detection
+    if llm_config:
+        resolved_provider, resolved_key = resolve_api_key(llm_config)
+        has_api = is_valid_key(resolved_key) or resolved_provider == "ollama"
+    else:
+        has_api = False
 
     if has_api:
         logger.info(f"LLM DNA Audit for {domain}...")
@@ -211,28 +288,18 @@ STRICT JSON OUTPUT:
   "primary_purpose": "short summary"
 }}
 """
+        # Use unified fallback chain
+        from src.utils.llm_resolver import call_llm_with_fallback
         try:
-            provider = llm_config.get("provider", "gemini").lower()
-            api_key = llm_config.get("api_key", "")
-
-            res = None
-            if provider == "openai": 
-                res = _call_openai(prompt, llm_config)
-            elif provider == "gemini": 
-                res = _call_gemini(prompt, llm_config)
-            elif provider == "ollama": 
-                res = _call_ollama(prompt, llm_config)
-            elif provider == "openrouter":
-                res = _call_openrouter(prompt, llm_config)
-            
+            res = call_llm_with_fallback(prompt, llm_config)
             data = _extract_json_from_llm(res)
             if data and "niche" in data:
-                data["discovery_method"] = "high_fidelity_api"
+                data["discovery_method"] = f"high_fidelity_{resolved_provider}"
                 data["domain"] = domain
                 data["sample_titles"] = [p.get("title", "") for p in pages[:10]]
                 return data
         except Exception as e:
-            logger.error(f"DNA API failed: {e}")
+            logger.warning(f"DNA Analysis failed: {e}. Falling back to heuristic.")
 
     # Heuristic Fallback
     logger.info(f"Fallback: Building Strategic Profile from clustering for {domain}")
@@ -246,7 +313,8 @@ def generate_markdown_site_profile(domain_context):
     Converts domain_context into a formatted Markdown Strategic DNA Report.
     """
     domain = domain_context.get("domain", "Unknown Site")
-    niche = domain_context.get("niche", "General")
+    category = domain_context.get("category", "General")
+    niche = domain_context.get("niche", "Professional Services")
     tone = domain_context.get("tone", "Conversational")
     mission = domain_context.get("mission", "None detected.")
     purpose = domain_context.get("primary_purpose", "Business operations.")
@@ -255,6 +323,7 @@ def generate_markdown_site_profile(domain_context):
     md = f"# 🕵️ Strategic DNA Report: {domain}\n\n"
     
     md += f"## 🎯 Strategic Identity\n"
+    md += f"- **Category:** {category}\n"
     md += f"- **Niche:** {niche}\n"
     md += f"- **Primary Purpose:** {purpose}\n"
     md += f"- **Brand Persona:** {tone.title()}\n"
@@ -305,7 +374,7 @@ def generate_content_for_keyword(keyword, competitor_urls, llm_config, existing_
             target_keyword=keyword, 
             domain=domain_context.get("domain", ""),
             site_profile_md=generate_markdown_site_profile(domain_context),
-            niche=domain_context.get("niche", "General")
+            niche=domain_context.get("category", domain_context.get("niche", "General"))
         )
         
         # Inject domain markers

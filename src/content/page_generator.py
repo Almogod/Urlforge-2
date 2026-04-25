@@ -15,41 +15,34 @@ from src.utils.logger import logger
 
 def generate_page(brief, llm_config, existing_pages=None, site_wide_faqs=None) -> dict:
     """
-    Expert content synthesis pipeline.
+    Expert content synthesis pipeline with Autonomous Fallback Chain.
+    Uses centralized LLM resolver for cascading key fallback.
     """
+    from src.utils.llm_resolver import call_llm_with_fallback
+    
     existing_pages = existing_pages or []
     site_wide_faqs = site_wide_faqs or []
-    json_schema_dict = None
+
+    prompt = _build_expert_prompt(brief, existing_pages, site_wide_faqs)
     
-    # 1. API Selection
-    has_api = bool(llm_config.get("api_key")) or llm_config.get("provider") == "ollama"
-    provider = llm_config.get("provider", "gemini").lower()
+    try:
+        logger.info(f"FidelityEngine: Generating page for '{brief.target_keyword}' via cascading fallback...")
+        raw = call_llm_with_fallback(prompt, llm_config)
+        
+        if raw:
+            json_schema_dict = _extract_json_from_llm(raw)
+            if json_schema_dict:
+                # Validate the generated content quality
+                json_schema_dict = _validate_generated_content(json_schema_dict, brief)
+                provider = llm_config.get("provider", "unknown")
+                logger.info(f"FidelityEngine: Content generated successfully for '{brief.target_keyword}'")
+                return _finalize_result(brief, json_schema_dict, provider)
+        
+        logger.warning(f"FidelityEngine: LLM returned invalid structure for '{brief.target_keyword}'. Using DNA synthesis.")
+    except Exception as e:
+        logger.warning(f"FidelityEngine: All providers failed for '{brief.target_keyword}': {e}. Using DNA synthesis.")
 
-    if has_api:
-        try:
-            prompt = _build_expert_prompt(brief, existing_pages, site_wide_faqs)
-            logger.info(f"FidelityEngine: Generating Expert {brief.target_keyword} via {provider}")
-            
-            raw = None
-            if provider == "openai": 
-                raw = _call_openai(prompt, llm_config)
-            elif provider == "gemini": 
-                raw = _call_gemini(prompt, llm_config)
-            elif provider == "ollama": 
-                raw = _call_ollama(prompt, llm_config)
-            elif provider == "openrouter":
-                raw = _call_openrouter(prompt, llm_config)
-            
-            if raw:
-                json_schema_dict = _extract_json_from_llm(raw)
-                if json_schema_dict:
-                    return _finalize_result(brief, json_schema_dict, provider)
-                    
-            logger.error(f"FidelityEngine: {provider} returned invalid structure. Forcing High-Fidelity Synthesis.")
-        except Exception as e:
-            logger.error(f"FidelityEngine: API Failure: {e}")
-
-    # 2. Site-DNA Synthesis Fallback (No Boilerplate)
+    # Site-DNA Synthesis Fallback (Final Safety Net)
     logger.info(f"FidelityEngine: Synthesizing {brief.target_keyword} from Site DNA.")
     json_schema_dict = _synthesize_from_site_dna(brief, existing_pages)
     return _finalize_result(brief, json_schema_dict, "dna_synthesis")
@@ -65,95 +58,260 @@ def _finalize_result(brief, schema, method):
         "generation_method": method,
     }
 
+def _validate_generated_content(schema: dict, brief) -> dict:
+    """
+    Quality gate for LLM-generated content.
+    Strips AI tropes, ensures minimum section depth, validates structure.
+    """
+    # Strip AI tropes from all text fields
+    ai_tropes = ["unlock", "transform", "navigate", "delve", "landscape",
+                 "empower", "game-changer", "cutting-edge", "in conclusion",
+                 "look no further", "state-of-the-art", "in today's world"]
+    
+    def clean_text(text):
+        if not isinstance(text, str):
+            return text
+        for trope in ai_tropes:
+            text = re.sub(rf'\b{re.escape(trope)}\b', '', text, flags=re.IGNORECASE)
+        # Clean up double spaces
+        text = re.sub(r'\s{2,}', ' ', text).strip()
+        return text
+    
+    # Clean hero
+    hero = schema.get("hero", {})
+    hero["headline"] = clean_text(hero.get("headline", ""))
+    hero["subheadline"] = clean_text(hero.get("subheadline", ""))
+    
+    # Clean sections
+    for sec in schema.get("sections", []):
+        sec["heading"] = clean_text(sec.get("heading", ""))
+        sec["body_paragraphs"] = [clean_text(p) for p in sec.get("body_paragraphs", [])]
+        if sec.get("callout"):
+            sec["callout"]["text"] = clean_text(sec["callout"].get("text", ""))
+    
+    # Clean FAQs
+    for faq in schema.get("faq", []):
+        faq["question"] = clean_text(faq.get("question", ""))
+        faq["answer"] = clean_text(faq.get("answer", ""))
+    
+    # Validate minimum section count
+    if len(schema.get("sections", [])) < 2:
+        # Add a supplemental section
+        kw = brief.target_keyword
+        niche = brief.niche or "our field"
+        schema.setdefault("sections", []).append({
+            "id": "practical-application",
+            "type": "body",
+            "heading": f"Practical Application of {kw.title()}",
+            "body_paragraphs": [
+                f"Implementing {kw} effectively requires a structured approach that accounts for the specific demands of the {niche} sector. Our methodology begins with a thorough assessment of current capabilities and gaps.",
+                f"By grounding {kw} in measurable outcomes rather than theoretical frameworks, we ensure that every implementation delivers tangible value to stakeholders."
+            ]
+        })
+    
+    # Validate FAQ quality
+    valid_faqs = []
+    for faq in schema.get("faq", []):
+        q, a = faq.get("question", ""), faq.get("answer", "")
+        if len(q) > 15 and len(a) > 40:
+            valid_faqs.append(faq)
+    schema["faq"] = valid_faqs
+    
+    return schema
+
+
 def _synthesize_from_site_dna(brief, existing_pages: list) -> dict:
     """
     Constructs a page using actual Site DNA fragments.
-    NO generic templates. Uses mission, services, and niche-specific wording.
+    v2: Produces richer content with 4+ sections, multiple FAQs,
+    and service-specific detail.
     """
     kw = brief.target_keyword
     niche = brief.niche
     mission = (brief.site_profile_md or f"Expert authority in {niche}.").split("\n")[0].replace("# ", "")
     services = brief.services or [niche]
+    pain_points = brief.pain_points or []
     brand = mission.split(":")[-1].strip() if ":" in mission else "Our industry experts"
+    
+    # Format services for display
+    svc_names = []
+    for s in services[:4]:
+        if isinstance(s, dict):
+            svc_names.append(s.get("name", str(s)))
+        else:
+            svc_names.append(str(s))
+    
+    svc_text = ", ".join(svc_names[:3]) if svc_names else niche
     
     # Hero
     hero = {
-        "headline": f"Specialized {kw.title()} Solutions for {niche}",
-        "subheadline": f"Grounding your {niche} operations in {brand} expertise and strategic insight.",
-        "cta_text": f"Consult {brand}"
+        "headline": f"{kw.title()}: A Practitioner's Perspective on {niche}",
+        "subheadline": f"How {brand} applies {kw} methodology to deliver measurable results in {niche}.",
+        "cta_text": f"Discuss Your {kw.title()} Needs"
     }
     
-    # Sections
+    # Build rich sections
     sections = []
     
-    # Use mission for intro
+    # Section 1: Strategic Overview
     sections.append({
-        "id": "identity", "type": "body", "heading": f"Our Approach to {kw.title()}",
+        "id": "strategic-overview", "type": "body",
+        "heading": f"Understanding {kw.title()} in the Context of {niche}",
         "body_paragraphs": [
-            f"At the intersection of {niche} and modern implementation, {kw} plays a pivotal role. {brand}'s methodology is rooted in the belief that every {niche} strategy must be technically sound and commercially viable.",
-            f"As part of our commitment to excellence, we've integrated {kw} into our broader scope of {', '.join(services[:2])}. This ensures that users of {brand} receive not just a service, but a competitive edge."
+            f"In {niche}, {kw} is not an isolated concern — it intersects directly with core operational requirements including {svc_text}. {brand}'s approach treats {kw} as a systemic capability rather than a point solution.",
+            f"Our fieldwork across multiple {niche} engagements has revealed that organizations which integrate {kw} into their foundational processes see measurably better outcomes than those who treat it as an afterthought. The key differentiator is alignment between {kw} strategy and business objectives.",
+            f"This page outlines our evidence-based methodology for {kw} implementation, drawn from direct experience in the {niche} sector."
         ]
     })
     
-    # Keyword intent section
+    # Section 2: Methodology
     sections.append({
-        "id": "intent", "type": "body", "heading": f"Why {kw.title()} Matters in {niche}",
+        "id": "methodology", "type": "body",
+        "heading": f"Our {kw.title()} Methodology",
         "body_paragraphs": [
-            f"In the context of {niche}, neglecting {kw} represents a significant strategic gap. Based on {brand}'s industry experience, we prioritize data-driven implementation over generic solutions.",
-            f"Our technical team focuses on {kw} as a foundational element for scaling {niche} projects. By leveraging specific industry markers, we deliver results that are both measurable and sustainable."
+            f"At {brand}, our {kw} methodology follows a structured four-phase process: Assessment, Strategy, Implementation, and Validation. Each phase is designed to minimize risk while maximizing the strategic value of {kw} within your {niche} operations.",
+            f"During the Assessment phase, we audit existing {kw} capabilities against industry benchmarks. The Strategy phase translates findings into a prioritized action plan aligned with your specific {svc_text} requirements.",
+            f"Implementation is handled in iterative cycles, allowing for course corrections based on real-world performance data. The Validation phase establishes measurable KPIs to track the impact of {kw} on your business outcomes."
         ],
-        "callout": {"type": "tip", "text": f"Expert Tip: When implementing {kw} for {niche}, focus on integration over isolation."}
+        "callout": {"type": "tip", "text": f"Our assessment process typically identifies 3-5 high-impact {kw} improvements within the first engagement session."}
     })
+    
+    # Section 3: Practical Application (with pain points if available)
+    pain_text = ""
+    if pain_points:
+        pain_text = f" Common challenges we address include {', '.join(pain_points[:2])}." 
+    
+    sections.append({
+        "id": "practical-application", "type": "body",
+        "heading": f"Applying {kw.title()} Across {niche} Operations",
+        "body_paragraphs": [
+            f"{kw.title()} implementation varies significantly depending on organizational maturity and sector-specific requirements.{pain_text} Our team tailors each engagement to account for these variables.",
+            f"For organizations early in their {kw} journey, we recommend starting with a focused pilot that demonstrates value within a single {svc_text} workstream. This builds internal buy-in and provides a baseline for scaling.",
+            f"For mature organizations, we focus on optimization — identifying inefficiencies in existing {kw} processes and implementing targeted improvements that compound over time."
+        ]
+    })
+    
+    # Section 4: Why it matters
+    sections.append({
+        "id": "business-impact", "type": "body",
+        "heading": f"The Business Impact of Strategic {kw.title()}",
+        "body_paragraphs": [
+            f"Organizations that invest in structured {kw} implementation report measurable improvements across key performance indicators. In our {niche} practice, we've observed consistent gains in operational efficiency, stakeholder satisfaction, and competitive positioning.",
+            f"The ROI of {kw} extends beyond direct metrics. Properly implemented, it creates compounding benefits — each improvement builds on the last, creating a sustainable advantage in the {niche} marketplace."
+        ],
+        "callout": {"type": "note", "text": f"We establish baseline metrics at the start of every {kw} engagement so that improvements can be tracked and validated objectively."}
+    })
+    
+    # Build multiple FAQs
+    faqs = [
+        {
+            "question": f"How does {brand} approach {kw} differently from standard consulting?",
+            "answer": f"We combine deep {niche} domain expertise with a structured, evidence-based {kw} methodology. Rather than applying generic frameworks, we tailor our approach to your specific operational context and measure outcomes against pre-established KPIs. Every engagement includes built-in validation checkpoints."
+        },
+        {
+            "question": f"What results can I expect from a {kw} engagement?",
+            "answer": f"Results depend on your starting point and objectives, but typical outcomes include improved {svc_text} efficiency, reduced operational friction, and stronger competitive positioning. We set measurable targets at the start of each engagement and track progress throughout the project lifecycle."
+        },
+        {
+            "question": f"How long does a typical {kw} implementation take?",
+            "answer": f"A focused {kw} pilot can be completed in 4-6 weeks. Full implementations typically span 3-6 months depending on scope and organizational complexity. We use an iterative approach that delivers value at each phase rather than requiring a full deployment before results are visible."
+        }
+    ]
+
+    word_count = sum(len(" ".join(s.get("body_paragraphs", [])).split()) for s in sections)
+    word_count += sum(len(f["answer"].split()) for f in faqs)
 
     return {
         "meta": {"title": brief.page_title, "description": brief.meta_description},
-        "content_metadata": {"keyword": kw, "word_count": 450, "method": "dna_synthesis"},
+        "content_metadata": {"keyword": kw, "word_count": word_count, "method": "dna_synthesis"},
         "hero": hero,
         "sections": sections,
-        "faq": [{"question": f"How does {kw} impact {niche}?", "answer": f"At {brand}, {kw} acts as a force multiplier for {niche} services. By refining the implementation, we ensure better performance and higher authority."}],
-        "sources": ["Internal Domain Audit", f"{niche} Technical Standards"]
+        "faq": faqs,
+        "sources": ["Internal Domain Audit", f"{niche} Industry Standards", "Field Implementation Data"]
     }
 
 def _build_expert_prompt(brief, existing_pages, site_wide_faqs) -> str:
     """
-    High-Fidelity Prompt with CoT and Trope Blacklist.
+    High-Fidelity Prompt v2 with CoT, Trope Blacklist, and Business Grounding.
     """
-    blacklist = "Unlock, Transform, Navigate, Delve, Landscape, Nurture, Game-changer, In conclusion, Empower, Unlock the potential, Comprehensive guide, Look no further"
+    blacklist = "Unlock, Transform, Navigate, Delve, Landscape, Nurture, Game-changer, In conclusion, Empower, Unlock the potential, Comprehensive guide, Look no further, State-of-the-art, Cutting-edge, In today's world, Streamline"
+    category = brief.niche
     
-    return f"""### EXPERT PERSONA: LEAD CONSULTANT FOR {brief.niche} ###
-TASK: Synthesize a 1200-word high-density professional document for '{brief.target_keyword}'.
+    # Build services reference
+    services_ref = ""
+    if brief.services:
+        svc_items = []
+        for s in brief.services[:4]:
+            if isinstance(s, dict):
+                svc_items.append(f"  - {s.get('name', s)}: {s.get('detailed_description', '')}")
+            else:
+                svc_items.append(f"  - {s}")
+        services_ref = "\n".join(svc_items)
+    
+    # Build pain points reference
+    pain_ref = ""
+    if brief.pain_points:
+        pain_ref = f"PROBLEMS THIS BUSINESS SOLVES: {', '.join(brief.pain_points[:4])}"
+    
+    # Build existing content reference to avoid duplication
+    existing_ref = ""
+    if existing_pages:
+        titles = [p.get('title', p.get('url', '')) for p in existing_pages[:8]]
+        existing_ref = f"EXISTING PAGES (DO NOT DUPLICATE): {', '.join(titles)}"
+    
+    return f"""### EXPERT PERSONA: LEAD CONSULTANT FOR {category} ###
+TASK: Produce a 1200-1500 word professional document for '{brief.target_keyword}' that reads as if written by a 15-year veteran in {category}.
 
-### PHASE 1: REASONING (DO NOT INCLUDE IN OUTPUT) ###
-1. Define the specific business problem '{brief.target_keyword}' solves for a professional in {brief.niche}.
-2. Identify 3 technical nuances that generic AI usually misses about this topic.
-3. Align the solution with the Site DNA provided below.
+### PHASE 1: SILENT REASONING (DO NOT OUTPUT) ###
+1. What specific business problem does '{brief.target_keyword}' solve for someone in {category}?
+2. What are 3 technical details that only a practitioner would know about this topic?
+3. How does this topic connect to the services listed below?
+4. What would a client searching for '{brief.target_keyword}' actually need to know?
 
-### PHASE 2: CONTENT GENERATION (STRICT CONSTRAINTS) ###
-- BANNED TROPES (Strictly Forbidden): {blacklist}
-- HUMAN TOUCH: Use "We" and "Our". Blend short, declarative sentences with dense technical explanations.
-- GROUNDING: You MUST reference one of these services: {', '.join(brief.services[:3])}.
-- TONE: {brief.tone} Authority.
+### PHASE 2: CONTENT RULES ###
+BANNED PHRASES (ZERO TOLERANCE): {blacklist}
+VOICE: First-person plural ("We", "Our"). Mix short declarative statements with technical depth.
+SPECIFICITY: Every paragraph must contain at least ONE concrete detail (a number, a methodology name, a tool, a benchmark, or a real-world scenario).
+GROUNDING: Content MUST reference at least 2 of these actual services:
+{services_ref or '  - (No specific services provided)'}
+{pain_ref}
+TONE: {brief.tone} Authority — confident but not salesy.
+STRUCTURE: Minimum 4 sections with 2-3 paragraphs each. Dense, no filler.
 
-### SITE DNA (SOURCE OF TRUTH) ###
+### BRAND IDENTITY ###
 {brief.site_profile_md}
 
-### JSON DATA SCHEMA (STRICT FILL) ###
+{existing_ref}
+
+### OUTPUT FORMAT: STRICT JSON ###
 {{
-  "meta": {{"title": "{brief.page_title}", "description": "Expert insights on {brief.target_keyword}"}},
+  "meta": {{"title": "{brief.page_title}", "description": "Expert practitioner insights on {brief.target_keyword} for {category} professionals"}},
   "content_metadata": {{"keyword": "{brief.target_keyword}", "word_count": <int>, "expertise_level": "Professional"}},
-  "hero": {{"headline": "A non-generic expert hook about {brief.target_keyword}", "subheadline": "Targeted outcome"}},
+  "hero": {{
+    "headline": "A specific, non-generic headline about {brief.target_keyword} (NOT 'The Ultimate Guide')",
+    "subheadline": "A concrete value statement mentioning a measurable outcome"
+  }},
   "sections": [
      {{
-       "id": "unique-id", "type": "body", "heading": "Technical Insight on {brief.target_keyword}",
-       "body_paragraphs": ["Detailed expert paragraph 1", "Detailed expert paragraph 2"],
-       "callout": {{"type": "tip", "text": "Specific technical workaround"}}
+       "id": "unique-kebab-id", "type": "body",
+       "heading": "Specific technical heading (not just '{brief.target_keyword}')",
+       "body_paragraphs": [
+         "Dense paragraph 1 with specific details (80-120 words)",
+         "Dense paragraph 2 with methodology or framework reference (80-120 words)",
+         "Dense paragraph 3 with practical application (80-120 words)"
+       ],
+       "callout": {{"type": "tip", "text": "A specific, actionable technical tip"}}
      }}
   ],
   "faq": [
-     {{"question": "Critical professional question?", "answer": "Dense 80-word authoritative answer"}}
+     {{"question": "A question a real client would ask during a consultation?", "answer": "An 80-120 word authoritative answer with specific details, methodology references, and measurable claims."}},
+     {{"question": "Second expert question?", "answer": "Detailed answer"}},
+     {{"question": "Third expert question?", "answer": "Detailed answer"}}
   ],
-  "sources": ["Primary Industry Documents"]
+  "sources": ["Industry standard or framework name", "Technical documentation reference"]
 }}
+
+CRITICAL: Generate at minimum 4 sections and 3 FAQs. Each FAQ answer must be 80-120 words.
 """
 
 def _extract_json_from_llm(text: str) -> dict:
@@ -220,7 +378,7 @@ def _call_gemini(prompt, config):
     if not key:
         raise RuntimeError("Gemini API Key is missing.")
 
-    max_retries = 3
+    max_retries = 5
     base_delay = 5.0
 
     for attempt in range(max_retries):
@@ -254,12 +412,12 @@ def _call_gemini(prompt, config):
                 elif res.status_code == 404:
                     continue
                 elif res.status_code == 429:
-                    # Respect retryDelay if provided
-                    retry_info = res.json().get("error", {}).get("details", [{}])[0].get("retryDelay", "5s")
-                    wait_time = float(retry_info.replace("s", "")) if "s" in str(retry_info) else base_delay
-                    wait_time = min(wait_time, 30.0) # Cap at 30s
+                    # Exponential Backoff with jitter
+                    retry_info = res.json().get("error", {}).get("details", [{}])[0].get("retryDelay", f"{base_delay * (2 ** attempt)}s")
+                    wait_time = float(retry_info.replace("s", "")) if "s" in str(retry_info) else base_delay * (2 ** attempt)
+                    wait_time = min(wait_time, 60.0) # Cap at 60s
                     logger.warning(f"Gemini Rate Limit (429). Retrying in {wait_time}s (Attempt {attempt+1}/{max_retries})...")
-                    time.sleep(wait_time + random.uniform(1, 3))
+                    time.sleep(wait_time + random.uniform(2, 5))
                     break # Break model loop to retry with fresh attempt
                 elif res.status_code == 403:
                     raise RuntimeError("Gemini API 403: Access Denied. Check 'Generative Language API' enablement.")
@@ -267,7 +425,7 @@ def _call_gemini(prompt, config):
                     raise RuntimeError(f"Gemini REST Error {res.status_code}: {res.text}")
             except Exception as rest_err:
                 if "429" in str(rest_err):
-                    time.sleep(base_delay * (attempt + 1))
+                    time.sleep(base_delay * (2 ** attempt))
                     break
                 if "404" in str(rest_err): continue
                 raise rest_err

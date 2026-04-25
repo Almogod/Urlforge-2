@@ -4,6 +4,7 @@ import json
 from src.crawler_engine.fetcher import fetch
 from src.utils.text_processor import clean_html, chunk_text
 from src.content.page_generator import _call_openai, _call_gemini, _call_ollama, _extract_json_from_llm
+from src.utils.llm_resolver import resolve_api_key, is_valid_key, call_llm_with_fallback
 from src.config import config
 from src.utils.logger import logger
 
@@ -26,9 +27,10 @@ async def process_site_homepage(url: str):
 async def process_html_content(url: str, html: str, llm_config: dict = None):
     """
     Cleans, chunks, and structures the business analysis from provided HTML.
+    Uses 'minimal' cleaning to preserve nav/header context for business intelligence.
     """
-    clean_text = clean_html(html)
-    chunks = chunk_text(clean_text, chunk_size=4000)
+    clean_text = clean_html(html, minimal=True)
+    chunks = chunk_text(clean_text, chunk_size=6000)
     
     logger.info(f"Extracted {len(chunks)} chunks for analysis.")
     
@@ -49,25 +51,36 @@ async def process_html_content(url: str, html: str, llm_config: dict = None):
 async def structure_business_chunk(chunk: str, llm_config: dict = None):
     """
     Sends a chunk to the LLM to extract business-specific data points.
+    Uses cascading API key resolution — if one field is empty, checks others.
     """
-    prompt = f"""### BUSINESS DATA EXTRACTION TASK ###
-Analyze the following website content chunk and extract key business information in STRICT JSON format.
+    prompt = f"""### BUSINESS INTELLIGENCE EXTRACTION ###
+Extract high-fidelity business signals from this website chunk. We need the "Brand Touch" — what makes them unique.
 
 CHUNK CONTENT:
 {chunk}
 
+EXTRACTION RULES:
+1. "core_services": ACTUAL service/product names (not generic categories).
+2. "brand_personality": Adjectives describing the "Touch" or "Feel" (e.g., Gritty, Elite, Compassionate, High-Tech).
+3. "value_propositions": Specific unique selling points.
+4. "target_audience": Who is the EXACT person they are talking to?
+5. "technologies_mentioned": Tools, platforms, stacks mentioned.
+6. "company_info": Brand name and stated mission.
+7. "tonality": How do they talk? (e.g. "Direct and Technical", "Warm and Welcoming").
+
 STRICT JSON OUTPUT:
 {{
-  "core_services": ["list of services offered"],
-  "value_propositions": ["unique selling points"],
-  "target_audience": ["who is this for?"],
-  "technologies_mentioned": ["tools, stacks, or tech"],
   "company_info": {{
-    "name": "extracted company name",
-    "mission": "philosophy or mission",
-    "contact_info": ["emails, phones, etc."]
+    "name": "brand name",
+    "mission": "stated mission"
   }},
-  "key_findings": ["any other important business facts"]
+  "brand_personality": ["adj1", "adj2"],
+  "tonality": "description of voice",
+  "core_services": ["specific service 1", "specific service 2"],
+  "value_propositions": ["VP 1", "VP 2"],
+  "target_audience": ["Segment 1"],
+  "technologies_mentioned": ["Tech 1"],
+  "key_findings": ["Any other unique touch markers or facts"]
 }}
 """
     
@@ -79,34 +92,95 @@ STRICT JSON OUTPUT:
             "model": "gpt-4o-mini" if config.LLM_PROVIDER == "openai" else "gemini-1.5-flash"
         }
     
-    # Provider-specific key resolution if not explicitly set
-    provider = llm_config.get("provider", config.LLM_PROVIDER)
-    api_key = llm_config.get("api_key")
+    # Use centralized resolver — cascading field fallback
+    resolved_provider, resolved_key = resolve_api_key(llm_config)
     
-    if not api_key:
-        if provider == "openai":
-            api_key = llm_config.get("openai_key") or (config.OPENAI_API_KEY.get_secret_value() if config.OPENAI_API_KEY else None)
-        elif provider == "gemini":
-            api_key = llm_config.get("gemini_key") or (config.GEMINI_API_KEY.get_secret_value() if config.GEMINI_API_KEY else None)
-        elif provider == "ollama":
-            api_key = "ollama"
+    if not is_valid_key(resolved_key) and resolved_provider != "ollama":
+        logger.warning("No valid LLM key found for chunk structuring. Skipping.")
+        return _heuristic_chunk_extraction(chunk)
 
-    # Internal call expects "api_key"
     call_config = llm_config.copy()
-    call_config["api_key"] = api_key
-    model = "gpt-4o-mini" if provider == "openai" else "gemini-1.5-flash"
-    call_config["model"] = model
+    call_config["provider"] = resolved_provider
+    call_config["api_key"] = resolved_key
+    
+    # Set appropriate model
+    if resolved_provider == "openai":
+        call_config["model"] = call_config.get("model", "gpt-4o-mini")
+    elif resolved_provider == "gemini":
+        call_config["model"] = call_config.get("model", "gemini-1.5-flash")
 
     try:
         raw_res = ""
-        if provider == "openai":
+        if resolved_provider == "openai":
             raw_res = _call_openai(prompt, call_config)
-        elif provider == "gemini":
+        elif resolved_provider == "gemini":
             raw_res = _call_gemini(prompt, call_config)
-        elif provider == "ollama":
+        elif resolved_provider == "ollama":
             raw_res = _call_ollama(prompt, call_config)
+        elif resolved_provider == "openrouter":
+            from src.content.page_generator import _call_openrouter
+            raw_res = _call_openrouter(prompt, call_config)
             
-        return _extract_json_from_llm(raw_res)
+        result = _extract_json_from_llm(raw_res)
+        if result:
+            return result
+        
+        # If JSON extraction failed, try heuristic
+        return _heuristic_chunk_extraction(chunk)
     except Exception as e:
         logger.error(f"Chunk structuring failed: {e}")
-        return None
+        return _heuristic_chunk_extraction(chunk)
+
+
+def _heuristic_chunk_extraction(chunk: str) -> dict:
+    """
+    Fallback: Extract business signals from chunk using regex and heuristics.
+    Used when no LLM is available.
+    """
+    import re
+    
+    services = []
+    technologies = []
+    emails = []
+    
+    # Extract emails
+    email_pattern = r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
+    emails = re.findall(email_pattern, chunk)
+    
+    # Extract technology mentions
+    tech_keywords = [
+        "React", "Angular", "Vue", "Node.js", "Python", "Django", "Flask",
+        "AWS", "Azure", "Google Cloud", "GCP", "Docker", "Kubernetes",
+        "PostgreSQL", "MongoDB", "Redis", "MySQL", "GraphQL", "REST",
+        "TypeScript", "JavaScript", "Java", "Go", "Rust", "PHP",
+        "Terraform", "Jenkins", "GitHub Actions", "GitLab CI",
+        "WordPress", "Shopify", "WooCommerce", "Magento",
+        "TensorFlow", "PyTorch", "OpenAI", "LangChain",
+        "Figma", "Sketch", "Adobe", "Photoshop",
+        "Salesforce", "HubSpot", "Stripe", "Twilio",
+    ]
+    chunk_lower = chunk.lower()
+    for tech in tech_keywords:
+        if tech.lower() in chunk_lower:
+            technologies.append(tech)
+    
+    # Extract service-like phrases (sentences with action verbs + nouns)
+    service_patterns = [
+        r'(?:we |our team |we\'re )?(?:offer|provide|specialize|deliver|build|create|develop|design|manage|consult)[s]?\s+(?:in\s+)?([^.]{10,60})',
+    ]
+    for pattern in service_patterns:
+        matches = re.findall(pattern, chunk_lower)
+        services.extend([m.strip().title() for m in matches[:5]])
+    
+    return {
+        "core_services": services[:5],
+        "value_propositions": [],
+        "target_audience": [],
+        "technologies_mentioned": technologies,
+        "company_info": {
+            "name": "",
+            "mission": "",
+            "contact_info": emails[:3]
+        },
+        "key_findings": []
+    }

@@ -104,71 +104,89 @@ async def run_plugin(
         "results": {}
     }
 
+    # Pipeline Adjustment: User requested to remove the scraper and use whole site analysis
+    if "crawl" in pipeline:
+        pipeline.remove("crawl")
+
     try:
         for phase in pipeline:
             progress(f"Starting phase: {phase}...")
             
-            if phase == "crawl":
-                progress("Initializing Enterprise Crawler...")
-                pages, clean_urls, domain, graph = await _crawl(site_url, crawl_options, progress, site_token)
-                context_data.update({
-                    "pages": pages,
-                    "clean_urls": clean_urls,
-                    "domain": domain,
-                    "graph": graph
-                })
-                progress(f"Crawled {len(pages)} pages")
+            if phase == "analyze":
+                # ═══════════════════════════════════════════════════
+                # STEP 1: Homepage-Only Business Analysis
+                # The homepage contains the core business identity —
+                # no need to scrape the entire site for this.
+                # ═══════════════════════════════════════════════════
+                from src.services.sitemap_parser import get_sitemap_urls
+                from src.crawler_engine.fetcher import fetch
+                from urllib.parse import urlparse
+                import httpx
 
-            elif phase == "analyze":
-                if not context_data["pages"]:
-                    progress("Skipping analysis: No pages crawled.")
-                    continue
-                
+                context_data["domain"] = urlparse(site_url).netloc
+
+                # Fetch ONLY the homepage for business analysis
+                progress("Fetching homepage for Business Analysis...")
+                homepage_html = ""
+                async with httpx.AsyncClient(timeout=30) as client:
+                    try:
+                        res = await fetch(client, site_url)
+                        if res.get("status") == 200:
+                            homepage_html = res.get("html", "")
+                            # Seed pages list with homepage
+                            context_data["pages"] = [{
+                                "url": site_url,
+                                "html": homepage_html,
+                                "status": 200
+                            }]
+                    except Exception as e:
+                        logger.warning(f"Failed to fetch homepage {site_url}: {e}")
+
+                if not homepage_html:
+                    report["errors"].append({"phase": "analyze", "error": "Could not fetch homepage"})
+                    progress("Homepage fetch failed. Skipping business analysis.")
+                else:
+                    # Process homepage content into structured data
+                    progress("Extracting business intelligence from homepage...")
+                    homepage_structured = []
+                    try:
+                        processed = await process_html_content(site_url, homepage_html, llm_config=llm_config)
+                        homepage_structured = processed.get("structured_data", [])
+                    except Exception as e:
+                        logger.error(f"Homepage processing failed: {e}")
+
+                    # Synthesize business analysis from homepage data only
+                    site_analysis = synthesize_business_analysis(
+                        context_data["domain"], homepage_structured, llm_config=llm_config
+                    )
+                    site_analysis_report = site_analysis.get("report", "")
+                    business_context = site_analysis.get("context", {})
+
+                    report["site_analysis_report"] = site_analysis_report
+                    report["business_context"] = business_context
+
+                    progress(f"Business Analysis Complete. Category: {business_context.get('category', 'Unknown')}")
+
                 # ═══════════════════════════════════════════════════
-                # STEP 0: GSC Analysis (Optional)
+                # STEP 1b: Collect sitemap URLs for SEO audit (not for analysis)
                 # ═══════════════════════════════════════════════════
-                progress("Authenticating with Google Search Console...")
-                gsc_res = {"available": False, "indexed": [], "unindexed": [], "gaps": {}}
-                gsc_service = GSCService()
-                if gsc_service.is_available():
-                    progress("GSC credentials found. Running Indexation Audit...")
-                    crawled_urls = [p["url"] for p in context_data["pages"]]
-                    
-                    # Also fetch sitemap URLs
-                    from src.services.sitemap_parser import get_sitemap_urls
+                if not context_data["pages"] or len(context_data["pages"]) < 2:
+                    progress("Collecting sitemap URLs for SEO audit...")
                     sitemap_urls = get_sitemap_urls(site_url)
-                    
-                    gsc_res["available"] = True
-                    gsc_res["gaps"] = gsc_service.analyze_sitemap_gaps(sitemap_urls, crawled_urls)
-                    
-                    # Inspect a sample or all (respecting limits/performance)
-                    # For now, let's inspect the first 100
-                    for url in crawled_urls[:100]:
-                        inspect_data = gsc_service.inspect_url(site_url, url)
-                        analytics = gsc_service.get_search_analytics(site_url, url)
-                        
-                        status_info = {
-                            "url": url,
-                            "status": inspect_data.get("indexStatusResult", {}).get("verdict", "Unknown"),
-                            "reason": inspect_data.get("indexStatusResult", {}).get("coverageState", "Unknown"),
-                            "clicks": analytics.get("clicks", 0),
-                            "impressions": analytics.get("impressions", 0),
-                            "ctr": analytics.get("ctr", 0),
-                            "position": analytics.get("position", 0)
-                        }
-                        
-                        if status_info["status"] == "PASS":
-                            gsc_res["indexed"].append(status_info)
-                        else:
-                            gsc_res["unindexed"].append(status_info)
-                    
-                    progress(f"GSC Audit: {len(gsc_res['indexed'])} indexed, {len(gsc_res['unindexed'])} unindexed")
-                
-                report["gsc_audit"] = gsc_res
-                
+                    if sitemap_urls:
+                        progress(f"Found {len(sitemap_urls)} URLs in sitemap.")
+                        # Add sitemap URLs as lightweight entries (no HTML needed for audit)
+                        for url in sitemap_urls:
+                            if not any(p["url"] == url for p in context_data["pages"]):
+                                context_data["pages"].append({"url": url, "html": "", "status": 200})
+
                 # ═══════════════════════════════════════════════════
-                # STEP 1: SEO Audit (standard engine analysis)
+                # STEP 3: SEO Audit & Keyword Strategy
                 # ═══════════════════════════════════════════════════
+                from src.engine.engine import run_engine
+                from src.content.engine import run_content_engine
+                
+                # Standard audit for score
                 results = run_engine(
                     pages=context_data["pages"],
                     clean_urls=context_data["clean_urls"],
@@ -177,141 +195,89 @@ async def run_plugin(
                     competitors=competitors,
                     progress_callback=progress
                 )
-                progress("Compiling audit report and fix strategy...")
-                context_data["results"] = results
                 report["seo_score_before"] = results.get("seo_score", 0)
                 report["engine_result"] = results
-                report["suggested_actions"] = results.get("actions", [])
-                progress(f"SEO Audit complete. Score: {report['seo_score_before']}")
+                
+                # ═══════════════════════════════════════════════════
+                # STEP 3: SEO Audit & Keyword Strategy
+                # ═══════════════════════════════════════════════════
+                # Before keyword analysis, we need actual content from the sitemap pages
+                # (Business Analysis only used the homepage, but keywords need the whole site)
+                empty_pages = [p for p in context_data["pages"] if not p.get("html")]
+                if empty_pages:
+                    progress(f"Fetching content for {len(empty_pages[:50])} sitemap pages for keyword analysis...")
+                    async with httpx.AsyncClient(timeout=20) as client:
+                        for p in empty_pages[:50]: # Limit to 50 for speed
+                            try:
+                                res = await fetch(client, p["url"])
+                                if res.get("status") == 200:
+                                    p["html"] = res.get("html", "")
+                            except: pass
 
-                # ═══════════════════════════════════════════════════
-                # STEP 2: Deep Site Content Analysis
-                # Understand WHAT the site is about, its tone, niche
-                # ═══════════════════════════════════════════════════
-                progress("Analyzing site content, tone, and niche...")
-                from src.content.engine import analyze_site_content, verify_keyword_relevance, generate_markdown_site_profile
-                domain_context = analyze_site_content(context_data["pages"], context_data["domain"], llm_config=llm_config)
-                
-                # NEW: Generate and save the persistent Site Profile Markdown
-                site_profile_md = generate_markdown_site_profile(domain_context)
-                
-                # NEW: Deep Strategic Site Analysis (Homepage Only)
-                progress("Synthesizing Strategic Site Analysis (Business Focus)...")
-                homepage_page = next((p for p in context_data["pages"] if p["url"].rstrip("/") == site_url.rstrip("/")), None)
-                if not homepage_page and context_data["pages"]:
-                     homepage_page = context_data["pages"][0] # Fallback to first page
-                
-                if homepage_page and homepage_page.get("html"):
-                    try:
-                        processed_bus = await process_html_content(site_url, homepage_page["html"], llm_config=llm_config)
-                        site_analysis_report = synthesize_business_analysis(context_data["domain"], processed_bus.get("structured_data", []), llm_config=llm_config)
-                        report["site_analysis_report"] = site_analysis_report
-                        progress("Strategic Site Analysis generated.")
-                    except Exception as sae:
-                        logger.error(f"Site analysis failed: {sae}")
-                        report["site_analysis_report"] = f"# Site Analysis Error\n\nCould not generate business analysis: {sae}"
-                
-                report["site_profile_md"] = site_profile_md
-                report["domain_context"] = domain_context # Keep raw for logic
-                
-                progress(f"Site analysis: niche='{domain_context.get('niche')}', tone='{domain_context.get('tone')}'")
-                progress("Site Profile Markdown generated for context injection.")
-
-                # ═══════════════════════════════════════════════════
-                # STEP 3: Extract & Rank Keywords
-                # ═══════════════════════════════════════════════════
-                from src.content.engine import run_content_engine
-                progress("Running Keyword Strategy Engine...")
+                progress("Running Keyword Strategy Engine (Phrase-Aware)...")
                 content_res = run_content_engine(
                     context_data["pages"], 
                     competitors, 
                     llm_config, 
                     domain=context_data["domain"]
                 )
-                progress("Ranking discovered keywords and identifying gaps...")
                 
                 keyword_gaps = content_res.get("recommendations", [])
-                site_keywords = content_res.get("site_keywords", [])
                 prime_keywords = content_res.get("prime_keywords", [])
-                
-                report["keyword_gap"] = content_res.get("keyword_gap", {})
-                report["site_keywords"] = site_keywords
-                
-                existing_pages_list = [{"url": p["url"], "title": _get_title(p)} for p in context_data["pages"]]
-                report["content_generation_available"] = bool(keyword_gaps) or bool(prime_keywords)
+                site_phrases = content_res.get("site_phrases", [])
                 report["keyword_recommendations"] = keyword_gaps
-                report["existing_pages_list"] = existing_pages_list
-                progress(f"Found {len(site_keywords)} site keywords, {len(prime_keywords)} prime keywords")
-
+                report["site_phrases"] = site_phrases  # Store phrase-aware keywords
+                
                 # ═══════════════════════════════════════════════════
-                # STEP 4: Search Web for Competitor FAQs & Generate
-                # Uses the API to match the site's tone
+                # STEP 4: Generate FAQs (Driven by Business Analysis + Phrases)
                 # ═══════════════════════════════════════════════════
-                progress(f"Searching web for competitor FAQs and generating site-specific FAQs...")
+                progress("Generating site-specific FAQs based on Business Analysis...")
                 from src.content.faq_generator import generate_site_faqs
+                # Use phrase-aware keywords for FAQ generation
+                faq_keywords = site_phrases[:10] if site_phrases else content_res.get("site_keywords", [])
                 site_faqs = generate_site_faqs(
-                    site_keywords, 
+                    faq_keywords, 
                     context_data["domain"], 
                     llm_config, 
-                    site_context=domain_context
+                    site_context=business_context # Use new context
                 )
                 report["site_faqs"] = [faq.model_dump() for faq in site_faqs]
-                progress(f"Generated {len(site_faqs)} site-specific FAQs (API: {llm_config.get('provider', 'builtin')})")
-                
+                progress(f"Generated {len(site_faqs)} FAQs.")
+
                 # ═══════════════════════════════════════════════════
-                # STEP 5: Verify Keywords & Auto-Generate Pages
-                # Only generate for keywords VERIFIED to be relevant
+                # STEP 5: Generate Pages (Driven by Category)
                 # ═══════════════════════════════════════════════════
                 candidate_keywords = []
                 if target_keyword:
                     candidate_keywords.append(target_keyword)
+                candidate_keywords.extend([rec["keyword"] for rec in keyword_gaps[:3]])
+                candidate_keywords.extend(prime_keywords[:2])
                 
-                for rec in keyword_gaps[:5]:
-                    if rec["keyword"] not in candidate_keywords:
-                        candidate_keywords.append(rec["keyword"])
-                
-                for pk in prime_keywords[:5]:
-                    if pk not in candidate_keywords:
-                        candidate_keywords.append(pk)
+                # Filter duplicates and limit
+                verified_keywords = list(dict.fromkeys(candidate_keywords))[:5]
+                progress(f"Generating pages for keywords: {verified_keywords}")
 
-                # Verify each keyword is relevant to the site content
-                verified_keywords = []
-                for kw in candidate_keywords:
-                    if verify_keyword_relevance(kw, domain_context):
-                        verified_keywords.append(kw)
-                    else:
-                        progress(f"Keyword '{kw}' rejected — not relevant to site content")
+                existing_pages_list = [{"url": p["url"], "title": _get_title(p)} for p in context_data["pages"]]
                 
-                if not verified_keywords:
-                    progress("No verified keywords for page generation.")
-                else:
-                    progress(f"Verified {len(verified_keywords)} keywords for page generation: {verified_keywords}")
-
-                for kw in verified_keywords[:5]:  # Cap at 5 pages max
+                for kw in verified_keywords:
                     try:
-                        progress(f"Generating page for verified keyword: '{kw}' (via {llm_config.get('provider', 'builtin')})")
+                        progress(f"Generating page for '{kw}' (Category: {business_context.get('category')})")
                         from src.content.engine import generate_content_for_keyword
                         page_result = generate_content_for_keyword(
                             kw, 
                             competitors, 
                             llm_config, 
                             existing_pages=existing_pages_list,
-                            domain_context=domain_context,
+                            domain_context=business_context, # Use business context
                             site_wide_faqs=report.get("site_faqs", [])
                         )
                         if "error" not in page_result:
                             page_result["keyword"] = kw
                             report["pages_generated"].append(page_result)
-                            method = page_result.get("generation_method", "unknown")
-                            words = page_result.get("word_count", 0)
-                            progress(f"Generated page for '{kw}': {words} words via {method}")
-                        else:
-                            progress(f"Generation failed for '{kw}': {page_result.get('error')}")
-                            report["errors"].append({"phase": "auto_gen", "keyword": kw, "error": page_result.get("error")})
+                            progress(f"Generated page for '{kw}'")
                     except Exception as gen_ex:
-                        progress(f"Critical error generating '{kw}': {gen_ex}")
+                        logger.error(f"Generation failed for {kw}: {gen_ex}")
                         report["errors"].append({"phase": "auto_gen", "keyword": kw, "error": str(gen_ex)})
-
 
         if dry_run:
             progress("Dry run complete. No changes would be applied.")

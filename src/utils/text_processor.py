@@ -2,9 +2,10 @@ import re
 from bs4 import BeautifulSoup
 from src.utils.logger import logger
 
-def clean_html(html: str) -> str:
+def clean_html(html: str, minimal: bool = False) -> str:
     """
     Strips boilerplate and returns human-readable text.
+    If minimal=True, preserves nav, footer, and header (useful for business analysis).
     """
     if not html:
         return ""
@@ -12,7 +13,11 @@ def clean_html(html: str) -> str:
     soup = BeautifulSoup(html, "lxml")
     
     # 1. Remove noise tags
-    for tag in soup(["script", "style", "nav", "footer", "header", "aside", "noscript", "svg", "form", "iframe", "button"]):
+    noise_tags = ["script", "style", "noscript", "svg", "form", "iframe"]
+    if not minimal:
+        noise_tags.extend(["nav", "footer", "header", "aside", "button"])
+        
+    for tag in soup(noise_tags):
         tag.decompose()
         
     # 2. Extract text with spacing
