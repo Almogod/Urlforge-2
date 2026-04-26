@@ -52,9 +52,11 @@ async def process_raw_content(url: str, text: str, llm_config: dict = None):
     """
     Chunks and structures the business analysis from provided raw text (e.g. Github Repo source).
     """
-    chunks = chunk_text(text, chunk_size=6000)
+    # Clean the raw content (which often contains HTML files from the repo) to strip tags and noise
+    clean_text = clean_html(text, minimal=True)
+    chunks = chunk_text(clean_text, chunk_size=6000)
     
-    logger.info(f"Extracted {len(chunks)} chunks from raw text for analysis.")
+    logger.info(f"Extracted {len(chunks)} chunks from cleaned raw text for analysis.")
     
     structured_data = []
     for i, chunk in enumerate(chunks):
@@ -65,7 +67,7 @@ async def process_raw_content(url: str, text: str, llm_config: dict = None):
             
     return {
         "url": url,
-        "raw_text_length": len(text),
+        "raw_text_length": len(clean_text),
         "chunk_count": len(chunks),
         "structured_data": structured_data
     }

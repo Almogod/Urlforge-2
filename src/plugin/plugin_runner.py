@@ -42,21 +42,7 @@ def discover_plugins(plugin_dir: str = "src/modules") -> Dict[str, BaseSEOPlugin
     
     return discovered
 
-def run_plugin(
-    site_url: str,
-    task_id: str,
-    deploy_config: dict,
-    llm_config: dict,
-    competitors: list,
-    crawl_options: dict,
-    user_id: str = "system"
-):
-    audit_logger.info(f"User {user_id} started plugin job {task_id} for {site_url}")
-    # ... previous implementation updated to use discover_plugins ...
-    # For brevity as a mock implementation:
-    plugins = discover_plugins()
-    # Execute plugins...
-    pass
+
 
 
 async def run_plugin(
@@ -76,7 +62,6 @@ async def run_plugin(
     """
     import asyncio
     from datetime import datetime
-    from src.engine.engine import run_engine
 
     def progress(msg):
         logger.info("[plugin:%s] %s", task_id, msg)
@@ -144,9 +129,19 @@ async def run_plugin(
                         
                     repo_analysis = await analyze_github_repo(site_url, progress, github_token=github_token)
                     if "error" in repo_analysis:
-                        progress(f"GitHub API Error: {repo_analysis['error']}")
-                        report["errors"].append({"phase": "analyze", "error": repo_analysis['error']})
+                        error_msg = repo_analysis['error']
+                        progress(f"GitHub API Error: {error_msg}")
+                        report["errors"].append({"phase": "analyze", "error": error_msg})
+                        
+                        # Stop analysis and return the error in the report directly
+                        report["site_analysis_report"] = f"### GitHub Analysis Failed\n\n**Error:** {error_msg}\n\n*Please check your configuration or provide a GitHub token if you are hitting rate limits.*"
+                        report["business_context"] = {"category": "Error"}
+                        
+                        # Skip the rest of the analyze phase
+                        homepage_html = ""
+                        is_github_error = True
                     else:
+                        is_github_error = False
                         homepage_html = repo_analysis.get("combined_content", "")
                         progress(f"Successfully fetched {repo_analysis.get('files_fetched')} source files from {site_url}.")
                         context_data["pages"] = [{
@@ -164,7 +159,7 @@ async def run_plugin(
                         except Exception as e:
                             logger.error(f"Repo processing failed: {e}")
 
-                if not is_github or not homepage_html:
+                if not is_github or (not homepage_html and not locals().get("is_github_error", False)):
                     async with httpx.AsyncClient(timeout=30) as client:
                         try:
                             res = await fetch(client, site_url)
@@ -192,6 +187,8 @@ async def run_plugin(
                         except Exception as e:
                             logger.error(f"Homepage processing failed: {e}")
 
+                # Only synthesize if we didn't hit a fatal GitHub error
+                if not locals().get("is_github_error", False):
                     # Synthesize business analysis from homepage data only
                     site_analysis = await asyncio.to_thread(
                         synthesize_business_analysis,
@@ -199,10 +196,10 @@ async def run_plugin(
                     )
                     site_analysis_report = site_analysis.get("report", "")
                     business_context = site_analysis.get("context", {})
-
+    
                     report["site_analysis_report"] = site_analysis_report
                     report["business_context"] = business_context
-
+    
                     progress(f"Business Analysis Complete. Category: {business_context.get('category', 'Unknown')}")
 
                 # ═══════════════════════════════════════════════════

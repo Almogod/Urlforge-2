@@ -9,6 +9,7 @@ via the GitHub API and extracts their content for business analysis.
 import httpx
 import base64
 import re
+import json
 from urllib.parse import urlparse
 from typing import List, Dict, Optional, Tuple
 from src.utils.logger import logger
@@ -134,6 +135,10 @@ async def fetch_repo_tree(owner: str, repo: str, branch: str = "main", github_to
             url = f"https://api.github.com/repos/{owner}/{repo}/git/trees/master?recursive=1"
             resp = await client.get(url, headers=headers)
         
+        if resp.status_code == 403:
+            logger.error("GitHub API Rate Limit exceeded.")
+            return [{"error": "403_RATE_LIMIT"}]
+            
         if resp.status_code != 200:
             logger.error(f"GitHub API error: {resp.status_code} - {resp.text[:200]}")
             return []
@@ -200,6 +205,10 @@ async def fetch_file_content(owner: str, repo: str, path: str, branch: str = "ma
             del headers["Authorization"]
             resp = await client.get(url, headers=headers)
         
+        if resp.status_code == 403:
+            logger.error(f"GitHub API Rate Limit exceeded while fetching {path}.")
+            return "ERROR_403_RATE_LIMIT"
+            
         if resp.status_code != 200:
             return ""
         
@@ -248,6 +257,9 @@ async def analyze_github_repo(
     
     if not files:
         return {"error": f"Could not fetch file tree for {owner}/{repo}. Check if the repo is public."}
+        
+    if len(files) > 0 and files[0].get("error") == "403_RATE_LIMIT":
+        return {"error": "GitHub API Rate Limit exceeded. Please provide a valid GitHub Token in the LLM config or deployment config."}
     
     # Step 2: Prioritize files — fetch priority files first, then by relevance
     priority_set = set(PRIORITY_FILES)
@@ -288,6 +300,9 @@ async def analyze_github_repo(
         
         content = await fetch_file_content(owner, repo, path, branch, github_token)
         
+        if content == "ERROR_403_RATE_LIMIT":
+            return {"error": "GitHub API Rate Limit exceeded while fetching files. Please provide a valid GitHub Token."}
+            
         if content:
             file_contents[path] = content
             files_analyzed.append({
@@ -411,7 +426,6 @@ def _extract_metadata(file_contents: Dict[str, str]) -> Dict:
     pkg_json = file_contents.get("package.json", "")
     if pkg_json:
         try:
-            import json
             pkg = json.loads(pkg_json)
             metadata["name"] = pkg.get("name", "")
             metadata["description"] = pkg.get("description", "")
