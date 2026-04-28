@@ -442,20 +442,66 @@ input:focus, select:focus, textarea:focus {
     mix-blend-mode: difference;
 }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-    width: 8px;
-}
-::-webkit-scrollbar-track {
+/* Editorial Gallery Section */
+.editorial-gallery {
+    padding: 120px 60px;
     background: var(--bg);
 }
-::-webkit-scrollbar-thumb {
-    background: var(--card-border);
-    border-radius: 10px;
+
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+    width: 100%;
 }
-::-webkit-scrollbar-thumb:hover {
-    background: var(--text-muted);
+
+.gallery-item {
+    position: relative;
+    aspect-ratio: 4/5;
+    overflow: hidden;
+    background: #000;
 }
+
+.gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 1.5s var(--ease-out-expo);
+    opacity: 0.9;
+}
+
+.gallery-item:hover img {
+    transform: scale(1.05);
+    opacity: 1;
+}
+
+.item-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.2);
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    opacity: 0;
+    transition: var(--transition-med);
+    pointer-events: none;
+}
+
+.gallery-item:hover .item-overlay {
+    opacity: 1;
+    background: rgba(0,0,0,0.4);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--card-border); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text); }
 
 /* Micro-interactions */
 .nav-link::after {
@@ -463,7 +509,7 @@ input:focus, select:focus, textarea:focus {
     display: block;
     width: 0;
     height: 1px;
-    background: var(--accent);
+    background: var(--text);
     transition: width 0.3s;
 }
 .nav-link:hover::after {
