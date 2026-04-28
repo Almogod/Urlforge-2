@@ -39,12 +39,12 @@
         <p class="hero-subtitle">Autonomous SEO Engine for Enterprise Domains.<br>Identify. Remediate. Deploy.</p>
     </section>
 
-    <div class="editorial-image-block reveal">
+    <div class="editorial-image-block">
         <img src="/static/images/editorial_1.png" alt="Editorial Abstract 1">
         <div class="image-caption">01 / Strategic Foundation</div>
     </div>
 
-    <section class="editorial-gallery reveal">
+    <section class="editorial-gallery">
         <div class="gallery-grid">
             <div class="gallery-item reveal" style="grid-column: span 2;">
                 <img src="/static/images/editorial_4.png" alt="Gallery 1">
@@ -131,7 +131,7 @@
         </div>
         {% endif %}
 
-        <div class="editorial-image-block reveal" data-theme-trigger="olive">
+        <div class="editorial-image-block" data-theme-trigger="olive">
             <img src="/static/images/editorial_2.png" alt="Editorial Abstract 2">
             <div class="image-caption">02 / Intelligence Synthesis</div>
         </div>
@@ -173,7 +173,7 @@
             </div>
         </div>
 
-        <div class="editorial-image-block reveal">
+        <div class="editorial-image-block">
             <img src="/static/images/editorial_3.png" alt="Editorial Abstract 3">
             <div class="image-caption">03 / Execution & Deployment</div>
         </div>
@@ -225,7 +225,7 @@
                             revealObserver.unobserve(entry.target);
                         }
                     });
-                }, { threshold: 0.05 });
+                }, { threshold: 0, rootMargin: '0px 0px -50px 0px' });
 
                 document.querySelectorAll('.reveal').forEach((el, i) => {
                     const rect = el.getBoundingClientRect();

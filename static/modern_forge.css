@@ -240,7 +240,7 @@ body {
 }
 
 .hero-title {
-    font-size: 18vw;
+    font-size: 15vw;
     font-weight: 800;
     line-height: 0.8;
     letter-spacing: -0.06em;
@@ -412,20 +412,23 @@ input:focus, select:focus, textarea:focus {
                 clip-path 1.2s var(--ease-out-expo);
 }
 
-/* Only hide if JS is confirmed to be running - DISABLED FOR DEBUGGING
-body.js-enabled .reveal:not(.active) {
+/* Reveal System - Fade In Only */
+.reveal {
     opacity: 0;
-    transform: translateY(40px);
-    clip-path: inset(100% 0 0 0);
-    visibility: hidden;
+    transform: translateY(20px);
+    transition: transform 1.2s var(--ease-out-expo), 
+                opacity 1.2s var(--ease-out-expo);
 }
-*/
 
 .reveal.active {
     opacity: 1 !important;
     transform: translateY(0) !important;
-    clip-path: inset(0 0 0 0) !important;
-    visibility: visible !important;
+}
+
+/* Fallback */
+body:not(.js-enabled) .reveal {
+    opacity: 1;
+    transform: none;
 }
 
 .editorial-image-block {
