@@ -70,17 +70,18 @@
 
                 <div class="form-group">
                     <label>Crawl Limit</label>
-                    <input type="number" name="limit" value="100" min="1" required>
+        <div id="cards" class="glass-card reveal">
+            <!-- Audit Form or Results -->
+            <h2 class="section-title">Audit Engine</h2>
+            <form action="/plugin/audit" method="POST" id="audit-form">
+                <div class="form-group">
+                    <label>Domain Identity</label>
+                    <input type="text" name="url" placeholder="https://example.com" required>
                 </div>
-
-                <div class="checkbox-group">
-                    <input type="checkbox" id="plugin_broken_links" name="broken_links_only" value="true">
-                    <label for="plugin_broken_links">Deep focus on fixing broken links</label>
-                </div>
-
+                
                 <div style="border-top: 1px dashed var(--card-border); padding-top: 15px; margin-top: 15px;">
-                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px; font-weight: 600;">ENTERPRISE CRAWLER SETTINGS</p>
-                    <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                    <p style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;">Enterprise Crawler Settings</p>
+                    <div style="display: flex; gap: 32px; margin-bottom: 32px;">
                         <div class="form-group" style="flex: 1; margin: 0;">
                             <label>Max Depth</label>
                             <input type="number" name="max_depth" value="10" min="1" max="100">
@@ -92,64 +93,24 @@
                     </div>
                     <div class="form-group">
                         <label>Crawler Identity (User-Agent)</label>
-                        <select name="user_agent" style="width:100%; padding:14px 18px; border-radius:12px; border:1px solid var(--card-border); background:rgba(255,255,255,0.3); font-family:'Inter', sans-serif;">
+                        <select name="user_agent" style="width:100%; padding:14px 18px; border-radius:12px; border:1px solid var(--card-border); background:rgba(255,255,255,0.3);">
                             <option value="chrome">Google Chrome (Desktop)</option>
                             <option value="googlebot">GoogleBot</option>
                             <option value="googlebot_mobile">GoogleBot (Smartphone)</option>
                             <option value="bingbot">BingBot</option>
                         </select>
                     </div>
-
-                    <div class="form-group">
-                        <label>Storage Backend</label>
-                        <select name="crawler_backend" style="width:100%; padding:14px 18px; border-radius:12px; border:1px solid var(--card-border); background:rgba(255,255,255,0.3); font-family:'Inter', sans-serif;">
-                            <option value="memory">In-Memory (Fast, &lt;10k pages)</option>
-                            <option value="sqlite">SQLite (Enterprise, &gt;10k pages)</option>
-                        </select>
-                    </div>
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="plugin_crawl_assets" name="crawl_assets" value="true">
-                        <label for="plugin_crawl_assets">Enable Deep Asset Crawl (CSS, JS, Images, PDFs)</label>
-                    </div>
-
-                    <div class="checkbox-group" style="margin-top: 10px;">
-                        <input type="checkbox" id="plugin_use_js" name="use_js" value="true">
-                        <label for="plugin_use_js">Enable JS Rendering (Playwright)</label>
-                    </div>
-
-                    <div class="form-group" style="margin-top: 15px;">
-                        <label>Crawl Delay (Seconds)</label>
-                        <input type="number" name="delay" value="1.0" min="0.1" max="10" step="0.1" style="width:100%; padding:14px; border-radius:12px; border:1px solid var(--card-border); background:rgba(255,255,255,0.3);">
-                    </div>
                 </div>
+                <button type="submit" class="submit-btn">Initialize Audit</button>
+            </form>
+        </div><!-- End cards -->
 
-                <div class="ai-world-section reveal" style="border-top: 1px solid var(--card-border);">
-                    <!-- DISCOVERY CARD VIEW -->
-                    <div id="ai-discovery-card" class="ai-discovery-card" onclick="revealAIForms()">
-                        <h3 class="ai-world-title">The Data World of AI ✨</h3>
-                        <div class="ai-orbit-system">
-                            <div class="orbit-ring" style="width: 140px; height: 140px; animation-duration: 8s;"></div>
-                            <div class="orbit-ring" style="width: 200px; height: 200px; animation-duration: 12s;"></div>
-                            <div class="orbit-ring" style="width: 260px; height: 260px; animation-duration: 16s;"></div>
-                            <div class="ai-core">
-                                <div class="ai-core-glow"></div>
-                                <div class="ai-eyes">
-                                    <span></span><span></span>
-                                </div>
-                            </div>
-                            <div class="planet" style="--orbit-size: 140px; --orbit-speed: 8s;"></div>
-                            <div class="planet" style="--orbit-size: 200px; --orbit-speed: 12s;"></div>
-                            <div class="planet" style="--orbit-size: 260px; --orbit-speed: 16s;"></div>
-                        </div>
-                        <div class="ai-click-me">Click Me ↓</div>
-                    </div>
+        <div class="editorial-image-block reveal" data-theme-trigger="olive">
+            <img src="/static/images/editorial_2.png" alt="Editorial Abstract 2">
+            <div class="image-caption">02 / Intelligence Synthesis</div>
+        </div>
 
-                    <!-- AI FORMS VIEW (HIDDEN) -->
-                    <div id="ai-config-forms" class="ai-config-forms hidden">
-                        <div class="form-group" style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 16px; margin-bottom: 24px; border: 1px solid var(--primary);">
-                            <label style="color: var(--primary); font-weight: 800; font-size: 0.7rem;">Primary AI Engine Selection</label>
-                            <select name="primary_provider" onchange="updateAIFields()" style="width:100%; padding:16px; border-radius:12px; background: rgba(0,0,0,0.4); border: 1px solid var(--card-border); color: #fff; font-weight: 700; font-family: inherit; cursor: pointer; transition: var(--transition-med); appearance: none;">
-                                <option value="gemini">Google Gemini (Elite Speed)</option>
+        <div id="features-section" class="glass-card reveal">
                                 <option value="ollama">Ollama (Private / Local)</option>
                                 <option value="openai">OpenAI (Creative Genius)</option>
                                 <option value="openrouter">OpenRouter (Universal)</option>
