@@ -19,20 +19,20 @@
 
     <div class="nav-container">
         <nav class="modern-nav">
-            <div class="nav-logo">URLFORGE</div>
+            <div class="nav-logo">URLFORGE | ELITE</div>
             <div class="nav-links">
-                <a href="#" class="nav-link">Home</a>
+                <a href="#cards" class="nav-link">Dashboard</a>
                 <a href="#features-section" class="nav-link">Features</a>
-                <a href="#faqs-section" class="nav-link">FAQs</a>
+                <a href="#faqs-section" class="nav-link">Analysis</a>
                 <button class="nav-btn">Log In</button>
             </div>
         </nav>
     </div>
 
     <section class="hero-section fade-in">
-        <span class="badge">Spatial Depth Engine</span>
-        <h1 class="hero-title">UrlForge<br>Spatial</h1>
-        <p class="hero-subtitle">The first autonomous SEO engine built with spatial intelligence. Crawl, Analyze, and Fix with isometric precision.</p>
+        <span class="badge">Next-Gen SEO Intelligence</span>
+        <h1 class="hero-title">The Future of<br>Autonomous SEO</h1>
+        <p class="hero-subtitle">UrlForge Elite leverages deep-learning audit engines to identify, remediate, and deploy optimizations with zero human intervention.</p>
     </section>
 
     <div class="content-area">
@@ -40,11 +40,11 @@
 <div id="cards">
 
     <!-- FORM CARD -->
-    <div class="card result-card glass-card">
+    <div class="card result-card glass-card reveal">
         <div id="plugin-tab">
-            <h2 class="section-title" style="margin-bottom: 10px;">Autonomous Plugin Engine</h2>
-            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">
-                Crawl, analyze, fix SEO loopholes, generate new content for keyword gaps, and deploy back to site autonomously.
+            <h2 class="section-title">Autonomous Control Center</h2>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 32px;">
+                Initialize your domain crawl to unlock autonomous remediation and content generation.
             </p>
             <form id="plugin-form" action="/plugin/run" method="post">
                 <div class="form-group">
@@ -113,7 +113,7 @@
                     </div>
                 </div>
 
-                <div class="ai-world-section" style="border-top: 1px solid var(--card-border); margin-top: 20px; padding-top: 20px;">
+                <div class="ai-world-section reveal" style="border-top: 1px solid var(--card-border);">
                     <!-- DISCOVERY CARD VIEW -->
                     <div id="ai-discovery-card" class="ai-discovery-card" onclick="revealAIForms()">
                         <h3 class="ai-world-title">The Data World of AI ✨</h3>
@@ -136,15 +136,15 @@
 
                     <!-- AI FORMS VIEW (HIDDEN) -->
                     <div id="ai-config-forms" class="ai-config-forms hidden">
-                        <div class="form-group" style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--primary-color);">
-                            <label style="color: var(--primary-color); font-weight: 700;">Primary AI Engine (User Choice)</label>
-                            <select name="primary_provider" onchange="updateAIFields()" style="width:100%; padding:12px; border-radius:8px; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); color: #fff; font-weight: 600;">
-                                <option value="gemini">Google Gemini (Use Google AI Studio API)</option>
-                                <option value="ollama">Ollama (Local / Private)</option>
-                                <option value="openai">OpenAI (Creative Content)</option>
-                                <option value="openrouter">OpenRouter (Universal Choice)</option>
+                        <div class="form-group" style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 16px; margin-bottom: 24px; border: 1px solid var(--primary);">
+                            <label style="color: var(--primary); font-weight: 800; font-size: 0.7rem;">Primary AI Engine Selection</label>
+                            <select name="primary_provider" onchange="updateAIFields()" style="width:100%; padding:16px; border-radius:12px; background: rgba(0,0,0,0.4); border: 1px solid var(--card-border); color: #fff; font-weight: 700; font-family: inherit; cursor: pointer; transition: var(--transition-med); appearance: none;">
+                                <option value="gemini">Google Gemini (Elite Speed)</option>
+                                <option value="ollama">Ollama (Private / Local)</option>
+                                <option value="openai">OpenAI (Creative Genius)</option>
+                                <option value="openrouter">OpenRouter (Universal)</option>
                             </select>
-                            <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px;">UrlForge will use this engine as the lead brain for your analysis.</p>
+                            <p style="font-size: 0.75rem; color: var(--text-dim); margin-top: 10px; opacity: 0.8;">Select the brain that will power your autonomous SEO audit.</p>
                         </div>
                         <div id="openai-config" class="form-group ai-field-group">
                             <label>OpenAI API Key (Optional)</label>
@@ -187,7 +187,7 @@
 
     <!-- ERROR STATE -->
     {% if error %}
-    <div class="card result-card">
+    <div class="card result-card glass-card reveal">
         <h3 style="color: var(--error-color);">Error Occurred</h3>
         <p style="color: var(--text-muted);">{{error}}</p>
     </div>
@@ -198,7 +198,7 @@
 
     {% if engine_result and engine_result.pages %}
     <!-- ENTERPRISE AUDIT DASHBOARD -->
-    <div class="card result-card glass-card">
+    <div class="card result-card glass-card reveal">
         <h2 class="section-title">Enterprise Audit Dashboard</h2>
         
         <div class="enterprise-grid">
@@ -294,9 +294,9 @@
     {% if is_plugin %}
     <!-- PLUGIN REPORT SUMMARY -->
     {% if is_plugin and plugin_report %}
-    <div class="card result-card glass-card" style="position: relative; overflow: hidden;">
+    <div class="card result-card glass-card reveal" style="position: relative; overflow: hidden;">
         <!-- RESTORED BRANDING: THE DATA WORLD OF AI -->
-        <div class="ai-world-section" style="position: absolute; top: -50px; right: -50px; opacity: 0.15; pointer-events: none; transform: scale(0.6);">
+        <div class="ai-world-section" style="position: absolute; top: -30px; right: -30px; opacity: 0.1; pointer-events: none; transform: scale(0.5); transform-origin: top right;">
             <div class="ai-orbit-system">
                 <div class="orbit-ring" style="width: 140px; height: 140px; animation-duration: 8s;"></div>
                 <div class="orbit-ring" style="width: 200px; height: 200px; animation-duration: 12s;"></div>
@@ -473,7 +473,7 @@
             {% endif %}
         </div>
         <!-- NEW SECTION: SITE FAQS (RICH CITATIONS) -->
-        <div class="review-section" style="margin-top: 30px; margin-bottom: 40px; border-top: 1px solid var(--card-border); padding-top: 20px;">
+        <div id="faqs-section" class="review-section" style="margin-top: 30px; margin-bottom: 40px; border-top: 1px solid var(--card-border); padding-top: 20px;">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
                 <h3 style="font-weight: 600;">AI-Powered Site FAQs</h3>
                 <span class="badge" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2);">Rich Results Ready</span>
@@ -498,7 +498,7 @@
         </div>
 
         {% if plugin_report.state == 'pending_approval' %}
-        <div class="review-section" id="review-area">
+        <div class="review-section reveal" id="review-area">
             <h3>Step 1: Review & Approve Suggestions</h3>
             <p style="color: var(--text-muted); margin-bottom: 15px;">Review the automated suggestions below. Uncheck any you wish to skip.</p>
             
@@ -726,7 +726,7 @@
             {% set total_failed = plugin_report.deploy_results | selectattr('success', 'equalto', false) | list | length %}
             {% set total_success = plugin_report.deploy_results | selectattr('success', 'equalto', true) | list | length %}
             
-            <div class="review-section" style="border-color: var(--primary-color);">
+            <div class="review-section reveal" style="border-color: var(--primary-color);">
                 <h3 style="color: var(--primary-color); background: linear-gradient(to right, var(--primary-color), #6366f1); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">
                     {{ 'Deployment Mixed Results' if (total_failed > 0 and total_success > 0) else ('Deployment Failed' if total_failed > 0 else 'Deployment Successful') }}
                 </h3>
@@ -774,7 +774,7 @@
 
     {% if not is_plugin %}
     <!-- OVERVIEW & SCORE CARD -->
-    <div class="card result-card glass-card">
+    <div class="card result-card glass-card reveal">
         <h2 class="section-title">SEO Health Overview</h2>
         
         <div class="score-display">
@@ -960,16 +960,16 @@
     {% endif %}
 
     <!-- CONTENT EDITOR MODAL -->
-    <div id="content-editor-modal" class="hidden" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; justify-content: center; align-items: center;">
-        <div class="card" style="width: 90%; max-width: 800px; max-height: 90vh; overflow-y: auto; position: relative;">
-            <button onclick="closeContentEditor()" style="position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-muted);">&times;</button>
-            <h2 style="margin-top: 0;">Content Editor: <span id="editor-keyword" style="color: var(--primary-color);"></span></h2>
-            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px;">Edit the JSON structure of the generated page. The HTML will be re-rendered automatically on save.</p>
+    <div id="content-editor-modal" class="modal-overlay hidden">
+        <div class="glass-card" style="width: 90%; max-width: 900px; max-height: 90vh; overflow-y: auto; position: relative; margin: 0;">
+            <button onclick="closeContentEditor()" style="position: absolute; top: 24px; right: 24px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-dim); transition: var(--transition-fast);">&times;</button>
+            <h2 class="section-title" style="font-size: 1.8rem; margin-bottom: 16px;">Content Editor: <span id="editor-keyword" style="color: var(--primary);"></span></h2>
+            <p style="color: var(--text-dim); font-size: 0.9rem; margin-bottom: 24px;">Refine the JSON structure of your generated page. Changes are reflected instantly upon saving.</p>
             <input type="hidden" id="editor-keyword-input">
-            <textarea id="editor-textarea" style="width: 100%; height: 50vh; font-family: monospace; font-size: 0.85rem; padding: 15px; background: rgba(0,0,0,0.05); border: 1px solid var(--card-border); border-radius: 8px; color: var(--text-color);"></textarea>
-            <div style="margin-top: 20px; text-align: right;">
-                <button onclick="closeContentEditor()" style="background: none; border: 1px solid var(--card-border); padding: 10px 20px; border-radius: 6px; cursor: pointer; margin-right: 10px; color: var(--text-color);">Cancel</button>
-                <button id="editor-save-btn" onclick="saveContent()" style="background: var(--primary-color); border: none; padding: 10px 20px; border-radius: 6px; color: white; cursor: pointer; font-weight: 600;">Save & Render</button>
+            <textarea id="editor-textarea" style="width: 100%; height: 50vh; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; padding: 20px; background: rgba(0,0,0,0.4); border: 1px solid var(--card-border); border-radius: 12px; color: #fff; line-height: 1.5;"></textarea>
+            <div style="margin-top: 32px; display: flex; justify-content: flex-end; gap: 16px;">
+                <button onclick="closeContentEditor()" style="background: transparent; border: 1px solid var(--card-border); padding: 12px 24px; border-radius: 10px; cursor: pointer; color: var(--text); font-weight: 600; transition: var(--transition-fast);">Cancel</button>
+                <button id="editor-save-btn" onclick="saveContent()" style="background: var(--primary); border: none; padding: 12px 32px; border-radius: 10px; color: #000; cursor: pointer; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; transition: var(--transition-med);">Save & Render</button>
             </div>
         </div>
     </div>
@@ -978,22 +978,22 @@
 <section id="features-section" class="features-section" style="padding: 60px 20px; max-width: 1200px; margin: 0 auto;">
     <h2 class="section-title" style="text-align: center; margin-bottom: 40px;">Why Choose UrlForge?</h2>
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
-        <div class="glass-card" style="padding: 30px; border-radius: 16px; border: 1px solid var(--card-border);">
+        <div class="glass-card reveal" style="padding: 30px; border-radius: 16px; border: 1px solid var(--card-border);">
             <div style="font-size: 2.5rem; margin-bottom: 15px;">🧠</div>
             <h3 style="margin-bottom: 10px; font-weight: 700;">Provider-Agnostic Engine</h3>
             <p style="color: var(--text-muted); line-height: 1.6; font-size: 0.95rem;">You have total control over the AI. Choose between Google Gemini, OpenAI, OpenRouter, or run it entirely privately using Ollama on your local machine.</p>
         </div>
-        <div class="glass-card" style="padding: 30px; border-radius: 16px; border: 1px solid var(--card-border);">
+        <div class="glass-card reveal" style="padding: 30px; border-radius: 16px; border: 1px solid var(--card-border);">
             <div style="font-size: 2.5rem; margin-bottom: 15px;">🔍</div>
             <h3 style="margin-bottom: 10px; font-weight: 700;">Holistic Business Analysis</h3>
             <p style="color: var(--text-muted); line-height: 1.6; font-size: 0.95rem;">UrlForge doesn't just look at keywords. It analyzes your homepage to understand your core business category, audience, and market gap before generating strategies.</p>
         </div>
-        <div class="glass-card" style="padding: 30px; border-radius: 16px; border: 1px solid var(--card-border);">
+        <div class="glass-card reveal" style="padding: 30px; border-radius: 16px; border: 1px solid var(--card-border);">
             <div style="font-size: 2.5rem; margin-bottom: 15px;">✨</div>
             <h3 style="margin-bottom: 10px; font-weight: 700;">Autonomous DOM Fixer</h3>
             <p style="color: var(--text-muted); line-height: 1.6; font-size: 0.95rem;">No more manual coding. UrlForge parses your malformed HTML, injects canonicals, demotes duplicate H1s, and applies structural fixes automatically.</p>
         </div>
-        <div class="glass-card" style="padding: 30px; border-radius: 16px; border: 1px solid var(--card-border);">
+        <div class="glass-card reveal" style="padding: 30px; border-radius: 16px; border: 1px solid var(--card-border);">
             <div style="font-size: 2.5rem; margin-bottom: 15px;">🚀</div>
             <h3 style="margin-bottom: 10px; font-weight: 700;">Direct CI/CD Integration</h3>
             <p style="color: var(--text-muted); line-height: 1.6; font-size: 0.95rem;">Once you approve the fixes, UrlForge securely deploys the patched files directly to your GitHub repository or Vercel, streamlining your workflow.</p>
@@ -1726,8 +1726,69 @@
             };
             renderMD();
             window.rerenderMarkdown = renderMD;
-            // Immediate re-check to catch late-load content
             setTimeout(renderMD, 500);
+
+            // Scroll Reveal Observer
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const revealObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                        revealObserver.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            const revealElements = document.querySelectorAll('.reveal');
+            revealElements.forEach(el => {
+                // If element is already in viewport (e.g. on reload), show it immediately
+                const rect = el.getBoundingClientRect();
+                if (rect.top < window.innerHeight) {
+                    el.classList.add('active');
+                } else {
+                    revealObserver.observe(el);
+                }
+            });
+
+            // Mouse following effect for glass cards
+            document.querySelectorAll('.glass-card').forEach(card => {
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = ((e.clientX - rect.left) / rect.width) * 100;
+                    const y = ((e.clientY - rect.top) / rect.height) * 100;
+                    card.style.setProperty('--mouse-x', `${x}%`);
+                    card.style.setProperty('--mouse-y', `${y}%`);
+                });
+            });
+            
+            // Fix for potential overlaps on mobile/scroll
+            window.addEventListener('scroll', () => {
+                const nav = document.querySelector('.modern-nav');
+                if (window.scrollY > 50) {
+                    nav.style.padding = '8px 20px';
+                    nav.style.background = 'rgba(3, 7, 18, 0.8)';
+                } else {
+                    nav.style.padding = '10px 24px';
+                    nav.style.background = 'rgba(3, 7, 18, 0.6)';
+                }
+            });
+
+            // Magnetic Button Effect
+            document.querySelectorAll('.submit-btn').forEach(btn => {
+                btn.addEventListener('mousemove', (e) => {
+                    const rect = btn.getBoundingClientRect();
+                    const x = e.clientX - rect.left - rect.width / 2;
+                    const y = e.clientY - rect.top - rect.height / 2;
+                    btn.style.transform = `translate(${x * 0.15}px, ${y * 0.15}px)`;
+                });
+                btn.addEventListener('mouseleave', () => {
+                    btn.style.transform = `translate(0, 0)`;
+                });
+            });
         });
     </script>
 </body>
