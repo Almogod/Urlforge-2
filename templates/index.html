@@ -40,6 +40,11 @@
         <p class="hero-subtitle">Autonomous SEO Engine for Enterprise Domains.<br>Identify. Remediate. Deploy.</p>
     </section>
 
+    <div class="editorial-image-block reveal">
+        <img src="/static/images/editorial_1.png" alt="Editorial Abstract 1">
+        <div class="image-caption">01 / Strategic Foundation</div>
+    </div>
+
     <div class="content-area">
 
 <div id="cards">
@@ -1778,6 +1783,38 @@
             }
             requestAnimationFrame(raf);
 
+            // Stagger Reveal
+            const revealObserver = new IntersectionObserver((entries) => {
+                entries.forEach((entry, i) => {
+                    if (entry.isIntersecting) {
+                        setTimeout(() => {
+                            entry.target.classList.add('active');
+                        }, i * 150);
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+            // Theme Switcher & Scroll Logic
+            window.addEventListener('scroll', () => {
+                const nav = document.querySelector('.nav-container');
+                const scrollPos = window.scrollY;
+                
+                if (scrollPos > 100) nav.classList.add('scrolled');
+                else nav.classList.remove('scrolled');
+
+                // Detect theme triggers
+                document.querySelectorAll('[data-theme-trigger]').forEach(trigger => {
+                    const rect = trigger.getBoundingClientRect();
+                    if (rect.top < window.innerHeight / 2 && rect.bottom > window.innerHeight / 2) {
+                        document.body.classList.add('theme-olive');
+                    } else if (rect.top > window.innerHeight) {
+                        document.body.classList.remove('theme-olive');
+                    }
+                });
+            });
+
             // Real-time Clock
             function updateTime() {
                 const now = new Date();
@@ -1787,16 +1824,6 @@
             }
             setInterval(updateTime, 1000);
             updateTime();
-
-            // Scroll Handling for Nav
-            window.addEventListener('scroll', () => {
-                const nav = document.querySelector('.nav-container');
-                if (window.scrollY > 100) {
-                    nav.classList.add('scrolled');
-                } else {
-                    nav.classList.remove('scrolled');
-                }
-            });
 
             // Magnetic Button Effect
             document.querySelectorAll('.submit-btn').forEach(btn => {

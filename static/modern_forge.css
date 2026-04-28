@@ -5,23 +5,29 @@
     --primary-glow: rgba(78, 93, 29, 0.2);
     --secondary: #000000;
     --accent: #4E5D1D;
-    --success: #10B981;
-    --warning: #F59E0B;
-    --error: #EF4444;
     
-    --bg: #EBEBE3; /* Warm Editorial Beige */
+    --bg: #EBEBE3; 
+    --bg-alt: #4E5D1D;
+    --text: #000000;
+    --text-alt: #EBEBE3;
+    
     --card-bg: rgba(255, 255, 255, 0.5);
     --card-border: rgba(0, 0, 0, 0.1);
-    --card-border-hover: rgba(0, 0, 0, 0.2);
-    
-    --text: #000000;
-    --text-dim: #4B4B4B;
-    --text-muted: #8E8E8E;
     
     --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
-    --transition-slow: 1.2s var(--ease-out-expo);
-    --transition-med: 0.6s var(--ease-out-expo);
-    --transition-fast: 0.3s var(--ease-out-expo);
+    --transition-slow: 1.5s var(--ease-out-expo);
+    --transition-med: 0.8s var(--ease-out-expo);
+    --transition-fast: 0.4s var(--ease-out-expo);
+}
+
+body {
+    transition: background-color 1.2s ease, color 1.2s ease;
+}
+
+body.theme-olive {
+    --bg: #4E5D1D;
+    --text: #EBEBE3;
+    --card-border: rgba(255, 255, 255, 0.1);
 }
 
 .vignette {
@@ -389,16 +395,51 @@ input:focus, select:focus, textarea:focus {
     color: #fff;
 }
 
-/* Reveal Animation Classes */
+/* Dramatic Reveal System */
 .reveal {
     opacity: 0;
-    transform: translateY(30px);
-    transition: all 1s var(--ease-out-expo);
+    transform: translateY(100px);
+    clip-path: inset(100% 0 0 0);
+    transition: transform 1.5s var(--ease-out-expo), opacity 1.5s var(--ease-out-expo), clip-path 1.5s var(--ease-out-expo);
 }
 
 .reveal.active {
     opacity: 1;
     transform: translateY(0);
+    clip-path: inset(0 0 0 0);
+}
+
+.editorial-image-block {
+    width: 100%;
+    height: 80vh;
+    overflow: hidden;
+    margin: 120px 0;
+    position: relative;
+    background: #000;
+}
+
+.editorial-image-block img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.1);
+    transition: transform 2s var(--ease-out-expo);
+}
+
+.editorial-image-block.active img {
+    transform: scale(1);
+}
+
+.image-caption {
+    position: absolute;
+    bottom: 40px;
+    left: 40px;
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: #fff;
+    mix-blend-mode: difference;
 }
 
 /* Custom Scrollbar */
