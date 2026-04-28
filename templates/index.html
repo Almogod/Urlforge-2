@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UrlForge | Autonomous SEO Engine</title>
-    <link rel="stylesheet" href="/static/modern_forge.css?v={{ timestamp | default('7') }}">
+    <link rel="stylesheet" href="/static/modern_forge.css?v={{ timestamp | default('8') }}">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://unpkg.com/@studio-freight/lenis@1.0.33/dist/lenis.min.js"></script>
 </head>
-<body>
+<body class="js-enabled">
     <div class="vignette"></div>
     <div id="bg-canvas"></div>
 
@@ -27,137 +27,72 @@
             </div>
             <div class="nav-logo">URLFORGE ELITE</div>
             <div class="nav-links">
-                <a href="#cards" class="nav-link">Audit</a>
+                <a href="#cards" class="nav-link">Forge</a>
                 <a href="#features-section" class="nav-link">Intelligence</a>
                 <a href="#faqs-section" class="nav-link">Strategy</a>
             </div>
         </nav>
     </div>
 
-    <section class="hero-section reveal">
+    <section class="hero-section reveal active">
         <h1 class="hero-title">UrlForge<br>Elite</h1>
         <p class="hero-subtitle">Autonomous SEO Engine for Enterprise Domains.<br>Identify. Remediate. Deploy.</p>
     </section>
 
-    <div class="editorial-image-block">
-        <img src="/static/images/editorial_1.png" alt="Editorial Abstract 1">
-        <div class="image-caption">01 / Strategic Foundation</div>
-    </div>
-
-    <section class="editorial-gallery">
-        <div class="gallery-grid">
-            <div class="gallery-item reveal" style="grid-column: span 2;">
-                <img src="/static/images/editorial_4.png" alt="Gallery 1">
-                <div class="item-overlay">Architecture of Data</div>
-            </div>
-            <div class="gallery-item reveal">
-                <img src="/static/images/editorial_3.png" alt="Gallery 2">
-                <div class="item-overlay">The Forge</div>
-            </div>
-            <div class="gallery-item reveal">
-                <img src="/static/images/editorial_2.png" alt="Gallery 3">
-                <div class="item-overlay">Intelligence</div>
-            </div>
-        </div>
-    </section>
-
     <div class="content-area">
-        <!-- AUDIT ENGINE SECTION -->
+        <!-- THE FORGE: DUAL CONTROL CENTER -->
         <div id="cards" class="glass-card reveal">
-            <h2 class="section-title">Audit Engine</h2>
+            <h2 class="section-title">Autonomous Forge</h2>
             <p style="color: var(--text-dim); font-size: 0.9rem; margin-bottom: 48px; text-transform: uppercase; letter-spacing: 0.1em;">
-                Autonomous Crawler for Enterprise Grade Site Analysis.
+                Initialize Audit or Begin AI-Driven Synthesis.
             </p>
-            <form action="/plugin/audit" method="POST" id="audit-form">
-                <div class="form-group">
-                    <label>Target Domain Identity</label>
-                    <input type="text" name="url" placeholder="https://example.com" required>
-                </div>
-                <div class="form-group">
-                    <label>Crawl Limit</label>
-                    <input type="number" name="limit" value="100" min="1" required>
-                </div>
-                
-                <div style="margin-top: 48px;">
-                    <p style="font-size: 0.65rem; color: var(--text-dim); margin-bottom: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.2em;">Crawler Configuration</p>
-                    <div style="display: flex; gap: 40px; margin-bottom: 40px;">
-                        <div class="form-group" style="flex: 1; margin: 0;">
-                            <label>Depth Limit</label>
-                            <input type="number" name="max_depth" value="10" min="1" max="100">
-                        </div>
-                        <div class="form-group" style="flex: 1; margin: 0;">
-                            <label>Parallel Threads</label>
-                            <input type="number" name="concurrency" value="10" min="1" max="50">
-                        </div>
-                    </div>
-                </div>
-                <button type="submit" class="submit-btn">Initialize Audit Forge</button>
-            </form>
-        </div>
 
-        {% if engine_result %}
-        <div class="glass-card reveal">
-            <h2 class="section-title">Audit Results</h2>
-            <div class="enterprise-grid">
-                <div class="stat-card">
-                    <h4>Total Pages</h4>
-                    <div class="value">{{engine_result.pages|length}}</div>
-                </div>
-                <div class="stat-card">
-                    <h4>SEO Score</h4>
-                    <div class="value">{{seo_score|default(0)}}</div>
-                </div>
-            </div>
-            <div class="audit-table-wrapper">
-                <table class="audit-table">
-                    <thead>
-                        <tr>
-                            <th>URL</th>
-                            <th>Status</th>
-                            <th>Type</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for p in engine_result.pages[:20] %}
-                        <tr>
-                            <td class="url-cell">{{p.url}}</td>
-                            <td>{{p.status}}</td>
-                            <td>{{p.content_type}}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        {% endif %}
-
-        <div class="editorial-image-block" data-theme-trigger="olive">
-            <img src="/static/images/editorial_2.png" alt="Editorial Abstract 2">
-            <div class="image-caption">02 / Intelligence Synthesis</div>
-        </div>
-
-        <div id="features-section" class="glass-card reveal">
-            <h2 class="section-title">Intelligence</h2>
-            <p style="color: var(--text-dim); font-size: 0.9rem; margin-bottom: 48px; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.8;">
-                Neural Analysis & Semantic Core Generation.
-            </p>
-            <div class="ai-world-section">
-                <div id="ai-discovery-card" class="ai-discovery-card" onclick="revealAIForms()">
-                    <h3 class="ai-world-title">The Data World of AI</h3>
-                    <div class="ai-orbit-system">
-                        <div class="orbit-ring" style="width: 140px; height: 140px; animation-duration: 8s;"></div>
-                        <div class="orbit-ring" style="width: 220px; height: 220px; animation-duration: 12s;"></div>
-                        <div class="ai-core"></div>
-                        <div class="planet" style="--orbit-size: 140px; --orbit-speed: 8s;"></div>
-                        <div class="planet" style="--orbit-size: 220px; --orbit-speed: 12s;"></div>
-                    </div>
-                    <div class="ai-click-me">Engage Neural Layer ↓</div>
-                </div>
-                <div id="ai-config-forms" class="ai-config-forms hidden">
-                    <form action="/plugin/run" method="post">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 60px;">
+                <!-- Audit Form -->
+                <div style="border-right: 1px solid var(--card-border); padding-right: 60px;">
+                    <h3 style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 32px; color: var(--text);">01 / Enterprise Crawler</h3>
+                    <form action="/plugin/audit" method="POST" id="audit-form">
                         <div class="form-group">
-                            <label>Domain Context</label>
+                            <label>Domain Identity</label>
+                            <input type="text" name="url" placeholder="https://example.com" required>
+                        </div>
+                        <div style="display: flex; gap: 20px;">
+                            <div class="form-group" style="flex: 1;">
+                                <label>Depth Limit</label>
+                                <input type="number" name="max_depth" value="10">
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label>Concurrency</label>
+                                <input type="number" name="concurrency" value="10">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Crawl Engine</label>
+                            <select name="user_agent">
+                                <option value="chrome">Chrome (Desktop)</option>
+                                <option value="googlebot">Googlebot</option>
+                                <option value="googlebot_mobile">Googlebot Mobile</option>
+                                <option value="bingbot">Bingbot</option>
+                            </select>
+                        </div>
+                        <div style="margin-top: 20px; font-size: 0.65rem; color: var(--text-dim);">
+                            Note: SQLite optimization active for sites under 10k pages.
+                        </div>
+                        <button type="submit" class="submit-btn">Initialize Audit</button>
+                    </form>
+                </div>
+
+                <!-- Plugin Form -->
+                <div>
+                    <h3 style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 32px; color: var(--text);">02 / Neural Synthesis</h3>
+                    <form action="/plugin/run" method="post" id="plugin-form">
+                        <div class="form-group">
+                            <label>Target Context</label>
                             <input type="text" name="site_url" placeholder="https://example.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Competitor Analysis</label>
+                            <input type="text" name="competitors" placeholder="comp1.com, comp2.com">
                         </div>
                         <div class="form-group">
                             <label>AI Architecture</label>
@@ -167,30 +102,171 @@
                                 <option value="openai">OpenAI (Creative)</option>
                             </select>
                         </div>
-                        <button type="submit" class="submit-btn">Begin Synthesis</button>
+                        <div class="form-group">
+                            <label>Access Credential</label>
+                            <input type="password" name="site_token" placeholder="Optional Auth Token">
+                        </div>
+                        <button type="submit" class="submit-btn" style="background: var(--primary); color: #fff;">Begin AI Forge</button>
                     </form>
                 </div>
             </div>
         </div>
 
-        <div class="editorial-image-block">
-            <img src="/static/images/editorial_3.png" alt="Editorial Abstract 3">
-            <div class="image-caption">03 / Execution & Deployment</div>
+        <!-- ERROR STATE -->
+        {% if error %}
+        <div class="glass-card reveal" style="border-top-color: #ef4444;">
+            <h2 class="section-title" style="color: #ef4444;">Error</h2>
+            <p style="color: var(--text-dim);">{{error}}</p>
         </div>
+        {% endif %}
 
-        <div id="faqs-section" class="glass-card reveal">
-            <h2 class="section-title">Strategy</h2>
-            <p style="color: var(--text-dim); font-size: 0.9rem; margin-bottom: 48px; text-transform: uppercase; letter-spacing: 0.1em;">
-                SEO Strategy & Competitive Edge Analysis.
-            </p>
-            {% if plugin_report %}
-            <div class="markdown-body">
-                {{plugin_report.strategic_analysis}}
+        <!-- AUDIT DASHBOARD -->
+        {% if engine_result %}
+        <div class="glass-card reveal">
+            <h2 class="section-title">Audit Intelligence</h2>
+            <div class="enterprise-grid">
+                <div class="stat-card">
+                    <h4>Total Discovery</h4>
+                    <div class="value">{{engine_result.pages|length}}</div>
+                </div>
+                <div class="stat-card">
+                    <h4>HTML Assets</h4>
+                    <div class="value">{{ engine_result.pages|selectattr('content_type', 'equalto', 'text/html')|list|length }}</div>
+                </div>
+                <div class="stat-card">
+                    <h4>SEO Core Score</h4>
+                    <div class="value">{{seo_score|default(0)}}</div>
+                </div>
             </div>
-            {% else %}
-            <p style="color: var(--text-dim); opacity: 0.5;">Perform an audit to generate a strategic analysis report.</p>
-            {% endif %}
+
+            <div style="margin-top: 80px;">
+                <h3 style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 24px;">Link Depth Distribution</h3>
+                <div style="display: flex; gap: 4px; height: 150px; align-items: flex-end; border-bottom: 1px solid var(--card-border);">
+                    {% set depth_counts = {0:0,1:0,2:0,3:0,4:0,5:0} %}
+                    {% for p in engine_result.pages %}
+                        {% if p.depth is defined and p.depth < 6 %}
+                            {% set _ = depth_counts.update({p.depth: depth_counts[p.depth] + 1}) %}
+                        {% endif %}
+                    {% endfor %}
+                    {% for d in range(6) %}
+                    <div style="flex: 1; height: {{ (depth_counts[d] / engine_result.pages|length * 100)|round|int if engine_result.pages|length > 0 else 0 }}%; background: var(--text); min-height: 2px; position: relative;" title="Depth {{d}}: {{depth_counts[d]}} pages">
+                        <span style="position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); font-size: 0.6rem; color: var(--text-dim);">D{{d}}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="audit-table-wrapper" style="margin-top: 80px;">
+                <table class="audit-table">
+                    <thead>
+                        <tr>
+                            <th>Identity</th>
+                            <th>Status</th>
+                            <th>Type</th>
+                            <th>Latency</th>
+                            <th>Metrics</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in engine_result.pages[:50] %}
+                        <tr>
+                            <td class="url-cell"><a href="{{p.url}}" target="_blank">{{p.url}}</a></td>
+                            <td><span style="font-weight: 800; color: {{ '#10b981' if p.status == 200 else '#ef4444' }}">{{p.status}}</span></td>
+                            <td>{{p.content_type.split('/')[-1]|upper}}</td>
+                            <td>{{p.response_time_ms}}ms</td>
+                            <td style="font-size: 0.7rem;">
+                                {% if p.meta and p.meta.title %}✓ Title OK{% else %}⚠️ No Title{% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
+        {% endif %}
+
+        <!-- PLUGIN REPORT / AI WORLD -->
+        {% if plugin_report %}
+        <div id="features-section" class="glass-card reveal">
+            <h2 class="section-title">Intelligence Report</h2>
+            
+            <!-- AI Orbit Visual integrated into report -->
+            <div class="ai-world-section" style="margin-bottom: 80px;">
+                <div class="ai-orbit-system" style="margin: 0 auto;">
+                    <div class="orbit-ring" style="width: 140px; height: 140px; animation-duration: 8s;"></div>
+                    <div class="orbit-ring" style="width: 220px; height: 220px; animation-duration: 12s;"></div>
+                    <div class="ai-core"></div>
+                    <div class="planet" style="--orbit-size: 140px; --orbit-speed: 8s;"></div>
+                    <div class="planet" style="--orbit-size: 220px; --orbit-speed: 12s;"></div>
+                </div>
+                <div style="text-align: center; margin-top: 32px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.2em; color: var(--text-dim);">
+                    Neural Synthesis Complete / Data World Unified
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 40px; margin-bottom: 60px;">
+                <div style="flex: 1; padding: 40px; background: rgba(0,0,0,0.02); border-top: 1px solid var(--card-border);">
+                    <h4 style="font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); margin-bottom: 16px;">Suggested Deployments</h4>
+                    <form action="/plugin/approve" method="POST">
+                        <input type="hidden" name="task_id" value="{{task_id}}">
+                        {% for action in plugin_report.suggested_actions %}
+                        <div style="display: flex; gap: 16px; margin-bottom: 16px; align-items: flex-start;">
+                            <input type="checkbox" name="approved_actions" value="{{loop.index0}}" checked>
+                            <div style="font-size: 0.85rem;">
+                                <b>{{action.type|upper}}</b>: {{action.description}}
+                                <div style="font-size: 0.7rem; color: var(--text-dim);">Target: {{action.target_file or action.target_url}}</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        <button type="submit" class="submit-btn" style="background: #10b981; color: #fff; margin-top: 24px;">Approve & Deploy</button>
+                    </form>
+                </div>
+                <div style="flex: 1; padding: 40px; border-top: 1px solid var(--card-border);">
+                    <h4 style="font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); margin-bottom: 16px;">Core Insights</h4>
+                    <div class="markdown-body" style="font-size: 0.9rem; line-height: 1.8;">
+                        {{plugin_report.strategic_analysis[:500]}}...
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ SECTION -->
+            <div id="faqs-section" style="margin-top: 80px;">
+                <h3 style="font-size: 1.2rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 32px; border-bottom: 1px solid var(--card-border); padding-bottom: 16px;">Intelligent FAQs</h3>
+                <div class="faq-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+                    {% for faq in plugin_report.faqs %}
+                    <div style="border-bottom: 1px solid var(--card-border); padding-bottom: 24px;">
+                        <h4 style="font-size: 0.9rem; margin-bottom: 12px; color: var(--text);">{{faq.question}}</h4>
+                        <p style="font-size: 0.85rem; color: var(--text-dim);">{{faq.answer}}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- SERVICES SECTION -->
+            <div id="services-section" style="margin-top: 80px;">
+                <h3 style="font-size: 1.2rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 32px; border-bottom: 1px solid var(--card-border); padding-bottom: 16px;">Identified Site Services</h3>
+                <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+                    {% for service in plugin_report.services %}
+                    <span style="padding: 8px 16px; background: rgba(0,0,0,0.05); font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; border-radius: 4px;">{{service}}</span>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- STRATEGY SECTION -->
+            <div id="strategy-full" style="margin-top: 100px;">
+                <h2 class="section-title">Strategic Analysis</h2>
+                <div class="markdown-body" style="background: #fff; padding: 60px; border: 1px solid var(--card-border);">
+                    {{plugin_report.strategic_analysis}}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if not engine_result and not plugin_report %}
+        <div id="empty-state" class="glass-card reveal" style="text-align: center; opacity: 0.5;">
+            <p>Awaiting Forge initialization... Audit your domain to generate strategic intelligence.</p>
+        </div>
+        {% endif %}
     </div>
 
     <script src="/static/brain_engine.js"></script>
@@ -236,29 +312,33 @@
                     }
                 });
             } else {
-                // Fallback for old browsers: Reveal all immediately
                 document.querySelectorAll('.reveal').forEach(el => el.classList.add('active'));
             }
+
+            // Markdown Rendering
+            document.querySelectorAll('.markdown-body').forEach(body => {
+                const raw = body.innerText.trim();
+                if (raw && (raw.includes('#') || raw.includes('**') || raw.includes('---'))) {
+                    body.innerHTML = marked.parse(raw);
+                }
+            });
 
             window.addEventListener('scroll', () => {
                 const nav = document.querySelector('.nav-container');
                 if (window.scrollY > 100) nav.classList.add('scrolled');
                 else nav.classList.remove('scrolled');
 
-                document.querySelectorAll('[data-theme-trigger]').forEach(trigger => {
-                    const rect = trigger.getBoundingClientRect();
-                    if (rect.top < window.innerHeight / 2 && rect.bottom > -window.innerHeight / 2) {
+                // Dynamic theme trigger based on first card
+                const cards = document.getElementById('cards');
+                if (cards) {
+                    const rect = cards.getBoundingClientRect();
+                    if (rect.top < window.innerHeight / 2) {
                         document.body.classList.add('theme-olive');
-                    } else if (rect.top > window.innerHeight) {
+                    } else {
                         document.body.classList.remove('theme-olive');
                     }
-                });
+                }
             });
-
-            window.revealAIForms = () => {
-                document.getElementById('ai-discovery-card').classList.add('hidden');
-                document.getElementById('ai-config-forms').classList.remove('hidden');
-            };
         });
     </script>
 </body>
