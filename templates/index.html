@@ -6,8 +6,11 @@
     <title>UrlForge | Autonomous SEO Engine</title>
     <link rel="stylesheet" href="/static/modern_forge.css?v={{ timestamp | default('5') }}">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Smooth Scroll Integration -->
+    <script src="https://unpkg.com/@studio-freight/lenis@1.0.33/dist/lenis.min.js"></script>
 </head>
 <body>
+    <div class="vignette"></div>
     <div id="bg-canvas"></div>
 
     <div id="loading-overlay" class="hidden">
@@ -19,20 +22,22 @@
 
     <div class="nav-container">
         <nav class="modern-nav">
-            <div class="nav-logo">URLFORGE | ELITE</div>
+            <div class="nav-env-data">
+                <span>40.7128° N, 74.0060° W</span>
+                <span id="nav-time">12:00:00 AM</span>
+            </div>
+            <div class="nav-logo">URLFORGE ELITE</div>
             <div class="nav-links">
-                <a href="#cards" class="nav-link">Dashboard</a>
-                <a href="#features-section" class="nav-link">Features</a>
-                <a href="#faqs-section" class="nav-link">Analysis</a>
-                <button class="nav-btn">Log In</button>
+                <a href="#cards" class="nav-link">Audit</a>
+                <a href="#features-section" class="nav-link">Intelligence</a>
+                <a href="#faqs-section" class="nav-link">Strategy</a>
             </div>
         </nav>
     </div>
 
-    <section class="hero-section fade-in">
-        <span class="badge">Next-Gen SEO Intelligence</span>
-        <h1 class="hero-title">The Future of<br>Autonomous SEO</h1>
-        <p class="hero-subtitle">UrlForge Elite leverages deep-learning audit engines to identify, remediate, and deploy optimizations with zero human intervention.</p>
+    <section class="hero-section reveal">
+        <h1 class="hero-title">UrlForge<br>Elite</h1>
+        <p class="hero-subtitle">Autonomous SEO Engine for Enterprise Domains.<br>Identify. Remediate. Deploy.</p>
     </section>
 
     <div class="content-area">
@@ -1765,15 +1770,31 @@
                 });
             });
             
-            // Fix for potential overlaps on mobile/scroll
+            // Lenis Smooth Scroll
+            const lenis = new Lenis();
+            function raf(time) {
+                lenis.raf(time);
+                requestAnimationFrame(raf);
+            }
+            requestAnimationFrame(raf);
+
+            // Real-time Clock
+            function updateTime() {
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                const timeEl = document.getElementById('nav-time');
+                if (timeEl) timeEl.innerText = timeStr;
+            }
+            setInterval(updateTime, 1000);
+            updateTime();
+
+            // Scroll Handling for Nav
             window.addEventListener('scroll', () => {
-                const nav = document.querySelector('.modern-nav');
-                if (window.scrollY > 50) {
-                    nav.style.padding = '8px 20px';
-                    nav.style.background = 'rgba(3, 7, 18, 0.8)';
+                const nav = document.querySelector('.nav-container');
+                if (window.scrollY > 100) {
+                    nav.classList.add('scrolled');
                 } else {
-                    nav.style.padding = '10px 24px';
-                    nav.style.background = 'rgba(3, 7, 18, 0.6)';
+                    nav.classList.remove('scrolled');
                 }
             });
 
@@ -1783,7 +1804,7 @@
                     const rect = btn.getBoundingClientRect();
                     const x = e.clientX - rect.left - rect.width / 2;
                     const y = e.clientY - rect.top - rect.height / 2;
-                    btn.style.transform = `translate(${x * 0.15}px, ${y * 0.15}px)`;
+                    btn.style.transform = `translate(${x * 0.1}px, ${y * 0.1}px)`;
                 });
                 btn.addEventListener('mouseleave', () => {
                     btn.style.transform = `translate(0, 0)`;
