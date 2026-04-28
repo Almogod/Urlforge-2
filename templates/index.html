@@ -195,29 +195,50 @@
 
     <script src="/static/brain_engine.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const lenis = new Lenis();
-            function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
-            requestAnimationFrame(raf);
+        // Immediate UI updates
+        function updateTime() {
+            const now = new Date();
+            const timeEl = document.getElementById('nav-time');
+            if (timeEl) timeEl.innerText = now.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
 
-            const revealObserver = new IntersectionObserver((entries) => {
-                entries.forEach((entry) => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('active');
-                        revealObserver.unobserve(entry.target);
+        document.addEventListener('DOMContentLoaded', () => {
+            document.body.classList.add('js-enabled');
+
+            // Lenis Smooth Scroll
+            try {
+                if (typeof Lenis !== 'undefined') {
+                    const lenis = new Lenis();
+                    function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+                    requestAnimationFrame(raf);
+                }
+            } catch (e) { console.warn('Lenis error:', e); }
+
+            // Reveal System
+            if ('IntersectionObserver' in window) {
+                const revealObserver = new IntersectionObserver((entries) => {
+                    entries.forEach((entry) => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('active');
+                            revealObserver.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.05 });
+
+                document.querySelectorAll('.reveal').forEach((el, i) => {
+                    const rect = el.getBoundingClientRect();
+                    if (rect.top < window.innerHeight) {
+                        setTimeout(() => el.classList.add('active'), i * 100);
+                    } else {
+                        revealObserver.observe(el);
                     }
                 });
-            }, { threshold: 0.05 });
-
-            // Initial check + Observe
-            document.querySelectorAll('.reveal').forEach((el, i) => {
-                const rect = el.getBoundingClientRect();
-                if (rect.top < window.innerHeight) {
-                    setTimeout(() => el.classList.add('active'), i * 100);
-                } else {
-                    revealObserver.observe(el);
-                }
-            });
+            } else {
+                // Fallback for old browsers: Reveal all immediately
+                document.querySelectorAll('.reveal').forEach(el => el.classList.add('active'));
+            }
 
             window.addEventListener('scroll', () => {
                 const nav = document.querySelector('.nav-container');
@@ -233,13 +254,6 @@
                     }
                 });
             });
-
-            function updateTime() {
-                const now = new Date();
-                const timeEl = document.getElementById('nav-time');
-                if (timeEl) timeEl.innerText = now.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            }
-            setInterval(updateTime, 1000); updateTime();
 
             window.revealAIForms = () => {
                 document.getElementById('ai-discovery-card').classList.add('hidden');

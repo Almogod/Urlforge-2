@@ -403,22 +403,29 @@ input:focus, select:focus, textarea:focus {
     color: #fff;
 }
 
-/* Dramatic Reveal System */
+/* Dramatic Reveal System - Robust Fallback */
 .reveal {
-    opacity: 0;
-    transform: translateY(60px);
-    clip-path: inset(100% 0 0 0);
+    opacity: 1;
+    transform: none;
     transition: transform 1.2s var(--ease-out-expo), 
                 opacity 1.2s var(--ease-out-expo), 
                 clip-path 1.2s var(--ease-out-expo);
-    visibility: hidden;
 }
 
+/* Only hide if JS is confirmed to be running - DISABLED FOR DEBUGGING
+body.js-enabled .reveal:not(.active) {
+    opacity: 0;
+    transform: translateY(40px);
+    clip-path: inset(100% 0 0 0);
+    visibility: hidden;
+}
+*/
+
 .reveal.active {
-    opacity: 1;
-    transform: translateY(0);
-    clip-path: inset(0 0 0 0);
-    visibility: visible;
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+    clip-path: inset(0 0 0 0) !important;
+    visibility: visible !important;
 }
 
 .editorial-image-block {
