@@ -3,7 +3,6 @@
 # ⚡ UrlForge
 
 ### The Autonomous SEO Engine
-
 **Crawl → Analyze → Fix → Generate → Deploy — Zero Human Intervention**
 
 [![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-urlforge--engine.onrender.com-0a0a0a?style=for-the-badge&labelColor=7c3aed)](https://urlforge-engine.onrender.com)
