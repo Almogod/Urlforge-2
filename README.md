@@ -1,6 +1,6 @@
 <div align="center">
 
-# ⚡ UrlForge
+# ⚡ UrlForger
 
 ### The Autonomous SEO Engine
 **Crawl → Analyze → Fix → Generate → Deploy — Zero Human Intervention**
